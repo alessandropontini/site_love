@@ -1,0 +1,1 @@
+Add your high-resolution couple photos here (e.g. 01.jpg, 02.jpg) and update the paths in lib/photos.ts to use local assets like /photos/01.jpg. Keep images optimized (2000px max width) for best performance.
