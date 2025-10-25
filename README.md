@@ -1,26 +1,41 @@
-# Dreamy Couple Gallery
+# Pixel Quest: Alessandro & Bridget
 
-Single-page Next.js experience that spotlights our favorite photos with a cinematic Ken Burns wall and an interactive 3D story stack.
+A retro-styled Next.js microsite that opens like an arcade cartridge. Follow a map, drop into four pixel mini-games, and relive the love story of Alessandro and Bridget while collecting hearts and vow coins.
 
 ## Getting Started
 
-1. Install dependencies  
+1. Install dependencies
    ```bash
    npm install
    ```
-2. Run the development server  
+2. Start the dev server
    ```bash
    npm run dev
    ```
-3. Open http://localhost:3000 to explore the gallery.
+3. Open http://localhost:3000 and press **Start Quest**.
 
-## Customizing It For You Two
+## Playing The Timeline
 
-- Drop your optimized images (≤2000px wide) inside `public/photos` and update the URLs in `lib/photos.ts`. Local files can use paths like `/photos/01.jpg`.
-- Tune hero copy in `lib/profile.ts` to reflect your names and tone.
-- Each photo entry supports `title`, `tagline`, `location`, `capturedOn`, and `accent` (RGBA string that powers the glow).
-- A ready-to-run showcase dataset (with public stock imagery) is documented in `docs/showcase.md`.
-- Personal raw assets or exports that shouldn't live in git can sit in `data/`—the folder exists locally but stays ignored so the repo stays lightweight.
+The site launches with a title card and map. Complete each chapter in order to unlock the finale:
+
+1. **Block Party Beginnings** – steer Tetris-style drops onto the glowing lane.
+2. **Hearts in the Arcade** – navigate a Pac-Maze, grabbing every heart while dodging doubts.
+3. **Skyline Letters** – flap rooftop love notes through the skyline gaps.
+4. **Side-Scroller Vows** – sprint through a Mario-inspired run to collect vow coins.
+
+Every win adds to the shared heart counter and advances the quest timeline. Finishing all four mini-games plays the epilogue panel.
+
+## Where To Customize
+
+- `lib/profile.ts` – edit the hero headline and copy for the title screen.
+- `components/QuestGame.tsx` – tweak map order, rewards, and screen copy.
+- `components/quest/questSchema.ts` – adjust chapter metadata (titles, years, locations, reward hearts, render components).
+- `components/quest/games/*` – fine-tune mechanics, difficulty, and art for each mini-game.
+- `components/pixel/PixelCharacter.tsx` – update pixel palettes or redraw the avatars.
+- `app/globals.css` – global palette, CRT overlays, and responsive layout tokens.
+- `data/` – still ignored; stash heavyweight concept art or exports here if needed.
+
+👉 For deeper breakdowns, peek at `docs/quest-guide.md`.
 
 ## Production Build
 
@@ -29,4 +44,14 @@ npm run build
 npm start
 ```
 
-This runs the optimized Next.js build. Aim for Lighthouse ≥ 90 by compressing imagery and serving the app via a CDN or Vercel.
+Deploy behind a CDN (Vercel works great) to keep input latency low for the mini-games.
+
+## Tech Stack Highlights
+
+- **Next.js 14** with the App Router powering the single-page quest.
+- **React hooks** orchestrating real-time state loops for each mini-game.
+- **Custom pixel art** drawn with CSS grids for avatars, tiles, and collectibles.
+- **RequestAnimationFrame loops** for Flappy and Side-Scroller physics.
+- **TypeScript** across all components for safer interaction code.
+
+Have fun remixing the stages—swap in new memories, change the mechanics, or add hidden chapters to keep the love story evolving.
