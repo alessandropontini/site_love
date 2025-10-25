@@ -1,7 +1,7 @@
 export const couple = {
-  names: "Alessandro & Giorgia",
+  names: "Aurora & Jules",
   headline:
-    "A dreamy reel of us, crafted for late-night rewinds and future daydreams.",
+    "A modern love letter told through city lights and quiet getaways.",
   subheading:
-    "Scroll slowly, breathe in the ambience, and let the frames pull you back into our shared heartbeat."
+    "Use this sample montage to preview the gallery without personal photos."
 };

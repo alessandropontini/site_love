@@ -1,1 +1,8 @@
+.DS_Store
+.env.local
+.env*
 .venv/
+.next/
+node_modules/
+data/*
+!data/.gitkeep
