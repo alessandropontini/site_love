@@ -11,10 +11,9 @@ type PixelSprite = {
   rows: string[];
 };
 
-const SPRITES: Record<
-  "alessandro" | "bridget",
-  PixelSprite
-> = {
+export type PixelCharacterVariant = "alessandro" | "bridget";
+
+const SPRITES: Record<PixelCharacterVariant, PixelSprite> = {
   alessandro: {
     width: 12,
     height: 16,
@@ -82,7 +81,7 @@ export function PixelCharacter({
   size = 92,
   className
 }: {
-  variant: "alessandro" | "bridget";
+  variant: PixelCharacterVariant;
   size?: number;
   className?: string;
 }) {

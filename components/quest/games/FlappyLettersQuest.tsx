@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import type { PixelCharacterVariant } from "@/components/pixel/PixelCharacter";
+
 const WIDTH = 360;
 const HEIGHT = 220;
 const GRAVITY = 980;
@@ -40,10 +42,12 @@ function createPipe(offset: number): Pipe {
 
 export function FlappyLettersQuest({
   rewardHearts,
-  onComplete
+  onComplete,
+  playerCharacter: _playerCharacter
 }: {
   rewardHearts: number;
   onComplete: (hearts: number) => void;
+  playerCharacter: PixelCharacterVariant;
 }) {
   const [bird, setBird] = useState<BirdState>({ y: HEIGHT / 2, velocity: 0 });
   const [pipes, setPipes] = useState<Pipe[]>([createPipe(0), createPipe(180), createPipe(360)]);

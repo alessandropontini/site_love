@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import type { PixelCharacterVariant } from "@/components/pixel/PixelCharacter";
 import { TetrisQuest } from "@/components/quest/games/TetrisQuest";
 import { PacMazeQuest } from "@/components/quest/games/PacMazeQuest";
 import { FlappyLettersQuest } from "@/components/quest/games/FlappyLettersQuest";
@@ -27,6 +28,7 @@ export type QuestEvent = {
     onComplete: (hearts: number) => void;
     onExit: () => void;
     rewardHearts: number;
+    playerCharacter: PixelCharacterVariant;
   }) => ReactNode;
 };
 
@@ -39,11 +41,15 @@ export const QUEST_EVENTS: QuestEvent[] = [
       "Drop the beats (and blocks) into place to remember that neon night where everything clicked.",
     location: "Milan Rooftop",
     year: "2017",
-    color: "#82c1ff",
-    accent: "#214872",
+    color: "#d8664f",
+    accent: "#8c2f26",
     rewardHearts: 4,
-    render: ({ onComplete, rewardHearts }) => (
-      <TetrisQuest onComplete={onComplete} rewardHearts={rewardHearts} />
+    render: ({ onComplete, rewardHearts, playerCharacter }) => (
+      <TetrisQuest
+        onComplete={onComplete}
+        rewardHearts={rewardHearts}
+        playerCharacter={playerCharacter}
+      />
     )
   },
   {
@@ -54,11 +60,15 @@ export const QUEST_EVENTS: QuestEvent[] = [
       "Navigate the maze, collect every heart, and dodge the doubts that tried to chase us away.",
     location: "Tokyo Arcade",
     year: "2018",
-    color: "#ffd966",
-    accent: "#5e4908",
+    color: "#3d7d58",
+    accent: "#1f4d33",
     rewardHearts: 6,
-    render: ({ onComplete, rewardHearts }) => (
-      <PacMazeQuest onComplete={onComplete} rewardHearts={rewardHearts} />
+    render: ({ onComplete, rewardHearts, playerCharacter }) => (
+      <PacMazeQuest
+        onComplete={onComplete}
+        rewardHearts={rewardHearts}
+        playerCharacter={playerCharacter}
+      />
     )
   },
   {
@@ -69,11 +79,15 @@ export const QUEST_EVENTS: QuestEvent[] = [
       "Keep the rooftop letters aloft through gusty winds. Every obstacle is another promise we made.",
     location: "Paris Balconies",
     year: "2019",
-    color: "#ff98d5",
-    accent: "#641647",
+    color: "#f2c36b",
+    accent: "#c07a32",
     rewardHearts: 8,
-    render: ({ onComplete, rewardHearts }) => (
-      <FlappyLettersQuest onComplete={onComplete} rewardHearts={rewardHearts} />
+    render: ({ onComplete, rewardHearts, playerCharacter }) => (
+      <FlappyLettersQuest
+        onComplete={onComplete}
+        rewardHearts={rewardHearts}
+        playerCharacter={playerCharacter}
+      />
     )
   },
   {
@@ -84,11 +98,15 @@ export const QUEST_EVENTS: QuestEvent[] = [
       "Sprint through the forest of jitters, leap over what-ifs, and gather the vows that seal our story.",
     location: "Dolomites Trail",
     year: "2021",
-    color: "#78f5ae",
-    accent: "#0f6a3a",
+    color: "#85bfa0",
+    accent: "#427a5a",
     rewardHearts: 10,
-    render: ({ onComplete, rewardHearts }) => (
-      <PlatformRunQuest onComplete={onComplete} rewardHearts={rewardHearts} />
+    render: ({ onComplete, rewardHearts, playerCharacter }) => (
+      <PlatformRunQuest
+        onComplete={onComplete}
+        rewardHearts={rewardHearts}
+        playerCharacter={playerCharacter}
+      />
     )
   }
 ];

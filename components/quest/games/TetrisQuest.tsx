@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import type { PixelCharacterVariant } from "@/components/pixel/PixelCharacter";
+
 const COLUMNS = 6;
 const ROWS = 14;
 const TARGET_SEQUENCE = [1, 4, 2, 3];
@@ -10,9 +12,14 @@ const DROP_INTERVAL = 260;
 type Props = {
   rewardHearts: number;
   onComplete: (hearts: number) => void;
+  playerCharacter: PixelCharacterVariant;
 };
 
-export function TetrisQuest({ rewardHearts, onComplete }: Props) {
+export function TetrisQuest({
+  rewardHearts,
+  onComplete,
+  playerCharacter: _playerCharacter
+}: Props) {
   const [column, setColumn] = useState<number>(Math.floor(COLUMNS / 2));
   const [row, setRow] = useState<number>(0);
   const [stage, setStage] = useState<number>(0);

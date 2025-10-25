@@ -2,9 +2,16 @@
 
 import { useMemo, useState } from "react";
 
-import { PixelCharacter } from "@/components/pixel/PixelCharacter";
+import {
+  PixelCharacter,
+  type PixelCharacterVariant
+} from "@/components/pixel/PixelCharacter";
 import { QuestEventPanel } from "@/components/quest/QuestEventPanel";
 import { QuestMap } from "@/components/quest/QuestMap";
+import {
+  QuestLeaderboard,
+  type QuestLeaderboardEntry
+} from "@/components/quest/QuestLeaderboard";
 import { QuestSummary } from "@/components/quest/QuestSummary";
 import {
   EventKey,
@@ -13,6 +20,23 @@ import {
 } from "@/components/quest/questSchema";
 
 type ScreenState = "intro" | "map" | "game" | "ending";
+
+const CHARACTER_OPTIONS: Array<{
+  key: PixelCharacterVariant;
+  label: string;
+  note: string;
+}> = [
+  {
+    key: "alessandro",
+    label: "Alessandro",
+    note: "Milanese cuore, city rooftop poet"
+  },
+  {
+    key: "bridget",
+    label: "Bridget",
+    note: "Brooklyn-born, Italian-American spark"
+  }
+];
 
 export function QuestGame() {
   const [screen, setScreen] = useState<ScreenState>("intro");
@@ -24,6 +48,12 @@ export function QuestGame() {
     platformer: false
   });
   const [heartsCollected, setHeartsCollected] = useState<number>(0);
+  const [playerCharacter, setPlayerCharacter] =
+    useState<PixelCharacterVariant>("alessandro");
+  const [attemptCount, setAttemptCount] = useState<number>(0);
+  const [leaderboardEntries, setLeaderboardEntries] = useState<QuestLeaderboardEntry[]>(
+    []
+  );
 
   const completedCount = useMemo(
     () => Object.values(progress).filter(Boolean).length,
@@ -39,6 +69,9 @@ export function QuestGame() {
     [completedCount, heartsCollected]
   );
 
+  const partnerCharacter: PixelCharacterVariant =
+    playerCharacter === "alessandro" ? "bridget" : "alessandro";
+
   const handleStart = () => {
     setScreen("map");
   };
@@ -46,9 +79,11 @@ export function QuestGame() {
   const handleSelectEvent = (eventKey: EventKey) => {
     setActiveEvent(eventKey);
     setScreen("game");
+    setAttemptCount((prev) => prev + 1);
   };
 
   const handleCompleteEvent = (eventKey: EventKey, heartsEarned: number) => {
+    const eventMeta = QUEST_EVENTS.find((event) => event.key === eventKey);
     setProgress((prev) => {
       const snapshot = { ...prev, [eventKey]: true };
       const finished = QUEST_EVENTS.every((event) => snapshot[event.key]);
@@ -56,6 +91,24 @@ export function QuestGame() {
       return snapshot;
     });
     setHeartsCollected((prev) => prev + heartsEarned);
+    if (eventMeta) {
+      setLeaderboardEntries((previous) => {
+        const nextEntry: QuestLeaderboardEntry = {
+          id: Date.now(),
+          eventKey,
+          eventTitle: eventMeta.title,
+          hearts: heartsEarned,
+          character: playerCharacter,
+          completedAt: Date.now()
+        };
+        return [...previous, nextEntry]
+          .sort((a, b) => {
+            if (b.hearts !== a.hearts) return b.hearts - a.hearts;
+            return b.completedAt - a.completedAt;
+          })
+          .slice(0, 8);
+      });
+    }
     setActiveEvent(null);
   };
 
@@ -67,7 +120,7 @@ export function QuestGame() {
   return (
     <section className="quest-shell">
       <header className="quest-hero">
-        <PixelCharacter variant="alessandro" />
+        <PixelCharacter variant={playerCharacter} size={148} />
         <div className="quest-hero-copy">
           <p className="quest-prelude">A pixel tale</p>
           <h1>
@@ -77,16 +130,51 @@ export function QuestGame() {
             Press start to hop onto the nostalgia trail. Each retro mini-game
             unlocks a slice of our story—from rooftop starts to forever vows.
           </p>
+          <div className="quest-character-selector">
+            <span>Choose your avatar</span>
+            <div className="quest-character-options">
+              {CHARACTER_OPTIONS.map(({ key, label, note }) => {
+                const isActive = playerCharacter === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    className="quest-character-option"
+                    data-active={isActive}
+                    aria-pressed={isActive}
+                    onClick={() => setPlayerCharacter(key)}
+                  >
+                    <PixelCharacter
+                      variant={key}
+                      size={60}
+                      className="quest-character-sprite"
+                    />
+                    <span className="quest-character-label">{label}</span>
+                    <span className="quest-character-note">{note}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
           {screen === "intro" ? (
             <button type="button" className="quest-primary" onClick={handleStart}>
               Start Quest
             </button>
           ) : (
             <div className="quest-hero-stats">
-              <PixelCharacter variant="bridget" />
+              <PixelCharacter
+                variant={partnerCharacter}
+                size={72}
+                className="quest-hero-companion"
+              />
               <QuestSummary snapshot={progressSnapshot} />
             </div>
           )}
+          <QuestLeaderboard
+            attempts={attemptCount}
+            totalHearts={heartsCollected}
+            entries={leaderboardEntries}
+          />
         </div>
       </header>
 
@@ -102,6 +190,7 @@ export function QuestGame() {
           event={QUEST_EVENTS.find((event) => event.key === activeEvent)!}
           onComplete={handleCompleteEvent}
           onExit={handleReturnToMap}
+          playerCharacter={playerCharacter}
         />
       )}
 

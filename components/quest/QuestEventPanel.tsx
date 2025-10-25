@@ -1,17 +1,20 @@
 import { useMemo } from "react";
 
+import type { PixelCharacterVariant } from "@/components/pixel/PixelCharacter";
 import type { QuestEvent, EventKey } from "@/components/quest/questSchema";
 
 type QuestEventPanelProps = {
   event: QuestEvent;
   onComplete: (key: EventKey, hearts: number) => void;
   onExit: () => void;
+  playerCharacter: PixelCharacterVariant;
 };
 
 export function QuestEventPanel({
   event,
   onComplete,
-  onExit
+  onExit,
+  playerCharacter
 }: QuestEventPanelProps) {
   const hint = useMemo(() => {
     switch (event.key) {
@@ -43,6 +46,9 @@ export function QuestEventPanel({
         </div>
         <div className="quest-event-meta">
           <span>
+            Avatar: {playerCharacter === "alessandro" ? "Alessandro" : "Bridget"}
+          </span>
+          <span>
             {event.location} · {event.year}
           </span>
           <button type="button" className="quest-secondary" onClick={onExit}>
@@ -58,7 +64,8 @@ export function QuestEventPanel({
         {event.render({
           onComplete: (hearts) => onComplete(event.key, hearts),
           onExit,
-          rewardHearts: event.rewardHearts
+          rewardHearts: event.rewardHearts,
+          playerCharacter
         })}
       </div>
     </section>

@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import type { PixelCharacterVariant } from "@/components/pixel/PixelCharacter";
+
 const WIDTH = 420;
 const HEIGHT = 220;
 const GROUND_Y = 170;
@@ -50,10 +52,12 @@ const PLAYER_HEIGHT = 42;
 
 export function PlatformRunQuest({
   rewardHearts,
-  onComplete
+  onComplete,
+  playerCharacter: _playerCharacter
 }: {
   rewardHearts: number;
   onComplete: (hearts: number) => void;
+  playerCharacter: PixelCharacterVariant;
 }) {
   const [player, setPlayer] = useState<PlayerState>(INITIAL_PLAYER);
   const [collected, setCollected] = useState<Set<number>>(new Set());
