@@ -1,93 +1,435 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import type { PixelCharacterVariant } from "@/components/pixel/PixelCharacter";
+import {
+  PixelCharacter,
+  type PixelCharacterVariant
+} from "@/components/pixel/PixelCharacter";
 
 const COLUMNS = 6;
 const ROWS = 14;
-const TARGET_SEQUENCE = [1, 4, 2, 3];
-const DROP_INTERVAL = 260;
+const DROP_INTERVAL = 420;
+const FAST_DROP_INTERVAL = 90;
+const POINT_TARGET = 50;
+
+type Point = { x: number; y: number };
+
+type Tetromino = {
+  key: string;
+  rotations: Point[][];
+};
+
+type Piece = {
+  shapeIndex: number;
+  rotation: number;
+  position: Point;
+};
+
+type GameState = {
+  board: number[][];
+  active: Piece;
+  nextShape: number;
+  points: number;
+  lines: number;
+  message: string;
+  completed: boolean;
+};
+
+const TETROMINOES: Tetromino[] = [
+  {
+    key: "i",
+    rotations: [
+      [
+        { x: -2, y: 0 },
+        { x: -1, y: 0 },
+        { x: 0, y: 0 },
+        { x: 1, y: 0 }
+      ],
+      [
+        { x: 0, y: -1 },
+        { x: 0, y: 0 },
+        { x: 0, y: 1 },
+        { x: 0, y: 2 }
+      ]
+    ]
+  },
+  {
+    key: "o",
+    rotations: [
+      [
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+        { x: 0, y: 1 },
+        { x: 1, y: 1 }
+      ]
+    ]
+  },
+  {
+    key: "t",
+    rotations: [
+      [
+        { x: -1, y: 0 },
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+        { x: 0, y: 1 }
+      ],
+      [
+        { x: 0, y: -1 },
+        { x: 0, y: 0 },
+        { x: 0, y: 1 },
+        { x: 1, y: 0 }
+      ],
+      [
+        { x: -1, y: 0 },
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+        { x: 0, y: -1 }
+      ],
+      [
+        { x: -1, y: 0 },
+        { x: 0, y: -1 },
+        { x: 0, y: 0 },
+        { x: 0, y: 1 }
+      ]
+    ]
+  },
+  {
+    key: "l",
+    rotations: [
+      [
+        { x: -1, y: 0 },
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+        { x: 1, y: 1 }
+      ],
+      [
+        { x: 0, y: -1 },
+        { x: 0, y: 0 },
+        { x: 0, y: 1 },
+        { x: 1, y: -1 }
+      ],
+      [
+        { x: -1, y: -1 },
+        { x: -1, y: 0 },
+        { x: 0, y: 0 },
+        { x: 1, y: 0 }
+      ],
+      [
+        { x: -1, y: 1 },
+        { x: 0, y: -1 },
+        { x: 0, y: 0 },
+        { x: 0, y: 1 }
+      ]
+    ]
+  },
+  {
+    key: "j",
+    rotations: [
+      [
+        { x: -1, y: 0 },
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+        { x: -1, y: 1 }
+      ],
+      [
+        { x: 0, y: -1 },
+        { x: 0, y: 0 },
+        { x: 0, y: 1 },
+        { x: 1, y: 1 }
+      ],
+      [
+        { x: 1, y: -1 },
+        { x: -1, y: 0 },
+        { x: 0, y: 0 },
+        { x: 1, y: 0 }
+      ],
+      [
+        { x: -1, y: -1 },
+        { x: 0, y: -1 },
+        { x: 0, y: 0 },
+        { x: 0, y: 1 }
+      ]
+    ]
+  },
+  {
+    key: "s",
+    rotations: [
+      [
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+        { x: -1, y: 1 },
+        { x: 0, y: 1 }
+      ],
+      [
+        { x: 0, y: -1 },
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+        { x: 1, y: 1 }
+      ]
+    ]
+  },
+  {
+    key: "z",
+    rotations: [
+      [
+        { x: -1, y: 0 },
+        { x: 0, y: 0 },
+        { x: 0, y: 1 },
+        { x: 1, y: 1 }
+      ],
+      [
+        { x: 1, y: -1 },
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+        { x: 0, y: 1 }
+      ]
+    ]
+  }
+];
+
+const PIECE_CLASSES = TETROMINOES.map((shape) => `piece-${shape.key}`);
+
+function createBoard(): number[][] {
+  return Array.from({ length: ROWS }, () => Array(COLUMNS).fill(0));
+}
+
+function randomShapeIndex(): number {
+  return Math.floor(Math.random() * TETROMINOES.length);
+}
+
+function spawnPiece(shapeIndex: number): Piece {
+  return {
+    shapeIndex,
+    rotation: 0,
+    position: { x: Math.floor(COLUMNS / 2) - 1, y: -1 }
+  };
+}
+
+function getBlocks(piece: Piece, rotationOverride?: number, positionOverride?: Point): Point[] {
+  const shape = TETROMINOES[piece.shapeIndex];
+  const rotation = shape.rotations[rotationOverride ?? piece.rotation];
+  const position = positionOverride ?? piece.position;
+  return rotation.map((block) => ({
+    x: block.x + position.x,
+    y: block.y + position.y
+  }));
+}
+
+function isValidPosition(board: number[][], piece: Piece): boolean {
+  return getBlocks(piece).every((block) => {
+    if (block.x < 0 || block.x >= COLUMNS) return false;
+    if (block.y >= ROWS) return false;
+    if (block.y < 0) return true;
+    return board[block.y][block.x] === 0;
+  });
+}
+
+function mergePiece(board: number[][], piece: Piece): number[][] {
+  const clone = board.map((row) => [...row]);
+  getBlocks(piece).forEach((block) => {
+    if (block.y >= 0 && block.y < ROWS && block.x >= 0 && block.x < COLUMNS) {
+      clone[block.y][block.x] = piece.shapeIndex + 1;
+    }
+  });
+  return clone;
+}
+
+function clearLines(board: number[][]): { board: number[][]; cleared: number } {
+  const remaining: number[][] = [];
+  let cleared = 0;
+  for (let row = 0; row < ROWS; row += 1) {
+    if (board[row].every((cell) => cell !== 0)) {
+      cleared += 1;
+    } else {
+      remaining.push(board[row]);
+    }
+  }
+  const newRows = Array.from({ length: cleared }, () => Array(COLUMNS).fill(0));
+  return { board: [...newRows, ...remaining], cleared };
+}
 
 type Props = {
   rewardHearts: number;
   onComplete: (hearts: number) => void;
   playerCharacter: PixelCharacterVariant;
+  partnerCharacter: PixelCharacterVariant;
 };
 
 export function TetrisQuest({
   rewardHearts,
   onComplete,
-  playerCharacter: _playerCharacter
+  playerCharacter,
+  partnerCharacter: _partnerCharacter
 }: Props) {
-  const [column, setColumn] = useState<number>(Math.floor(COLUMNS / 2));
-  const [row, setRow] = useState<number>(0);
-  const [stage, setStage] = useState<number>(0);
-  const [landed, setLanded] = useState<number[]>([]);
-  const [message, setMessage] = useState<string>("Align the block with the glowing lane.");
-  const [isFastDrop, setIsFastDrop] = useState<boolean>(false);
+  const playerName = playerCharacter === "alessandro" ? "Alessandro" : "Bridget";
+  const [game, setGame] = useState<GameState>(() => ({
+    board: createBoard(),
+    active: spawnPiece(randomShapeIndex()),
+    nextShape: randomShapeIndex(),
+    points: 0,
+    lines: 0,
+    message: "Stack the pieces like classic Tetris. Reach 50 hearts to unlock the memory.",
+    completed: false
+  }));
+  const [isFastDrop, setIsFastDrop] = useState(false);
 
-  const columnRef = useRef(column);
-  const stageRef = useRef(stage);
-  const fastRef = useRef(isFastDrop);
+  const applyLock = useCallback(
+    (state: GameState, lockedBoard: number[][]): GameState => {
+      const { nextShape, points, lines } = state;
+      const { board: clearedBoard, cleared } = clearLines(lockedBoard);
+      const earned = 1 + cleared * 4;
+      const updatedPoints = points + earned;
+      const finished = updatedPoints >= POINT_TARGET;
 
-  columnRef.current = column;
-  stageRef.current = stage;
-  fastRef.current = isFastDrop;
+      const spawned = spawnPiece(nextShape);
+      if (!isValidPosition(clearedBoard, spawned)) {
+        return {
+          board: createBoard(),
+          active: spawnPiece(randomShapeIndex()),
+          nextShape: randomShapeIndex(),
+          points: 0,
+          lines: 0,
+          message: "We stacked too high! Resetting tower.",
+          completed: false
+        };
+      }
 
-  const targetColumn = stage < TARGET_SEQUENCE.length ? TARGET_SEQUENCE[stage] : null;
+      const upcoming = randomShapeIndex();
+
+      return {
+        board: clearedBoard,
+        active: spawned,
+        nextShape: upcoming,
+        points: Math.min(updatedPoints, POINT_TARGET),
+        lines: lines + cleared,
+        message: finished
+          ? "Fifty hearts stacked! The memory lights up."
+          : cleared
+          ? `Line clear! +${earned} hearts locked.`
+          : "Heart locked in—keep stacking!",
+        completed: finished
+      };
+    },
+    []
+  );
+
+  const step = useCallback(() => {
+    setGame((current) => {
+      if (current.completed) return current;
+      const moved: Piece = {
+        ...current.active,
+        position: { x: current.active.position.x, y: current.active.position.y + 1 }
+      };
+      if (isValidPosition(current.board, moved)) {
+        return { ...current, active: moved };
+      }
+      const lockedBoard = mergePiece(current.board, current.active);
+      return applyLock(current, lockedBoard);
+    });
+  }, [applyLock]);
+
+  const moveHorizontal = useCallback((direction: number) => {
+    setGame((current) => {
+      if (current.completed) return current;
+      const moved: Piece = {
+        ...current.active,
+        position: {
+          x: current.active.position.x + direction,
+          y: current.active.position.y
+        }
+      };
+      if (!isValidPosition(current.board, moved)) {
+        return current;
+      }
+      return { ...current, active: moved };
+    });
+  }, []);
+
+  const rotatePiece = useCallback((direction: number) => {
+    setGame((current) => {
+      if (current.completed) return current;
+      const shape = TETROMINOES[current.active.shapeIndex];
+      const rotations = shape.rotations.length;
+      const nextRotation = (current.active.rotation + direction + rotations) % rotations;
+      const kicks = [0, -1, 1, -2, 2];
+      for (const kick of kicks) {
+        const candidate: Piece = {
+          ...current.active,
+          rotation: nextRotation,
+          position: { x: current.active.position.x + kick, y: current.active.position.y }
+        };
+        if (isValidPosition(current.board, candidate)) {
+          return { ...current, active: candidate };
+        }
+      }
+      return current;
+    });
+  }, []);
+
+  const hardDrop = useCallback(() => {
+    setGame((current) => {
+      if (current.completed) return current;
+      let falling: Piece = current.active;
+      while (
+        isValidPosition(current.board, {
+          ...falling,
+          position: { x: falling.position.x, y: falling.position.y + 1 }
+        })
+      ) {
+        falling = {
+          ...falling,
+          position: { x: falling.position.x, y: falling.position.y + 1 }
+        };
+      }
+
+      const lockedBoard = mergePiece(current.board, falling);
+      return applyLock({ ...current, active: falling }, lockedBoard);
+    });
+  }, [applyLock]);
 
   useEffect(() => {
-    if (stage >= TARGET_SEQUENCE.length) {
-      const timer = setTimeout(() => onComplete(rewardHearts), 650);
-      return () => clearTimeout(timer);
-    }
-
-    setRow(0);
-    setColumn(targetColumn ?? Math.floor(COLUMNS / 2));
-  }, [stage, targetColumn, onComplete, rewardHearts]);
-
-  useEffect(() => {
-    if (stage >= TARGET_SEQUENCE.length) return undefined;
-
-    const interval = setInterval(() => {
-      setRow((currentRow) => {
-        if (stageRef.current >= TARGET_SEQUENCE.length) {
-          return currentRow;
-        }
-
-        const maxRow = ROWS - 1;
-        if (currentRow >= maxRow) {
-          const target = TARGET_SEQUENCE[stageRef.current];
-          const atTarget = columnRef.current === target;
-          if (atTarget) {
-            setLanded((prev) => [...prev, target]);
-            setStage((prev) => prev + 1);
-            setMessage("Perfect drop! Another memory clicks into place.");
-          } else {
-            setMessage("Missed the beat—slide into the glowing lane.");
-          }
-          return 0;
-        }
-        return currentRow + (fastRef.current ? 2 : 1);
-      });
-    }, fastRef.current ? DROP_INTERVAL / 2 : DROP_INTERVAL);
-
+    if (game.completed) return undefined;
+    const interval = setInterval(step, isFastDrop ? FAST_DROP_INTERVAL : DROP_INTERVAL);
     return () => clearInterval(interval);
-  }, [stage]);
+  }, [isFastDrop, step, game.completed]);
 
   useEffect(() => {
-    const handleKey = (event: KeyboardEvent) => {
-      if (stageRef.current >= TARGET_SEQUENCE.length) return;
+    if (!game.completed) return undefined;
+    const timer = setTimeout(() => onComplete(rewardHearts), 600);
+    return () => clearTimeout(timer);
+  }, [game.completed, onComplete, rewardHearts]);
 
-      if (event.key === "ArrowLeft" || event.key === "a") {
-        setColumn((prev) => Math.max(0, prev - 1));
-      }
-      if (event.key === "ArrowRight" || event.key === "d") {
-        setColumn((prev) => Math.min(COLUMNS - 1, prev + 1));
-      }
-      if (event.key === "ArrowDown" || event.key === "s") {
-        setIsFastDrop(true);
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      switch (event.key) {
+        case "ArrowLeft":
+        case "a":
+          event.preventDefault();
+          moveHorizontal(-1);
+          break;
+        case "ArrowRight":
+        case "d":
+          event.preventDefault();
+          moveHorizontal(1);
+          break;
+        case "ArrowUp":
+        case "w":
+          event.preventDefault();
+          rotatePiece(1);
+          break;
+        case " ":
+        case "Spacebar":
+          event.preventDefault();
+          hardDrop();
+          break;
+        case "ArrowDown":
+        case "s":
+          event.preventDefault();
+          setIsFastDrop(true);
+          break;
+        default:
+          break;
       }
     };
 
@@ -97,68 +439,93 @@ export function TetrisQuest({
       }
     };
 
-    window.addEventListener("keydown", handleKey);
+    window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
-
     return () => {
-      window.removeEventListener("keydown", handleKey);
+      window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, []);
+  }, [hardDrop, moveHorizontal, rotatePiece]);
 
-  const landedPositions = useMemo(
-    () =>
-      landed.map((landedColumn, index) => ({
-        column: landedColumn,
-        row: ROWS - 1 - index * 2
-      })),
-    [landed]
-  );
+  const activeBlocks = useMemo(() => getBlocks(game.active), [game.active]);
 
-  const renderCell = useCallback(
-    (cellRow: number, cellColumn: number) => {
-      const isLanded = landedPositions.some(
-        (piece) => piece.row === cellRow && piece.column === cellColumn
-      );
+  const activeBlockSet = useMemo(() => {
+    const map = new Map<string, boolean>();
+    activeBlocks.forEach((block) => {
+      if (block.y >= 0) {
+        map.set(`${block.x}-${block.y}`, true);
+      }
+    });
+    return map;
+  }, [activeBlocks]);
 
-      const isFalling = row === cellRow && column === cellColumn && stage < TARGET_SEQUENCE.length;
-      const isTarget = targetColumn !== null && cellColumn === targetColumn && cellRow === ROWS - 1;
-      const isGuideLane = targetColumn !== null && cellColumn === targetColumn && cellRow > ROWS - 6;
-
-      const classes = [
-        "tetris-cell",
-        isGuideLane ? "lane" : "",
-        isTarget ? "target" : "",
-        isFalling ? "falling" : "",
-        isLanded ? "landed" : ""
-      ]
-        .filter(Boolean)
-        .join(" ");
-
-      return <div key={`${cellRow}-${cellColumn}`} className={classes} />;
-    },
-    [column, landedPositions, row, stage, targetColumn]
-  );
+  const nextPreviewBlocks = useMemo(() => {
+    const previewPiece: Piece = {
+      shapeIndex: game.nextShape,
+      rotation: 0,
+      position: { x: 1, y: 1 }
+    };
+    return getBlocks(previewPiece);
+  }, [game.nextShape]);
 
   return (
     <div className="tetris-quest">
       <div className="tetris-grid">
-        {Array.from({ length: ROWS }).map((_, rowIndex) => (
+        {game.board.map((row, rowIndex) => (
           <div key={`row-${rowIndex}`} className="tetris-row">
-            {Array.from({ length: COLUMNS }).map((_, columnIndex) =>
-              renderCell(rowIndex, columnIndex)
-            )}
+            {row.map((cell, columnIndex) => {
+              const key = `${columnIndex}-${rowIndex}`;
+              const isActive = activeBlockSet.has(key);
+              const filledShapeIndex = isActive
+                ? game.active.shapeIndex
+                : cell > 0
+                  ? cell - 1
+                  : null;
+              const classes = ["tetris-cell"];
+              if (filledShapeIndex !== null) {
+                classes.push(PIECE_CLASSES[filledShapeIndex]);
+              }
+              if (isActive) {
+                classes.push("active");
+              } else if (cell > 0) {
+                classes.push("locked");
+              }
+              return <div key={key} className={classes.join(" ")} />;
+            })}
           </div>
         ))}
       </div>
       <div className="tetris-panel">
-        <h3>Stage {Math.min(stage + 1, TARGET_SEQUENCE.length)}/
-        {TARGET_SEQUENCE.length}</h3>
-        <p>{message}</p>
+        <div className="tetris-player-card">
+          <PixelCharacter variant={playerCharacter} size={70} className="tetris-player-sprite" />
+          <span>{playerName} stacking memories</span>
+        </div>
+        <h3>Hearts locked: {game.points}/{POINT_TARGET}</h3>
+        <p>{game.message}</p>
+        <div className="tetris-next">
+          <span>Next piece</span>
+          <div className="tetris-preview">
+            {Array.from({ length: 4 }).map((_, previewRow) => (
+              <div key={`preview-row-${previewRow}`} className="tetris-preview-row">
+                {Array.from({ length: 4 }).map((__, previewColumn) => {
+                  const filled = nextPreviewBlocks.some(
+                    (block) => block.x === previewColumn && block.y === previewRow
+                  );
+                  const classes = ["tetris-preview-cell"];
+                  if (filled) {
+                    classes.push(PIECE_CLASSES[game.nextShape]);
+                  }
+                  return <div key={`preview-${previewColumn}-${previewRow}`} className={classes.join(" ")} />;
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
         <ul>
-          <li>← → : slide block</li>
-          <li>↓ : fast drop</li>
-          <li>Stack {TARGET_SEQUENCE.length} hearts to advance.</li>
+          <li>← → : move</li>
+          <li>↑ / W : rotate</li>
+          <li>↓ : soft drop</li>
+          <li>Space: hard drop</li>
         </ul>
       </div>
     </div>

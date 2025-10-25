@@ -2,7 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import type { PixelCharacterVariant } from "@/components/pixel/PixelCharacter";
+import {
+  PixelCharacter,
+  type PixelCharacterVariant
+} from "@/components/pixel/PixelCharacter";
 
 const WIDTH = 420;
 const HEIGHT = 220;
@@ -53,11 +56,13 @@ const PLAYER_HEIGHT = 42;
 export function PlatformRunQuest({
   rewardHearts,
   onComplete,
-  playerCharacter: _playerCharacter
+  playerCharacter,
+  partnerCharacter: _partnerCharacter
 }: {
   rewardHearts: number;
   onComplete: (hearts: number) => void;
   playerCharacter: PixelCharacterVariant;
+  partnerCharacter: PixelCharacterVariant;
 }) {
   const [player, setPlayer] = useState<PlayerState>(INITIAL_PLAYER);
   const [collected, setCollected] = useState<Set<number>>(new Set());
@@ -73,6 +78,8 @@ export function PlatformRunQuest({
   const collectedRef = useRef<Set<number>>(new Set());
   const runningRef = useRef<boolean>(running);
   const finishedRef = useRef<boolean>(finished);
+  const canDoubleJumpRef = useRef<boolean>(false);
+  const glideHoldRef = useRef<boolean>(false);
 
   playerRef.current = player;
   runningRef.current = running;
@@ -82,6 +89,8 @@ export function PlatformRunQuest({
   const resetLevel = useCallback(() => {
     playerRef.current = INITIAL_PLAYER;
     collectedRef.current = new Set();
+    canDoubleJumpRef.current = false;
+    glideHoldRef.current = false;
     setPlayer(INITIAL_PLAYER);
     setCollected(new Set());
     setMessage("Back at the start—steady strides win.");
@@ -92,11 +101,24 @@ export function PlatformRunQuest({
   const triggerJump = useCallback(() => {
     if (!runningRef.current) return;
     setPlayer((prev) => {
-      if (prev.y !== 0) return prev;
-      setMessage("Leap! We glide past the doubts.");
-      const next = { ...prev, velocityY: JUMP_FORCE, y: prev.y - 1 };
-      playerRef.current = next;
-      return next;
+      if (prev.y === 0) {
+        setMessage("Leap! We glide past the doubts.");
+        const next = { ...prev, velocityY: JUMP_FORCE, y: prev.y - 1 };
+        playerRef.current = next;
+        canDoubleJumpRef.current = true;
+        return next;
+      }
+      if (canDoubleJumpRef.current) {
+        setMessage("Second jump! We keep climbing.");
+        const next = {
+          ...prev,
+          velocityY: JUMP_FORCE * 0.7
+        };
+        playerRef.current = next;
+        canDoubleJumpRef.current = false;
+        return next;
+      }
+      return prev;
     });
   }, []);
 
@@ -105,10 +127,20 @@ export function PlatformRunQuest({
       if (event.key === " " || event.key === "ArrowUp" || event.key === "w") {
         event.preventDefault();
         triggerJump();
+        glideHoldRef.current = true;
+      }
+    };
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (event.key === " " || event.key === "ArrowUp" || event.key === "w") {
+        glideHoldRef.current = false;
       }
     };
     window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
+    window.addEventListener("keyup", handleKeyUp);
+    return () => {
+      window.removeEventListener("keydown", handleKey);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
   }, [triggerJump]);
 
   useEffect(() => {
@@ -119,11 +151,17 @@ export function PlatformRunQuest({
 
       if (runningRef.current) {
         const previous = playerRef.current;
-        let velocityY = previous.velocityY + GRAVITY * delta;
+        const isAirborne = previous.y < 0;
+        const glideFactor = glideHoldRef.current && isAirborne ? 0.42 : 1;
+        let velocityY = previous.velocityY + GRAVITY * delta * glideFactor;
+        if (glideHoldRef.current && isAirborne && velocityY > 120) {
+          velocityY = 120;
+        }
         let y = previous.y + velocityY * delta;
         if (y > 0) {
           y = 0;
           velocityY = 0;
+          canDoubleJumpRef.current = false;
         }
         const x = Math.min(LEVEL_LENGTH, previous.x + RUN_SPEED * delta);
         const nextPlayer: PlayerState = { x, y, velocityY };
@@ -195,10 +233,24 @@ export function PlatformRunQuest({
         style={{ width: WIDTH, height: HEIGHT }}
         role="button"
         tabIndex={0}
-        onMouseDown={triggerJump}
+        onMouseDown={(event) => {
+          event.preventDefault();
+          triggerJump();
+          glideHoldRef.current = true;
+        }}
+        onMouseUp={() => {
+          glideHoldRef.current = false;
+        }}
+        onMouseLeave={() => {
+          glideHoldRef.current = false;
+        }}
         onTouchStart={(event) => {
           event.preventDefault();
           triggerJump();
+          glideHoldRef.current = true;
+        }}
+        onTouchEnd={() => {
+          glideHoldRef.current = false;
         }}
       >
         <div className="platform-ground" />
@@ -237,7 +289,13 @@ export function PlatformRunQuest({
           style={{
             transform: `translate(${player.x - cameraX}px, ${GROUND_Y + player.y}px)`
           }}
-        />
+        >
+          <PixelCharacter
+            variant={playerCharacter}
+            size={44}
+            className="platform-player-sprite"
+          />
+        </div>
       </div>
       <div className="platform-panel">
         <h3>Vow coins: {collected.size}/{COINS.length}</h3>

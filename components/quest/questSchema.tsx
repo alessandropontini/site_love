@@ -29,6 +29,7 @@ export type QuestEvent = {
     onExit: () => void;
     rewardHearts: number;
     playerCharacter: PixelCharacterVariant;
+    partnerCharacter: PixelCharacterVariant;
   }) => ReactNode;
 };
 
@@ -38,17 +39,18 @@ export const QUEST_EVENTS: QuestEvent[] = [
     title: "Block Party Beginnings",
     subtitle: "Tetris rooftops",
     description:
-      "Drop the beats (and blocks) into place to remember that neon night where everything clicked.",
+      "Stack classic tetrominoes and bank 50 glowing hearts to relive that neon rooftop night.",
     location: "Milan Rooftop",
     year: "2017",
     color: "#d8664f",
     accent: "#8c2f26",
     rewardHearts: 4,
-    render: ({ onComplete, rewardHearts, playerCharacter }) => (
+    render: ({ onComplete, rewardHearts, playerCharacter, partnerCharacter }) => (
       <TetrisQuest
         onComplete={onComplete}
         rewardHearts={rewardHearts}
         playerCharacter={playerCharacter}
+        partnerCharacter={partnerCharacter}
       />
     )
   },
@@ -57,17 +59,18 @@ export const QUEST_EVENTS: QuestEvent[] = [
     title: "Hearts in the Arcade",
     subtitle: "Pac-Maze chase",
     description:
-      "Navigate the maze, collect every heart, and dodge the doubts that tried to chase us away.",
+      "Navigate the maze, scoop every heart, and outmaneuver the doubts that tried to chase us away.",
     location: "Tokyo Arcade",
     year: "2018",
     color: "#3d7d58",
     accent: "#1f4d33",
     rewardHearts: 6,
-    render: ({ onComplete, rewardHearts, playerCharacter }) => (
+    render: ({ onComplete, rewardHearts, playerCharacter, partnerCharacter }) => (
       <PacMazeQuest
         onComplete={onComplete}
         rewardHearts={rewardHearts}
         playerCharacter={playerCharacter}
+        partnerCharacter={partnerCharacter}
       />
     )
   },
@@ -82,11 +85,12 @@ export const QUEST_EVENTS: QuestEvent[] = [
     color: "#f2c36b",
     accent: "#c07a32",
     rewardHearts: 8,
-    render: ({ onComplete, rewardHearts, playerCharacter }) => (
+    render: ({ onComplete, rewardHearts, playerCharacter, partnerCharacter }) => (
       <FlappyLettersQuest
         onComplete={onComplete}
         rewardHearts={rewardHearts}
         playerCharacter={playerCharacter}
+        partnerCharacter={partnerCharacter}
       />
     )
   },
@@ -101,11 +105,12 @@ export const QUEST_EVENTS: QuestEvent[] = [
     color: "#85bfa0",
     accent: "#427a5a",
     rewardHearts: 10,
-    render: ({ onComplete, rewardHearts, playerCharacter }) => (
+    render: ({ onComplete, rewardHearts, playerCharacter, partnerCharacter }) => (
       <PlatformRunQuest
         onComplete={onComplete}
         rewardHearts={rewardHearts}
         playerCharacter={playerCharacter}
+        partnerCharacter={partnerCharacter}
       />
     )
   }

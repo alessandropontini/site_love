@@ -2,11 +2,15 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import type { PixelCharacterVariant } from "@/components/pixel/PixelCharacter";
+import {
+  PixelCharacter,
+  type PixelCharacterVariant
+} from "@/components/pixel/PixelCharacter";
 
 type Position = { x: number; y: number };
 
-const MOVE_INTERVAL = 210;
+const MOVE_INTERVAL = 260;
+const GHOST_STEP_FREQUENCY = 3;
 
 const GRID_TEMPLATE = [
   "#########",
@@ -65,11 +69,13 @@ function isWall(position: Position) {
 export function PacMazeQuest({
   rewardHearts,
   onComplete,
-  playerCharacter
+  playerCharacter,
+  partnerCharacter: _partnerCharacter
 }: {
   rewardHearts: number;
   onComplete: (hearts: number) => void;
   playerCharacter: PixelCharacterVariant;
+  partnerCharacter: PixelCharacterVariant;
 }) {
   const heroLabel = playerCharacter === "alessandro" ? "Alessandro" : "Bridget";
   const [player, setPlayer] = useState<Position>(PLAYER_START);
@@ -121,7 +127,7 @@ export function PacMazeQuest({
             return null;
           }
           const distance = Math.abs(hero.x - next.x) + Math.abs(hero.y - next.y);
-          const jitter = Math.random() * 1.25;
+          const jitter = Math.random() * 2.2;
           return { next, score: distance - jitter };
         })
         .filter((value): value is { next: Position; score: number } => value !== null)
@@ -161,7 +167,7 @@ export function PacMazeQuest({
         ghostLagRef.current += 1;
 
         setGhost((prevGhost) => {
-          const shouldMoveGhost = ghostLagRef.current % 2 === 0;
+          const shouldMoveGhost = ghostLagRef.current % GHOST_STEP_FREQUENCY === 0;
           const candidate = shouldMoveGhost ? moveGhost(prevGhost, next) : prevGhost;
 
           if (candidate.x === next.x && candidate.y === next.y) {
@@ -173,8 +179,7 @@ export function PacMazeQuest({
             setTimeout(() => {
               setPlayer(PLAYER_START);
               setGhost(GHOST_START);
-              setHearts(new Set(GRID.hearts));
-              setStatus(`Back in the maze. Stay nimble, ${heroLabel}.`);
+              setStatus(`Back in the maze. Hearts stay safe—keep cruising, ${heroLabel}.`);
             }, 220);
             return GHOST_START;
           }
@@ -236,12 +241,15 @@ export function PacMazeQuest({
       const containsHeart = hearts.has(key);
       const containsPlayer = player.x === x && player.y === y;
       const containsGhost = ghost.x === x && ghost.y === y;
+      const playerVariantClass =
+        containsPlayer && playerCharacter === "alessandro" ? "player-alessandro" : containsPlayer ? "player-bridget" : "";
 
       const className = [
         "pac-cell",
         isBorder ? "wall" : "",
         containsHeart ? "heart" : "",
         containsPlayer ? "player" : "",
+        playerVariantClass,
         containsGhost ? "ghost" : ""
       ]
         .filter(Boolean)
@@ -249,7 +257,7 @@ export function PacMazeQuest({
 
       return <div key={key} className={className} />;
     },
-    [ghost, hearts, player]
+    [ghost, hearts, player, playerCharacter]
   );
 
   const gridRows = useMemo(
@@ -266,12 +274,16 @@ export function PacMazeQuest({
     <div className={["pac-quest", shake ? "shake" : ""].join(" ").trim()}>
       <div className="pac-grid">{gridRows}</div>
       <div className="pac-panel">
+        <div className="pac-player-card">
+          <PixelCharacter variant={playerCharacter} size={64} className="pac-player-sprite" />
+          <span>{heroLabel} is on maze duty</span>
+        </div>
         <h3>Hearts left: {remaining}</h3>
         <p>{status}</p>
         <ul>
           <li>Hold arrows / WASD to glide through the maze.</li>
-          <li>The neon doubt now moves every other beat.</li>
-          <li>Snag every heart to unlock the next memory.</li>
+          <li>The neon doubt only moves every third beat.</li>
+          <li>If it tags you, hearts stay collected—just regain your stride.</li>
         </ul>
       </div>
     </div>

@@ -18,10 +18,10 @@ A retro-styled Next.js microsite that opens like an arcade cartridge. Follow a m
 
 The site launches with a title card and map. Complete each chapter in order to unlock the finale:
 
-1. **Block Party Beginnings** – steer Tetris-style drops onto the glowing lane.
+1. **Block Party Beginnings** – stack classic tetrominoes to bank 50 hearts.
 2. **Hearts in the Arcade** – navigate a Pac-Maze, grabbing every heart while dodging doubts.
 3. **Skyline Letters** – flap rooftop love notes through the skyline gaps.
-4. **Side-Scroller Vows** – sprint through a Mario-inspired run to collect vow coins.
+4. **Side-Scroller Vows** – double-jump, glide, and sprint through the trail to gather every vow coin.
 
 Every win adds to the shared heart counter and advances the quest timeline. Finishing all four mini-games plays the epilogue panel.
 
@@ -36,6 +36,16 @@ Every win adds to the shared heart counter and advances the quest timeline. Fini
 - `data/` – still ignored; stash heavyweight concept art or exports here if needed.
 
 👉 For deeper breakdowns, peek at `docs/quest-guide.md`.
+
+## Dev Skip Button
+
+During development a **Skip (DEV)** button appears in every mini-game panel so you can jump past a stage while testing. It is shown automatically when `NODE_ENV !== "production"` or when you set:
+
+```bash
+NEXT_PUBLIC_DEV_SKIP=true
+```
+
+Be sure to unset the flag (or comment out the button) before launching to production.
 
 ## Production Build
 

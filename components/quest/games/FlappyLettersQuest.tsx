@@ -2,7 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import type { PixelCharacterVariant } from "@/components/pixel/PixelCharacter";
+import {
+  PixelCharacter,
+  type PixelCharacterVariant
+} from "@/components/pixel/PixelCharacter";
 
 const WIDTH = 360;
 const HEIGHT = 220;
@@ -25,32 +28,42 @@ type Pipe = {
   scored: boolean;
 };
 
-let PIPE_ID = 0;
-
-function createPipe(offset: number): Pipe {
-  const minCenter = 60;
-  const maxCenter = HEIGHT - 60;
-  const gapCenter = Math.random() * (maxCenter - minCenter) + minCenter;
-  PIPE_ID += 1;
-  return {
-    id: PIPE_ID,
-    x: WIDTH + offset,
-    gapCenter,
-    scored: false
-  };
-}
-
 export function FlappyLettersQuest({
   rewardHearts,
   onComplete,
-  playerCharacter: _playerCharacter
+  playerCharacter,
+  partnerCharacter: _partnerCharacter
 }: {
   rewardHearts: number;
   onComplete: (hearts: number) => void;
   playerCharacter: PixelCharacterVariant;
+  partnerCharacter: PixelCharacterVariant;
 }) {
+  const playerName = playerCharacter === "alessandro" ? "Alessandro" : "Bridget";
+  const pipeIdRef = useRef(0);
+
+  const createPipe = useCallback(
+    (offset: number): Pipe => {
+      const minCenter = 60;
+      const maxCenter = HEIGHT - 60;
+      const gapCenter = Math.random() * (maxCenter - minCenter) + minCenter;
+      pipeIdRef.current += 1;
+      return {
+        id: pipeIdRef.current,
+        x: WIDTH + offset,
+        gapCenter,
+        scored: false
+      };
+    },
+    []
+  );
+
   const [bird, setBird] = useState<BirdState>({ y: HEIGHT / 2, velocity: 0 });
-  const [pipes, setPipes] = useState<Pipe[]>([createPipe(0), createPipe(180), createPipe(360)]);
+  const [pipes, setPipes] = useState<Pipe[]>(() => [
+    createPipe(0),
+    createPipe(180),
+    createPipe(360)
+  ]);
   const [running, setRunning] = useState<boolean>(false);
   const [cleared, setCleared] = useState<number>(0);
   const [message, setMessage] = useState<string>("Press space or tap to keep the letter aloft.");
@@ -66,6 +79,7 @@ export function FlappyLettersQuest({
   clearedRef.current = cleared;
 
   const resetGame = useCallback(() => {
+    pipeIdRef.current = 0;
     setBird({ y: HEIGHT / 2, velocity: 0 });
     const initialPipes = [createPipe(0), createPipe(180), createPipe(360)];
     setPipes(initialPipes);
@@ -74,7 +88,7 @@ export function FlappyLettersQuest({
     clearedRef.current = 0;
     setRunning(false);
     setMessage("Press space or tap to keep the letter aloft.");
-  }, []);
+  }, [createPipe]);
 
   const flap = useCallback(() => {
     setBird((prev) => ({
@@ -154,15 +168,22 @@ export function FlappyLettersQuest({
           return { y: HEIGHT / 2, velocity: 0 };
         }
 
+        let scoredUpdate = false;
         pipesRef.current = pipesRef.current.map((pipe) => {
           if (!pipe.scored && pipe.x + 30 < headX) {
-            pipe.scored = true;
+            const scoredPipe = { ...pipe, scored: true };
             setCleared((count) => count + 1);
             clearedRef.current += 1;
             setMessage("Great! Keep weaving through the skyline.");
+            scoredUpdate = true;
+            return scoredPipe;
           }
           return pipe;
         });
+
+        if (scoredUpdate) {
+          setPipes(pipesRef.current.map((pipe) => ({ ...pipe })));
+        }
 
         if (clearedRef.current >= REQUIRED_PIPES) {
           setMessage("Letters delivered! Skyline applauds.");
@@ -180,7 +201,7 @@ export function FlappyLettersQuest({
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
-  }, [onComplete, resetGame, rewardHearts]);
+  }, [createPipe, onComplete, resetGame, rewardHearts]);
 
   return (
     <div
@@ -200,7 +221,9 @@ export function FlappyLettersQuest({
         <div
           className="flappy-bird"
           style={{ transform: `translate(${WIDTH / 4}px, ${bird.y}px)` }}
-        />
+        >
+          <PixelCharacter variant={playerCharacter} size={34} className="flappy-bird-sprite" />
+        </div>
         {pipes.map((pipe) => (
           <div key={pipe.id} className="flappy-pipe" style={{ transform: `translateX(${pipe.x}px)` }}>
             <span
@@ -219,7 +242,7 @@ export function FlappyLettersQuest({
         <p>{message}</p>
         <ul>
           <li>Tap / Space / ↑ to flap.</li>
-          <li>Weave through {REQUIRED_PIPES} gaps to finish the delivery.</li>
+          <li>{playerName} must weave through {REQUIRED_PIPES} gaps.</li>
           <li>Stay steady—gusts get trickier the further we go.</li>
         </ul>
       </div>

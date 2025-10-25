@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   PixelCharacter,
@@ -75,6 +75,19 @@ export function QuestGame() {
   const handleStart = () => {
     setScreen("map");
   };
+
+  useEffect(() => {
+    if (screen === "game") {
+      const panel = document.getElementById("quest-event-panel");
+      if (panel) {
+        panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      return;
+    }
+    if (screen === "map" || screen === "ending") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [screen, activeEvent]);
 
   const handleSelectEvent = (eventKey: EventKey) => {
     setActiveEvent(eventKey);
@@ -191,6 +204,7 @@ export function QuestGame() {
           onComplete={handleCompleteEvent}
           onExit={handleReturnToMap}
           playerCharacter={playerCharacter}
+          partnerCharacter={partnerCharacter}
         />
       )}
 
