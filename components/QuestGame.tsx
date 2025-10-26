@@ -72,9 +72,33 @@ export function QuestGame() {
   const partnerCharacter: PixelCharacterVariant =
     playerCharacter === "alessandro" ? "bridget" : "alessandro";
 
+  useEffect(() => {
+    const root = typeof document !== "undefined" ? document.documentElement : null;
+    if (!root) return;
+    root.setAttribute("data-player", playerCharacter);
+    root.setAttribute("data-partner", partnerCharacter);
+    return () => {
+      root.removeAttribute("data-player");
+      root.removeAttribute("data-partner");
+    };
+  }, [playerCharacter, partnerCharacter]);
+
   const handleStart = () => {
     setScreen("map");
   };
+
+  useEffect(() => {
+    const root = typeof document !== "undefined" ? document.documentElement : null;
+    if (!root) return;
+    if (screen === "game") {
+      root.classList.add("game--lock-scroll");
+    } else {
+      root.classList.remove("game--lock-scroll");
+    }
+    return () => {
+      root.classList.remove("game--lock-scroll");
+    };
+  }, [screen]);
 
   useEffect(() => {
     if (screen === "game") {
@@ -131,65 +155,67 @@ export function QuestGame() {
   };
 
   return (
-    <section className="quest-shell">
-      <header className="quest-hero">
-        <PixelCharacter variant={playerCharacter} size={148} />
-        <div className="quest-hero-copy">
-          <p className="quest-prelude">A pixel tale</p>
-          <h1>
-            The Story of <span>Alessandro</span> & <span>Bridget</span>
-          </h1>
-          <p>
-            Press start to hop onto the nostalgia trail. Each retro mini-game
-            unlocks a slice of our story—from rooftop starts to forever vows.
-          </p>
-          <div className="quest-character-selector">
-            <span>Choose your avatar</span>
-            <div className="quest-character-options">
-              {CHARACTER_OPTIONS.map(({ key, label, note }) => {
-                const isActive = playerCharacter === key;
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    className="quest-character-option"
-                    data-active={isActive}
-                    aria-pressed={isActive}
-                    onClick={() => setPlayerCharacter(key)}
-                  >
-                    <PixelCharacter
-                      variant={key}
-                      size={60}
-                      className="quest-character-sprite"
-                    />
-                    <span className="quest-character-label">{label}</span>
-                    <span className="quest-character-note">{note}</span>
-                  </button>
-                );
-              })}
+    <section className="quest-shell" data-screen={screen} data-player={playerCharacter}>
+      {screen !== "game" && (
+        <header className="quest-hero">
+          <PixelCharacter variant={playerCharacter} size={148} />
+          <div className="quest-hero-copy">
+            <p className="quest-prelude">A pixel tale</p>
+            <h1>
+              The Story of <span>Alessandro</span> & <span>Bridget</span>
+            </h1>
+            <p>
+              Press start to hop onto the nostalgia trail. Each retro mini-game
+              unlocks a slice of our story—from rooftop starts to forever vows.
+            </p>
+            <div className="quest-character-selector">
+              <span>Choose your avatar</span>
+              <div className="quest-character-options">
+                {CHARACTER_OPTIONS.map(({ key, label, note }) => {
+                  const isActive = playerCharacter === key;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      className="quest-character-option"
+                      data-active={isActive}
+                      aria-pressed={isActive}
+                      onClick={() => setPlayerCharacter(key)}
+                    >
+                      <PixelCharacter
+                        variant={key}
+                        size={60}
+                        className="quest-character-sprite"
+                      />
+                      <span className="quest-character-label">{label}</span>
+                      <span className="quest-character-note">{note}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
+            {screen === "intro" ? (
+              <button type="button" className="quest-primary" onClick={handleStart}>
+                Start Quest
+              </button>
+            ) : (
+              <div className="quest-hero-stats">
+                <PixelCharacter
+                  variant={partnerCharacter}
+                  size={72}
+                  className="quest-hero-companion"
+                />
+                <QuestSummary snapshot={progressSnapshot} />
+              </div>
+            )}
+            <QuestLeaderboard
+              attempts={attemptCount}
+              totalHearts={heartsCollected}
+              entries={leaderboardEntries}
+            />
           </div>
-          {screen === "intro" ? (
-            <button type="button" className="quest-primary" onClick={handleStart}>
-              Start Quest
-            </button>
-          ) : (
-            <div className="quest-hero-stats">
-              <PixelCharacter
-                variant={partnerCharacter}
-                size={72}
-                className="quest-hero-companion"
-              />
-              <QuestSummary snapshot={progressSnapshot} />
-            </div>
-          )}
-          <QuestLeaderboard
-            attempts={attemptCount}
-            totalHearts={heartsCollected}
-            entries={leaderboardEntries}
-          />
-        </div>
-      </header>
+        </header>
+      )}
 
       {screen === "map" && (
         <QuestMap

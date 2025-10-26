@@ -23,7 +23,8 @@ export function QuestMap({
         >
           <path
             d="M20 150 C140 80 200 80 310 140 S460 200 540 110"
-            stroke="rgba(216, 102, 79, 0.65)"
+            stroke="var(--player-accent)"
+            strokeOpacity={0.65}
             strokeWidth={8}
             strokeLinecap="round"
             strokeLinejoin="round"

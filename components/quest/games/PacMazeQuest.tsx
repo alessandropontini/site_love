@@ -26,6 +26,8 @@ const GRID_TEMPLATE = [
 const PLAYER_START: Position = { x: 1, y: 1 };
 const GHOST_START: Position = { x: 7, y: 6 };
 
+type GridState = ReturnType<typeof parseGrid>;
+
 const DIR_UP: Position = { x: 0, y: -1 };
 const DIR_DOWN: Position = { x: 0, y: 1 };
 const DIR_LEFT: Position = { x: -1, y: 0 };
@@ -60,12 +62,6 @@ function parseGrid() {
   return { width: GRID_TEMPLATE[0].length, height: GRID_TEMPLATE.length, walls, hearts };
 }
 
-const GRID = parseGrid();
-
-function isWall(position: Position) {
-  return GRID.walls.has(`${position.x}-${position.y}`);
-}
-
 export function PacMazeQuest({
   rewardHearts,
   onComplete,
@@ -78,9 +74,11 @@ export function PacMazeQuest({
   partnerCharacter: PixelCharacterVariant;
 }) {
   const heroLabel = playerCharacter === "alessandro" ? "Alessandro" : "Bridget";
+  const gridRef = useRef<GridState>(parseGrid());
+  const initialHeartsRef = useRef<number>(gridRef.current.hearts.size);
   const [player, setPlayer] = useState<Position>(PLAYER_START);
   const [ghost, setGhost] = useState<Position>(GHOST_START);
-  const [hearts, setHearts] = useState<Set<string>>(new Set(GRID.hearts));
+  const [hearts, setHearts] = useState<Set<string>>(() => new Set(gridRef.current.hearts));
   const [status, setStatus] = useState<string>(
     () => `Collect every heart and dodge the doubts, ${heroLabel}.`
   );
@@ -88,6 +86,10 @@ export function PacMazeQuest({
   const [activeDirection, setActiveDirection] = useState<Position | null>(null);
 
   const ghostLagRef = useRef<number>(0);
+  const resetTimeoutRef = useRef<number>();
+  const frameRef = useRef<number>();
+  const lastTimestampRef = useRef<number>();
+  const stepAccumulatorRef = useRef<number>(0);
 
   const remaining = hearts.size;
   const cleared = remaining === 0;
@@ -99,10 +101,34 @@ export function PacMazeQuest({
   }, [cleared, onComplete, rewardHearts]);
 
   useEffect(() => {
-    if (hearts.size === GRID.hearts.size && !cleared) {
+    if (hearts.size === initialHeartsRef.current && !cleared) {
       setStatus(`Collect every heart and dodge the doubts, ${heroLabel}.`);
     }
   }, [heroLabel, hearts.size, cleared]);
+
+  const resetGame = useCallback(() => {
+    if (resetTimeoutRef.current) {
+      clearTimeout(resetTimeoutRef.current);
+      resetTimeoutRef.current = undefined;
+    }
+    const freshGrid = parseGrid();
+    gridRef.current = freshGrid;
+    initialHeartsRef.current = freshGrid.hearts.size;
+    ghostLagRef.current = 0;
+    setPlayer(PLAYER_START);
+    setGhost(GHOST_START);
+    setHearts(new Set(freshGrid.hearts));
+    setStatus(`Maze reset—walls and hearts refreshed, ${heroLabel}.`);
+    setShake(false);
+    setActiveDirection(null);
+  }, [heroLabel]);
+
+  useEffect(() => {
+    return () => {
+      if (frameRef.current) cancelAnimationFrame(frameRef.current);
+      if (resetTimeoutRef.current) clearTimeout(resetTimeoutRef.current);
+    };
+  }, []);
 
   const tryMove = useCallback(
     (from: Position, direction: Position) => {
@@ -110,7 +136,7 @@ export function PacMazeQuest({
         x: from.x + direction.x,
         y: from.y + direction.y
       };
-      if (isWall(next)) {
+      if (gridRef.current.walls.has(`${next.x}-${next.y}`)) {
         return from;
       }
       return next;
@@ -176,10 +202,12 @@ export function PacMazeQuest({
             setStatus(`Doubts caught us—resetting, ${heroLabel}.`);
             ghostLagRef.current = 0;
             setActiveDirection(null);
-            setTimeout(() => {
-              setPlayer(PLAYER_START);
-              setGhost(GHOST_START);
-              setStatus(`Back in the maze. Hearts stay safe—keep cruising, ${heroLabel}.`);
+            if (resetTimeoutRef.current) {
+              clearTimeout(resetTimeoutRef.current);
+            }
+            resetTimeoutRef.current = window.setTimeout(() => {
+              resetGame();
+              setStatus(`Back in the maze. Every wall is back up—keep cruising, ${heroLabel}.`);
             }, 220);
             return GHOST_START;
           }
@@ -190,7 +218,7 @@ export function PacMazeQuest({
         return next;
       });
     },
-    [cleared, heroLabel, moveGhost, tryMove]
+    [cleared, heroLabel, moveGhost, resetGame, tryMove]
   );
 
   useEffect(() => {
@@ -221,11 +249,43 @@ export function PacMazeQuest({
   }, [attemptMove, cleared]);
 
   useEffect(() => {
-    if (!activeDirection || cleared) return;
-    const interval = setInterval(() => {
-      attemptMove(activeDirection);
-    }, MOVE_INTERVAL);
-    return () => clearInterval(interval);
+    const stepMs = MOVE_INTERVAL;
+
+    const loop = (timestamp: number) => {
+      if (cleared) {
+        stepAccumulatorRef.current = 0;
+        lastTimestampRef.current = timestamp;
+        frameRef.current = requestAnimationFrame(loop);
+        return;
+      }
+
+      if (lastTimestampRef.current === undefined) {
+        lastTimestampRef.current = timestamp;
+      }
+
+      const delta = Math.min(180, timestamp - (lastTimestampRef.current ?? timestamp));
+      lastTimestampRef.current = timestamp;
+
+      if (activeDirection) {
+        stepAccumulatorRef.current += delta;
+        while (stepAccumulatorRef.current >= stepMs) {
+          attemptMove(activeDirection);
+          stepAccumulatorRef.current -= stepMs;
+        }
+      } else {
+        stepAccumulatorRef.current = 0;
+      }
+
+      frameRef.current = requestAnimationFrame(loop);
+    };
+
+    frameRef.current = requestAnimationFrame(loop);
+    return () => {
+      if (frameRef.current) cancelAnimationFrame(frameRef.current);
+      frameRef.current = undefined;
+      lastTimestampRef.current = undefined;
+      stepAccumulatorRef.current = 0;
+    };
   }, [activeDirection, attemptMove, cleared]);
 
   useEffect(() => {
@@ -283,7 +343,7 @@ export function PacMazeQuest({
         <ul>
           <li>Hold arrows / WASD to glide through the maze.</li>
           <li>The neon doubt only moves every third beat.</li>
-          <li>If it tags you, hearts stay collected—just regain your stride.</li>
+          <li>If it tags you, the maze redraws—dash again from the start.</li>
         </ul>
       </div>
     </div>

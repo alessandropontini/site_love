@@ -1,9 +1,10 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import {
   PixelCharacter,
   type PixelCharacterVariant
 } from "@/components/pixel/PixelCharacter";
+import { initCheer, setCharacter, startCheer, stopCheer } from "@/components/quest/cheer";
 import type { QuestEvent, EventKey } from "@/components/quest/questSchema";
 
 type QuestEventPanelProps = {
@@ -40,10 +41,34 @@ export function QuestEventPanel({
     }
   }, [event.key]);
 
+  const cheerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const container = cheerRef.current;
+    if (!container) return;
+    initCheer(container, partnerCharacter);
+    setCharacter(partnerCharacter);
+    startCheer();
+    return () => {
+      stopCheer();
+    };
+  }, [partnerCharacter]);
+
+  const handleComplete = (hearts: number) => {
+    stopCheer();
+    onComplete(event.key, hearts);
+  };
+
+  const handleExit = () => {
+    stopCheer();
+    onExit();
+  };
+
   return (
     <section
       className="quest-event-panel"
       id="quest-event-panel"
+      data-player={playerCharacter}
       style={{
         borderColor: event.accent,
         background: `linear-gradient(160deg, ${event.color}33, rgba(8,10,22,0.85))`
@@ -61,14 +86,17 @@ export function QuestEventPanel({
           <span>
             {event.location} · {event.year}
           </span>
-          <button type="button" className="quest-secondary" onClick={onExit}>
+          <button type="button" className="quest-secondary" onClick={handleExit}>
             Back to map
           </button>
           {devSkipEnabled && (
             <button
               type="button"
               className="quest-dev-button"
-              onClick={() => onComplete(event.key, event.rewardHearts)}
+              onClick={() => {
+                stopCheer();
+                onComplete(event.key, event.rewardHearts);
+              }}
             >
               Skip (DEV)
             </button>
@@ -76,22 +104,26 @@ export function QuestEventPanel({
         </div>
       </header>
 
-      <p className="quest-event-description">{event.description}</p>
-      <p className="quest-event-hint">{hint}</p>
+      <div className="quest-event-copy">
+        <p className="quest-event-description">{event.description}</p>
+        <p className="quest-event-hint">{hint}</p>
+      </div>
 
       <div className="quest-event-stage">
         <div className="quest-event-game">
-          {event.render({
-            onComplete: (hearts) => onComplete(event.key, hearts),
-            onExit,
-            rewardHearts: event.rewardHearts,
-            playerCharacter,
-            partnerCharacter
-          })}
+          <div className="game-shell">
+            {event.render({
+              onComplete: (hearts) => handleComplete(hearts),
+              onExit: handleExit,
+              rewardHearts: event.rewardHearts,
+              playerCharacter,
+              partnerCharacter
+            })}
+          </div>
         </div>
-        <div className="quest-event-cheer">
+        <div className="quest-event-cheer" ref={cheerRef}>
           <PixelCharacter variant={partnerCharacter} size={84} className="quest-cheer-sprite" />
-          <span>
+          <span data-cheer-line>
             {partnerCharacter === "alessandro" ? "Alessandro" : "Bridget"} says: Vai amore!
           </span>
         </div>

@@ -12,6 +12,40 @@
   --accent-gold: #f2c36b;
   --accent-lime: #85bfa0;
   --accent-cobalt: #3c5d82;
+  --player-accent: #6395d6;
+  --player-accent-soft: rgba(99, 149, 214, 0.2);
+  --player-accent-strong: rgba(99, 149, 214, 0.32);
+  --player-accent-border: rgba(99, 149, 214, 0.55);
+  --player-accent-glow: rgba(99, 149, 214, 0.28);
+  --partner-accent: #d8664f;
+  --partner-accent-soft: rgba(216, 102, 79, 0.2);
+  --partner-accent-strong: rgba(216, 102, 79, 0.32);
+  --partner-accent-border: rgba(216, 102, 79, 0.5);
+  --partner-accent-glow: rgba(216, 102, 79, 0.28);
+}
+
+:root[data-player="bridget"] {
+  --player-accent: #d8664f;
+  --player-accent-soft: rgba(216, 102, 79, 0.2);
+  --player-accent-strong: rgba(216, 102, 79, 0.32);
+  --player-accent-border: rgba(216, 102, 79, 0.55);
+  --player-accent-glow: rgba(216, 102, 79, 0.28);
+}
+
+:root[data-partner="alessandro"] {
+  --partner-accent: #6395d6;
+  --partner-accent-soft: rgba(99, 149, 214, 0.2);
+  --partner-accent-strong: rgba(99, 149, 214, 0.32);
+  --partner-accent-border: rgba(99, 149, 214, 0.5);
+  --partner-accent-glow: rgba(99, 149, 214, 0.28);
+}
+
+:root[data-partner="bridget"] {
+  --partner-accent: #d8664f;
+  --partner-accent-soft: rgba(216, 102, 79, 0.2);
+  --partner-accent-strong: rgba(216, 102, 79, 0.32);
+  --partner-accent-border: rgba(216, 102, 79, 0.5);
+  --partner-accent-glow: rgba(216, 102, 79, 0.28);
 }
 
 *,
@@ -36,6 +70,37 @@ body {
   color: var(--text-main);
   min-height: 100vh;
   letter-spacing: 0.04em;
+}
+
+html.game--lock-scroll,
+html.game--lock-scroll body {
+  overflow: hidden;
+  height: 100%;
+}
+
+html.game--lock-scroll main.quest-layout {
+  padding: clamp(18px, 4vw, 28px);
+  min-height: 100vh;
+  height: 100vh;
+  align-items: stretch;
+  justify-content: center;
+}
+
+html.game--lock-scroll .quest-shell {
+  max-height: 100%;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+.quest-shell[data-screen="game"] {
+  width: min(1020px, 100%);
+}
+
+html.game--lock-scroll .quest-shell[data-screen="game"] {
+  gap: clamp(24px, 3vw, 32px);
+  height: 100%;
+  justify-content: center;
 }
 
 main.quest-layout {
@@ -137,9 +202,9 @@ button {
 }
 
 .quest-character-option[data-active="true"] {
-  border-color: rgba(216, 102, 79, 0.62);
-  background: rgba(216, 102, 79, 0.22);
-  box-shadow: 0 12px 36px rgba(216, 102, 79, 0.2);
+  border-color: var(--player-accent);
+  background: var(--player-accent-soft);
+  box-shadow: 0 12px 36px var(--player-accent-glow);
   color: var(--text-main);
 }
 
@@ -279,29 +344,32 @@ button {
   letter-spacing: 0.22em;
   text-transform: uppercase;
   border-radius: 999px;
-  border: 2px solid rgba(61, 125, 88, 0.68);
-  background: rgba(61, 125, 88, 0.2);
   color: var(--text-main);
   cursor: pointer;
   transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
 
+.quest-primary {
+  border: 2px solid var(--player-accent-border);
+  background: var(--player-accent-soft);
+}
+
 .quest-primary:hover {
   transform: translateY(-3px);
-  box-shadow: 0 18px 48px rgba(61, 125, 88, 0.28);
-  background: rgba(61, 125, 88, 0.28);
+  box-shadow: 0 18px 48px var(--player-accent-glow);
+  background: var(--player-accent-strong);
+}
+
+.quest-secondary {
+  border: 2px solid var(--partner-accent-border);
+  background: var(--partner-accent-soft);
+  color: var(--text-main);
 }
 
 .quest-secondary:hover {
   transform: translateY(-3px);
-  box-shadow: 0 18px 48px rgba(242, 195, 107, 0.28);
-  background: rgba(255, 241, 220, 0.18);
-}
-
-.quest-secondary {
-  border-color: rgba(255, 241, 220, 0.45);
-  background: rgba(255, 241, 220, 0.1);
-  color: var(--text-main);
+  box-shadow: 0 18px 48px var(--partner-accent-glow);
+  background: var(--partner-accent-strong);
 }
 
 .quest-hero-stats {
@@ -376,7 +444,7 @@ button {
     radial-gradient(circle at 18% 20%, rgba(242, 195, 107, 0.08), transparent 55%),
     repeating-radial-gradient(circle at 60% 40%, rgba(61, 125, 88, 0.08) 0 22px, rgba(26, 13, 11, 0) 22px 44px),
     var(--surface-panel-strong);
-  border: 2px solid rgba(61, 125, 88, 0.38);
+  border: 2px solid var(--player-accent-border);
   padding: 28px;
   overflow: hidden;
 }
@@ -386,7 +454,7 @@ button {
   inset: 0;
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 0 12px rgba(103, 146, 255, 0.4));
+  filter: drop-shadow(0 0 12px var(--player-accent-glow));
 }
 
 .quest-map-nodes {
@@ -406,7 +474,7 @@ button {
 .quest-map-nodes li button {
   width: 210px;
   border-radius: 18px;
-  border: 2px solid rgba(216, 102, 79, 0.35);
+  border: 2px solid var(--player-accent-border);
   background: rgba(41, 24, 17, 0.85);
   color: var(--text-main);
   padding: 16px 18px;
@@ -424,8 +492,8 @@ button {
 
 .quest-map-nodes li button:hover:not(:disabled) {
   transform: translateY(-6px);
-  border-color: rgba(61, 125, 88, 0.55);
-  box-shadow: 0 12px 30px rgba(216, 102, 79, 0.22);
+  border-color: var(--player-accent);
+  box-shadow: 0 12px 30px var(--player-accent-soft);
 }
 
 .quest-node-title {
@@ -450,7 +518,8 @@ button {
 }
 
 .quest-map-nodes li[data-status="ready"] button {
-  border-color: rgba(61, 125, 88, 0.58);
+  border-color: var(--player-accent);
+  box-shadow: 0 0 0 3px var(--player-accent-soft);
 }
 
 .quest-map-nodes li[data-status="locked"] button {
@@ -460,7 +529,8 @@ button {
 
 .quest-event-panel {
   display: grid;
-  gap: 20px;
+  grid-template-rows: auto auto 1fr;
+  gap: clamp(18px, 2.4vw, 24px);
   padding: clamp(22px, 3.2vw, 32px);
   border-radius: 28px;
   border: 2px solid rgba(216, 102, 79, 0.4);
@@ -468,7 +538,7 @@ button {
   box-shadow: 0 30px 90px rgba(12, 7, 4, 0.65);
   max-width: min(100%, 960px);
   margin: 0 auto;
-  max-height: min(88vh, 640px);
+  height: min(92vh, 720px);
   overflow: auto;
 }
 
@@ -502,6 +572,10 @@ button {
   letter-spacing: 0.18em;
 }
 
+.quest-event-meta span:first-of-type {
+  color: var(--player-accent);
+}
+
 .quest-dev-button {
   justify-self: end;
   padding: 10px 14px;
@@ -520,37 +594,66 @@ button {
   transform: translateY(-2px);
 }
 
+.quest-event-copy {
+  display: grid;
+  gap: 10px;
+  max-width: 68ch;
+}
+
 .quest-event-description {
   margin: 0;
   color: var(--text-soft);
-  line-height: 1.65;
-  font-size: 0.9rem;
+  line-height: 1.7;
+  font-size: clamp(0.9rem, 1.4vw, 1.05rem);
+  max-width: 68ch;
 }
 
 .quest-event-hint {
   margin: 0;
   color: var(--accent-gold);
-  font-size: 0.75rem;
+  font-size: clamp(0.62rem, 1vw, 0.78rem);
   text-transform: uppercase;
   letter-spacing: 0.18em;
+  padding-top: 4px;
 }
 
 .quest-event-game {
-  border-radius: 22px;
-  border: 2px solid rgba(61, 125, 88, 0.36);
-  background: rgba(24, 13, 10, 0.88);
-  padding: clamp(14px, 2.6vw, 20px);
-  min-height: 0;
   display: flex;
+  align-items: stretch;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.game-shell {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: clamp(260px, 55vh, 480px);
+  border-radius: 22px;
+  border: 2px solid var(--player-accent-border);
+  background: rgba(24, 13, 10, 0.9);
+  box-shadow: 0 18px 48px var(--player-accent-glow);
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.game-shell canvas,
+.game-shell > div {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .quest-event-stage {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 160px;
   gap: 20px;
-  align-items: center;
+  align-items: stretch;
+  min-height: 0;
 }
 
 .quest-event-cheer {
@@ -559,8 +662,13 @@ button {
   gap: 10px;
   padding: 14px;
   border-radius: 18px;
-  border: 1px dashed rgba(242, 195, 107, 0.35);
+  border: 1px dashed var(--partner-accent-border);
   background: rgba(42, 24, 17, 0.65);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  align-self: stretch;
+  box-shadow: 0 0 18px var(--partner-accent-soft);
 }
 
 .quest-event-cheer span {
@@ -575,6 +683,73 @@ button {
   border: none;
   background: transparent;
   box-shadow: none;
+  animation: cheer-bob 0.65s ease-in-out infinite alternate;
+  animation-play-state: paused;
+  transform-origin: center;
+}
+
+.quest-event-cheer::before,
+.quest-event-cheer::after {
+  content: "";
+  position: absolute;
+  top: 12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, rgba(242, 195, 107, 0.85), rgba(216, 102, 79, 0.15));
+  box-shadow: 0 0 18px rgba(242, 195, 107, 0.45);
+  animation: cheer-pomp 0.72s ease-in-out infinite alternate;
+  animation-play-state: paused;
+  opacity: 0.85;
+  transform-origin: center;
+  z-index: -1;
+}
+
+.quest-event-cheer::before {
+  left: -8px;
+}
+
+.quest-event-cheer::after {
+  right: -8px;
+}
+
+.quest-event-cheer[data-cheer-character="alessandro"]::before,
+.quest-event-cheer[data-cheer-character="alessandro"]::after {
+  background: radial-gradient(circle at 50% 50%, rgba(99, 149, 214, 0.92), rgba(60, 93, 130, 0.18));
+  box-shadow: 0 0 18px rgba(99, 149, 214, 0.45);
+}
+
+.quest-event-cheer[data-cheer-character="bridget"]::before,
+.quest-event-cheer[data-cheer-character="bridget"]::after {
+  background: radial-gradient(circle at 50% 50%, rgba(216, 102, 79, 0.92), rgba(242, 195, 107, 0.18));
+  box-shadow: 0 0 18px rgba(216, 102, 79, 0.45);
+}
+
+.quest-event-cheer[data-cheer-active="true"]::before,
+.quest-event-cheer[data-cheer-active="true"]::after {
+  animation-play-state: running;
+}
+
+.quest-event-cheer[data-cheer-active="true"] .quest-cheer-sprite.pixel-character {
+  animation-play-state: running;
+}
+
+@keyframes cheer-bob {
+  0% {
+    transform: translateY(-4px) rotate(-2deg);
+  }
+  100% {
+    transform: translateY(4px) rotate(2deg);
+  }
+}
+
+@keyframes cheer-pomp {
+  0% {
+    transform: rotate(-12deg) scale(0.95);
+  }
+  100% {
+    transform: rotate(12deg) scale(1.05);
+  }
 }
 
 .quest-ending {
@@ -611,8 +786,10 @@ button {
   display: grid;
   grid-template-columns: minmax(0, clamp(160px, 30vw, 220px)) minmax(0, 190px);
   gap: 16px;
-  width: 100%;
   align-items: start;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .tetris-grid {
@@ -623,7 +800,7 @@ button {
     rgba(29, 17, 12, 0.9);
   border-radius: 14px;
   padding: 8px;
-  border: 2px solid rgba(216, 102, 79, 0.28);
+  border: 2px solid var(--player-accent-border);
   width: 100%;
   max-width: clamp(170px, 30vw, 220px);
   margin: 0 auto;
@@ -772,6 +949,9 @@ button {
   grid-template-columns: minmax(0, 220px) minmax(0, clamp(220px, 42vw, 320px));
   gap: 18px;
   align-items: start;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .pac-grid {
@@ -781,7 +961,7 @@ button {
     rgba(29, 17, 12, 0.9);
   padding: 10px;
   border-radius: 16px;
-  border: 2px solid rgba(216, 102, 79, 0.3);
+  border: 2px solid var(--player-accent-border);
   width: 100%;
   max-width: clamp(220px, 42vw, 320px);
   justify-self: center;
@@ -820,8 +1000,8 @@ button {
   position: absolute;
   inset: 5px;
   border-radius: 50%;
-  background: var(--accent-pink);
-  box-shadow: 0 0 6px rgba(216, 102, 79, 0.55);
+  background: var(--player-accent);
+  box-shadow: 0 0 6px var(--player-accent-glow);
 }
 
 .pac-cell.player.player-alessandro::after {
@@ -893,13 +1073,16 @@ button {
   grid-template-columns: minmax(0, clamp(220px, 42vw, 320px)) 220px;
   gap: 18px;
   align-items: start;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .flappy-stage {
   position: relative;
   background: linear-gradient(180deg, rgba(61, 125, 88, 0.22), rgba(29, 17, 12, 0.92));
   border-radius: 18px;
-  border: 2px solid rgba(216, 102, 79, 0.32);
+  border: 2px solid var(--player-accent-border);
   overflow: hidden;
 }
 
@@ -914,7 +1097,7 @@ button {
   justify-content: center;
   border-radius: 50%;
   background: rgba(24, 12, 9, 0.42);
-  box-shadow: 0 0 8px rgba(216, 102, 79, 0.45);
+  box-shadow: 0 0 8px var(--player-accent-glow);
 }
 
 .flappy-bird-sprite.pixel-character {
@@ -984,6 +1167,9 @@ button {
   grid-template-columns: minmax(0, clamp(240px, 44vw, 360px)) 220px;
   gap: 18px;
   align-items: start;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .platform-stage {
@@ -1021,18 +1207,19 @@ button {
   justify-content: center;
 }
 
-.platform-player.jump {
-  animation: pixel-bob 0.4s infinite alternate;
-}
-
-.platform-player.celebrate {
-  animation: pixel-bob 0.25s infinite alternate;
-}
-
 .platform-player-sprite.pixel-character {
   border: none;
   background: none;
   box-shadow: none;
+  animation: none;
+}
+
+.platform-player.jump .platform-player-sprite.pixel-character {
+  animation: pixel-bob 0.4s infinite alternate;
+}
+
+.platform-player.celebrate .platform-player-sprite.pixel-character {
+  animation: pixel-bob 0.25s infinite alternate;
 }
 
 @keyframes pixel-bob {
@@ -1051,6 +1238,27 @@ button {
   border-radius: 6px 6px 0 0;
   background: rgba(61, 125, 88, 0.32);
   border: 2px solid rgba(61, 125, 88, 0.62);
+}
+
+.platform-enemy {
+  position: absolute;
+  width: 28px;
+  height: 26px;
+  margin-left: -14px;
+  margin-top: -26px;
+  border-radius: 8px 8px 4px 4px;
+  background: radial-gradient(circle at 50% 35%, rgba(242, 195, 107, 0.9), rgba(216, 102, 79, 0.85));
+  border: 2px solid rgba(216, 102, 79, 0.65);
+  box-shadow: 0 0 14px rgba(216, 102, 79, 0.45);
+}
+
+.platform-enemy::after {
+  content: "";
+  position: absolute;
+  inset: 6px 4px 4px;
+  border-radius: 50%;
+  background: rgba(24, 13, 10, 0.8);
+  box-shadow: inset 0 -2px 4px rgba(255, 241, 220, 0.15);
 }
 
 .platform-coin {
@@ -1180,6 +1388,10 @@ button {
 
   .quest-event-stage {
     grid-template-columns: 1fr;
+  }
+
+  .game-shell {
+    min-height: clamp(220px, 60vh, 360px);
   }
 
   .quest-map-board {
