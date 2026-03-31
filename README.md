@@ -36,6 +36,7 @@ Every win adds to the shared heart counter and advances the quest timeline. Fini
 - `data/` – still ignored; stash heavyweight concept art or exports here if needed.
 
 👉 For deeper breakdowns, peek at `docs/quest-guide.md`.
+👉 For the current visual direction and character references, use `docs/visual-direction.md`.
 
 ## Dev Skip Button
 

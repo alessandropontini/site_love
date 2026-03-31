@@ -6,6 +6,7 @@ import {
   PixelCharacter,
   type PixelCharacterVariant
 } from "@/components/pixel/PixelCharacter";
+import { PixelLandmark } from "@/components/pixel/PixelLandmark";
 import { QuestEventPanel } from "@/components/quest/QuestEventPanel";
 import { QuestMap } from "@/components/quest/QuestMap";
 import {
@@ -29,12 +30,12 @@ const CHARACTER_OPTIONS: Array<{
   {
     key: "alessandro",
     label: "Alessandro",
-    note: "Milanese cuore, city rooftop poet"
+    note: "Blue suit, glasses, mustache"
   },
   {
     key: "bridget",
     label: "Bridget",
-    note: "Brooklyn-born, Italian-American spark"
+    note: "Sage dress, updo, warm smile"
   }
 ];
 
@@ -156,7 +157,226 @@ export function QuestGame() {
 
   return (
     <section className="quest-shell" data-screen={screen} data-player={playerCharacter}>
-      {screen !== "game" && (
+      {screen === "intro" && (
+        <>
+          <header className="quest-start-screen quest-start-screen--desktop">
+            <div className="quest-start-stage" aria-hidden="true">
+              <div className="quest-start-sky" />
+              <div className="quest-start-cloud quest-start-cloud--left" />
+              <div className="quest-start-cloud quest-start-cloud--right" />
+              <div className="quest-start-sun" />
+              <div className="quest-start-landmarks" aria-hidden="true">
+                <PixelLandmark
+                  variant="duomo"
+                  size={238}
+                  className="quest-start-landmark quest-start-landmark--duomo"
+                />
+                <PixelLandmark
+                  variant="galleria"
+                  size={170}
+                  className="quest-start-landmark quest-start-landmark--galleria"
+                />
+                <PixelLandmark
+                  variant="castello"
+                  size={196}
+                  className="quest-start-landmark quest-start-landmark--castello"
+                />
+                <PixelLandmark
+                  variant="bosco"
+                  size={144}
+                  className="quest-start-landmark quest-start-landmark--bosco"
+                />
+                <PixelLandmark
+                  variant="sansiro"
+                  size={138}
+                  className="quest-start-landmark quest-start-landmark--sansiro"
+                />
+                <PixelLandmark
+                  variant="tram"
+                  size={122}
+                  className="quest-start-landmark quest-start-landmark--tram"
+                />
+              </div>
+              <div className="quest-start-urban-layer" aria-hidden="true">
+                <div className="quest-start-houses quest-start-houses--left" />
+                <div className="quest-start-houses quest-start-houses--right" />
+                <div className="quest-start-lamp quest-start-lamp--left" />
+                <div className="quest-start-lamp quest-start-lamp--right" />
+                <div className="quest-start-wire" />
+              </div>
+              <div className="quest-start-trees">
+                <span />
+                <span />
+                <span />
+                <span />
+                <span />
+              </div>
+              <div className="quest-start-route">
+                <div className="quest-start-navigli" />
+                <div className="quest-start-grass quest-start-grass--left" />
+                <div className="quest-start-grass quest-start-grass--right" />
+                <div className="quest-start-path" />
+                <div className="quest-start-sprites">
+                  <PixelCharacter
+                    variant="alessandro"
+                    size={112}
+                    className="quest-start-sprite quest-start-sprite--lead"
+                  />
+                  <PixelCharacter
+                    variant="bridget"
+                    size={112}
+                    className="quest-start-sprite"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="quest-start-panel">
+              <p className="quest-start-edition">LeafGreen-inspired love story</p>
+              <div className="quest-start-logo">
+                <span className="quest-start-logo-top">Ale & Bridget</span>
+                <strong className="quest-start-logo-bottom">Version</strong>
+              </div>
+
+              <div className="quest-start-menu" role="navigation" aria-label="Start menu">
+                <button type="button" className="quest-start-menu-item" onClick={handleStart}>
+                  Start
+                </button>
+                <button type="button" className="quest-start-menu-item" onClick={handleStart}>
+                  Our Journey
+                </button>
+                <button type="button" className="quest-start-menu-item" disabled>
+                  Photo Dex
+                </button>
+              </div>
+
+              <div className="quest-start-dialog">
+                <p>
+                  This story begins with two hearts meeting in the tall grass. Choose
+                  your avatar and press start.
+                </p>
+              </div>
+
+              <div className="quest-character-selector quest-character-selector--intro">
+                <span>Choose your avatar</span>
+                <div className="quest-character-options">
+                  {CHARACTER_OPTIONS.map(({ key, label, note }) => {
+                    const isActive = playerCharacter === key;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        className="quest-character-option"
+                        data-active={isActive}
+                        aria-pressed={isActive}
+                        onClick={() => setPlayerCharacter(key)}
+                      >
+                        <PixelCharacter
+                          variant={key}
+                          size={82}
+                          className="quest-character-sprite"
+                        />
+                        <span className="quest-character-label">{label}</span>
+                        <span className="quest-character-note">{note}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <header className="quest-start-screen-mobile">
+            <div className="quest-start-mobile-shell">
+              <p className="quest-start-edition">LeafGreen-inspired love story</p>
+              <div className="quest-start-logo quest-start-logo--mobile">
+                <span className="quest-start-logo-top">Ale & Bridget</span>
+                <strong className="quest-start-logo-bottom">Version</strong>
+              </div>
+
+              <div className="quest-start-mobile-banner" aria-hidden="true">
+                <div className="quest-start-mobile-skyline">
+                  <PixelLandmark
+                    variant="duomo"
+                    size={92}
+                    className="quest-start-mobile-landmark quest-start-mobile-landmark--duomo"
+                  />
+                  <PixelLandmark
+                    variant="galleria"
+                    size={68}
+                    className="quest-start-mobile-landmark quest-start-mobile-landmark--galleria"
+                  />
+                  <PixelLandmark
+                    variant="castello"
+                    size={82}
+                    className="quest-start-mobile-landmark quest-start-mobile-landmark--castello"
+                  />
+                  <PixelLandmark
+                    variant="bosco"
+                    size={64}
+                    className="quest-start-mobile-landmark quest-start-mobile-landmark--bosco"
+                  />
+                  <PixelLandmark
+                    variant="sansiro"
+                    size={58}
+                    className="quest-start-mobile-landmark quest-start-mobile-landmark--sansiro"
+                  />
+                  <PixelLandmark
+                    variant="tram"
+                    size={62}
+                    className="quest-start-mobile-landmark quest-start-mobile-landmark--tram"
+                  />
+                </div>
+                <div className="quest-start-mobile-houses" />
+                <div className="quest-start-mobile-canal" />
+              </div>
+
+              <div className="quest-start-mobile-dialog">
+                <p>Choose your avatar and start the journey.</p>
+              </div>
+
+              <div className="quest-start-mobile-avatars">
+                {CHARACTER_OPTIONS.map(({ key, label, note }) => {
+                  const isActive = playerCharacter === key;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      className="quest-start-mobile-avatar"
+                      data-active={isActive}
+                      aria-pressed={isActive}
+                      onClick={() => setPlayerCharacter(key)}
+                    >
+                      <PixelCharacter
+                        variant={key}
+                        size={88}
+                        className="quest-character-sprite"
+                      />
+                      <span className="quest-character-label">{label}</span>
+                      <span className="quest-character-note">{note}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button type="button" className="quest-primary quest-primary--mobile" onClick={handleStart}>
+                Start Journey
+              </button>
+
+              <div className="quest-start-mobile-links">
+                <button type="button" className="quest-start-mobile-link" onClick={handleStart}>
+                  Our Journey
+                </button>
+                <button type="button" className="quest-start-mobile-link" disabled>
+                  Photo Dex
+                </button>
+              </div>
+            </div>
+          </header>
+        </>
+      )}
+
+      {screen !== "game" && screen !== "intro" && (
         <header className="quest-hero">
           <PixelCharacter variant={playerCharacter} size={148} />
           <div className="quest-hero-copy">
@@ -184,7 +404,7 @@ export function QuestGame() {
                     >
                       <PixelCharacter
                         variant={key}
-                        size={60}
+                        size={82}
                         className="quest-character-sprite"
                       />
                       <span className="quest-character-label">{label}</span>
@@ -194,20 +414,14 @@ export function QuestGame() {
                 })}
               </div>
             </div>
-            {screen === "intro" ? (
-              <button type="button" className="quest-primary" onClick={handleStart}>
-                Start Quest
-              </button>
-            ) : (
-              <div className="quest-hero-stats">
-                <PixelCharacter
-                  variant={partnerCharacter}
-                  size={72}
-                  className="quest-hero-companion"
-                />
-                <QuestSummary snapshot={progressSnapshot} />
-              </div>
-            )}
+            <div className="quest-hero-stats">
+              <PixelCharacter
+                variant={partnerCharacter}
+                size={72}
+                className="quest-hero-companion"
+              />
+              <QuestSummary snapshot={progressSnapshot} />
+            </div>
             <QuestLeaderboard
               attempts={attemptCount}
               totalHearts={heartsCollected}
