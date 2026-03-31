@@ -19,6 +19,16 @@ export type PixelLandmarkVariant =
   | "sansiro"
   | "tram";
 
+function centerRows(width: number, rows: string[]) {
+  return rows.map((row) => {
+    if (row.length >= width) return row;
+    const total = width - row.length;
+    const left = Math.floor(total / 2);
+    const right = total - left;
+    return `${".".repeat(left)}${row}${".".repeat(right)}`;
+  });
+}
+
 function defineSprite(name: PixelLandmarkVariant, sprite: PixelSprite): PixelSprite {
   if (process.env.NODE_ENV !== "production") {
     if (sprite.rows.length !== sprite.height) {
@@ -41,42 +51,50 @@ function defineSprite(name: PixelLandmarkVariant, sprite: PixelSprite): PixelSpr
 
 const SPRITES: Record<PixelLandmarkVariant, PixelSprite> = {
   duomo: defineSprite("duomo", {
-    width: 30,
-    height: 20,
+    width: 48,
+    height: 28,
     palette: {
-      o: "#6a8aa0",
-      s: "#edf3f7",
-      d: "#c9d7e0",
+      o: "#5e7f94",
+      s: "#f1f5f7",
+      d: "#c9d6de",
       g: "#f0c85f",
-      w: "#8fadc0",
+      w: "#8fa7b7",
       r: "#d1ab6d",
       y: "#f6dc7d",
       l: "#6ea860",
       b: "#a8d9ef",
-      k: "#48636d"
+      k: "#4f6874"
     },
-    rows: [
-      "..............g...............",
-      ".............ogo..............",
-      "........o....oso....o.........",
-      "......o.oo..ossso..oo.o.......",
-      ".....osooooosssssoooooso......",
-      "....oossssssssssssssssoo......",
-      "...oosssosssossssossssssoo....",
-      "..oosssossssswwssssossssssoo..",
-      "..osssosssswwwwwwsssosssssso..",
-      ".oossssssswwkkkkwwsssssssssoo.",
-      ".ossssssssswkkkkwssssssssssso.",
-      ".osssossssskwwwwkssssosssosso.",
-      ".osssossssskwwwwkssssosssosso.",
-      ".ossssssssskkkkkkssssssssssso.",
-      ".ossssoossssssssssssoosssssso.",
-      ".osssssssssssssssssssssssssso.",
-      ".osssosssssossssoosssssosssso.",
-      ".osssssssssssssssssssssssssso.",
-      ".oooooooooooooooooooooooooooo.",
-      ".............................."
-    ]
+    rows: centerRows(48, [
+      "....................g...................",
+      "...................ogo..................",
+      "..............o.o.o.oso.o.o.o...........",
+      "............o.o.o.o.sss.o.o.o.o.........",
+      "...........oossoossoosssoossoossoo......",
+      ".........oosssosssosssssosssossssoo.....",
+      "........oossssssssssssssssssssssssoo....",
+      ".......oosssosssosssosssosssossssssoo...",
+      "......oosssosssssosssssssssosssssssssoo.",
+      ".....oosssssssssssssssssssssssssssssssoo",
+      "....oossssssssssssswwwwsssssssssssssssso",
+      "...oosssosssosssswwwkkwwwssssosssossssso",
+      "...osssosssosssswkkwwwwkkwssssosssosssso",
+      "..oosssssssssssswkwwkkkkwwksssssssssssso",
+      "..osssosssosssswkwwkkkkwwkssssosssosssso",
+      "..osssosssosssswkkwwwwwwkkwsssosssosssso",
+      "..ossssssssssssswwwwwwwwwwssssssssssssso",
+      "..ossssoossssooossskkkkssssooossssoossso",
+      "..ossssoossssoossskkkkssssoossssoossssso",
+      "..osssssssssssssssskkkksssssssssssssssso",
+      "..osssosssosssossswkkwsssosssosssossssso",
+      "..osssosssosssossswkkwsssosssosssossssso",
+      "..osssssssssssssssssssssssssssssssssssso",
+      "..ossssoossssoossssssssssoossssoosssssso",
+      "..ossssooskksoossssokkksssooskksoossssso",
+      "..ossssssssssssssssskkkkssssssssssssssso",
+      "..oooooooooooooooooooooooooooooooooooooo",
+      "........................................"
+    ])
   }),
   galleria: defineSprite("galleria", {
     width: 24,

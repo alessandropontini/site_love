@@ -1,5 +1,6 @@
 'use client';
 
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 
 import {
@@ -165,44 +166,20 @@ export function QuestGame() {
               <div className="quest-start-cloud quest-start-cloud--left" />
               <div className="quest-start-cloud quest-start-cloud--right" />
               <div className="quest-start-sun" />
-              <div className="quest-start-landmarks" aria-hidden="true">
-                <PixelLandmark
-                  variant="duomo"
-                  size={238}
-                  className="quest-start-landmark quest-start-landmark--duomo"
-                />
-                <PixelLandmark
-                  variant="galleria"
-                  size={170}
-                  className="quest-start-landmark quest-start-landmark--galleria"
-                />
-                <PixelLandmark
-                  variant="castello"
-                  size={196}
-                  className="quest-start-landmark quest-start-landmark--castello"
-                />
-                <PixelLandmark
-                  variant="bosco"
-                  size={144}
-                  className="quest-start-landmark quest-start-landmark--bosco"
-                />
-                <PixelLandmark
-                  variant="sansiro"
-                  size={138}
-                  className="quest-start-landmark quest-start-landmark--sansiro"
-                />
-                <PixelLandmark
-                  variant="tram"
-                  size={122}
-                  className="quest-start-landmark quest-start-landmark--tram"
-                />
+              <div className="quest-start-milano-sign" aria-hidden="true">
+                <span>MILANO</span>
               </div>
-              <div className="quest-start-urban-layer" aria-hidden="true">
-                <div className="quest-start-houses quest-start-houses--left" />
-                <div className="quest-start-houses quest-start-houses--right" />
-                <div className="quest-start-lamp quest-start-lamp--left" />
-                <div className="quest-start-lamp quest-start-lamp--right" />
-                <div className="quest-start-wire" />
+              <div className="quest-start-landmarks" aria-hidden="true">
+                <div className="quest-start-duomo-asset">
+                  <Image
+                    src="/scene/duomo-milano-bitzee-warm-v2.png"
+                    alt=""
+                    width={141}
+                    height={124}
+                    className="quest-start-duomo-image"
+                    unoptimized
+                  />
+                </div>
               </div>
               <div className="quest-start-trees">
                 <span />
@@ -216,18 +193,6 @@ export function QuestGame() {
                 <div className="quest-start-grass quest-start-grass--left" />
                 <div className="quest-start-grass quest-start-grass--right" />
                 <div className="quest-start-path" />
-                <div className="quest-start-sprites">
-                  <PixelCharacter
-                    variant="alessandro"
-                    size={112}
-                    className="quest-start-sprite quest-start-sprite--lead"
-                  />
-                  <PixelCharacter
-                    variant="bridget"
-                    size={112}
-                    className="quest-start-sprite"
-                  />
-                </div>
               </div>
             </div>
 
@@ -295,40 +260,28 @@ export function QuestGame() {
               </div>
 
               <div className="quest-start-mobile-banner" aria-hidden="true">
+                <div className="quest-start-mobile-sign">
+                  <span>MILANO</span>
+                </div>
                 <div className="quest-start-mobile-skyline">
                   <PixelLandmark
                     variant="duomo"
-                    size={92}
+                    size={118}
                     className="quest-start-mobile-landmark quest-start-mobile-landmark--duomo"
                   />
                   <PixelLandmark
-                    variant="galleria"
-                    size={68}
-                    className="quest-start-mobile-landmark quest-start-mobile-landmark--galleria"
-                  />
-                  <PixelLandmark
                     variant="castello"
-                    size={82}
+                    size={102}
                     className="quest-start-mobile-landmark quest-start-mobile-landmark--castello"
                   />
                   <PixelLandmark
-                    variant="bosco"
-                    size={64}
-                    className="quest-start-mobile-landmark quest-start-mobile-landmark--bosco"
-                  />
-                  <PixelLandmark
-                    variant="sansiro"
-                    size={58}
-                    className="quest-start-mobile-landmark quest-start-mobile-landmark--sansiro"
-                  />
-                  <PixelLandmark
                     variant="tram"
-                    size={62}
+                    size={88}
                     className="quest-start-mobile-landmark quest-start-mobile-landmark--tram"
                   />
                 </div>
-                <div className="quest-start-mobile-houses" />
-                <div className="quest-start-mobile-canal" />
+                <div className="quest-start-mobile-ground" />
+                <div className="quest-start-mobile-path" />
               </div>
 
               <div className="quest-start-mobile-dialog">

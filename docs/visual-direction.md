@@ -15,7 +15,7 @@ This document tracks the visual decisions for the rebuild so style changes stay 
 - The intro screen structure is moving in the right direction, but the surface treatment still needs to be closer to GBA menus and dialogue windows.
 - Scene art is still not approved: desktop needs denser composition, less empty sky, and landmarks that read as real Milan icons instead of abstract blocks.
 - Mobile banner is closer, but still needs stronger landmark silhouettes and more character.
-- The current Milan read is still too weak if the Duomo cannot be recognized immediately. Landmark art must move from symbolic blocks to denser micro-sprites.
+- The current Milan read is still too weak if the Duomo cannot be recognized immediately. The desktop hero landmark must read as the Duomo front facade first, not as a pasted photo crop or a generic cathedral.
 
 ## LeafGreen Style Notes
 
@@ -70,10 +70,18 @@ Use this as the base when redrawing the custom player sprites.
 - On mobile, information and actions come first; decorative route scenery becomes secondary and more compact.
 - On phone widths, the intro should fit within a single screen as much as possible, with title, CTA, and avatar choice prioritized over scenic decoration.
 - Implementation rule: keep separate desktop and mobile intro layouts instead of endlessly compressing the desktop composition.
-- The desktop pixel scene should include recognisable Milan cues such as the Duomo, Castello Sforzesco, tram motifs, or other city symbols.
-- Minimum landmark set to represent clearly in the scene art:
-  Duomo di Milano, Castello Sforzesco, tram ATM, Galleria Vittorio Emanuele II, Navigli, Bosco Verticale.
-- Composition rule: the Duomo is not just one landmark among equals. It should carry the scene and be the first thing that communicates "Milano".
+- The scene should stop trying to show all of Milan at once.
+- Approved landmark set for the start screen: `Duomo di Milano`, `Castello Sforzesco`, `tram ATM`, plus a clear `MILANO` city-entry sign.
+- Composition rule: the Duomo is the hero landmark, the Castello is the supporting mass, the tram is the moving city cue, and the Milano sign anchors the theme immediately.
+- Mobile should use the same four reads, but in a tighter dedicated composition instead of a miniature skyline collage.
+- Current desktop focus is narrower: remove the couple avatars from the left scene entirely and make the Duomo the only landmark that truly matters until it feels correct.
+- The Milano road sign should read like a real Italian place-entry sign: light background, dark border, dark text, no fantasy yellow treatment.
+- The desktop Duomo direction has changed again: use a hand-built front-facade pixel asset inspired by the real Duomo, simplified to a Bitzee-like density and a limited LeafGreen-compatible palette.
+- The Duomo asset must stay transparent, avoid stray blues from source photography, and feel native to the scene instead of composited on top of it.
+- The approved lighting direction for the desktop Duomo is now warmer: cream stone highlights, amber mids, and dark teal-brown shadows, inspired by vintage travel-poster lighting rather than neutral grayscale.
+- Use the poster reference only for facade lighting and hierarchy, not as a literal framed poster pasted into the route scene.
+- End-of-day status: the desktop Duomo has moved to a second hand-built front-facade asset (`duomo-milano-bitzee-warm-v2.png`) with a wider front, clearer portal rhythm, and more Duomo-like facade geometry. It is closer, but still pending approval.
+- The Milano sign should stay in the scene, but as restrained Italian-style city-entry signage: off-white panel, dark olive/gray border, dark text, and two simple posts.
 
 ## Font Direction
 
@@ -96,14 +104,16 @@ Use this as the base when redrawing the custom player sprites.
 
 ## Next Steps
 
-1. Continue refining the Milano scene art until the desktop scene feels full and layered, with less empty sky and six landmarks that are recognisable at a glance.
-2. Keep iterating the Duomo and skyline micro-sprites until the city reads as Milan even without labels.
-3. Improve supporting typography only: larger body sizes, stronger menu/button hierarchy, and tighter pairing with the title.
-4. Rebuild Alessandro's sprite first, then Bridget's, keeping the photo reference and the chibi GBA direction.
-5. Revisit mobile spacing after the sprite pass so the start screen still fits comfortably without feeling cramped.
+1. Continue refining only the desktop Duomo front geometry until the silhouette reads unmistakably as the real Duomo facade.
+2. Keep the warm poster-like light direction, but avoid turning the Duomo into a framed poster asset.
+3. Once the Duomo is approved, rebalance desktop composition around the Duomo and Milano sign before reintroducing any secondary landmark.
+4. Improve supporting typography only: larger body sizes, stronger menu/button hierarchy, and tighter pairing with the title.
+5. Rebuild Alessandro's sprite first, then Bridget's, keeping the photo reference and the chibi GBA direction.
+6. Redesign the mobile scene separately after the desktop Duomo is approved.
 
 ## Sources
 
 - Pokemon FireRed / LeafGreen screenshot gallery: https://www.rpgfan.com/gallery/pokemon-firered-leafgreen-screenshots/
 - Pokemon FireRed / LeafGreen font sheet: https://www.spriters-resource.com/fullview/45598/
 - Pokemon-inspired downloadable FRLG/Emerald font pack: https://pokeprint.kimbachu.com/downloads/
+- Duomo reference photo used for the current desktop asset: https://commons.wikimedia.org/wiki/File:Milan_Cathedral_from_Piazza_del_Duomo.jpg
