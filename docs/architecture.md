@@ -5,7 +5,7 @@ Pixel Quest: Alessandro & Bridget is a single-page Next.js 14 App Router experie
 ## Next.js app structure
 
 - `app/layout.tsx` defines app metadata, loads the Manrope UI font and Silkscreen accent/title font, and imports `app/globals.css`.
-- `app/page.tsx` renders the main quest layout and mounts `QuestGame`.
+- `app/page.tsx` renders the current home experience and mounts `StoryShell`.
 - `next.config.mjs` contains Next.js configuration for remote image host patterns.
 - `tsconfig.json` enables strict TypeScript settings and the `@/*` path alias.
 
@@ -20,11 +20,29 @@ npm run lint
 
 ## Components structure
 
+- `components/story/StoryShell.tsx` is the current scrollytelling controller. It assembles the intro, scroll scenes, progress indicator, mini-games, chapter gating, local first-game CTA, and finale.
+- `components/story/ScrollScene.tsx` renders individual narrative scenes and their locked/unlocked presentation.
+- `components/story/ProgressIndicator.tsx` renders compact game progress states: `complete`, `available/current`, and `locked`.
+- `components/games/` contains lightweight scrollytelling mini-games: quiz, memory, puzzle, and hidden object.
+- `components/finale/FinalReveal.tsx` renders the gated final reveal.
 - `components/QuestGame.tsx` is the top-level interactive controller. It manages the intro, map, active game, ending screen, selected character, completed chapters, heart totals, attempt counts, leaderboard entries, and game-panel scroll locking.
 - `components/quest/QuestMap.tsx` renders the map/progression layer.
 - `components/quest/QuestEventPanel.tsx` hosts the currently selected chapter game.
 - `components/quest/QuestLeaderboard.tsx` and `components/quest/QuestSummary.tsx` render supporting progress and end-state UI.
 - `components/pixel/PixelCharacter.tsx` and `components/pixel/PixelLandmark.tsx` render custom pixel-style characters and landmark scenery.
+
+The legacy arcade quest in `components/QuestGame.tsx` and `components/quest/` remains available for reuse/reference, but it is not currently mounted by `app/page.tsx`.
+
+## Scrollytelling structure
+
+Scrollytelling content and state live in:
+
+- `lib/storyConfig.ts` for chapters, game order, accessible game labels, quiz questions, memory pairs, puzzle tiles, and hidden objects.
+- `lib/useStoryProgress.ts` for session state, `localStorage` persistence, game unlocks, and finale unlocks.
+
+Story gating applies to both games and later narrative chapters. The first intro chapter is always readable. Future chapters depend on completion of the previous required mini-game or story block. The first game should be derived from `gameOrder` rather than hardcoded in UI code. If a user scrolls to the first game before pressing the intro CTA, `StoryShell` must provide a local start CTA instead of relying on auto-start. Locked chapters should expose one clear locked explanation and avoid duplicate nested locked messages.
+
+Progress indicators must represent three distinct states: `complete`, `available/current`, and `locked`. Do not label an available but incomplete game as locked.
 
 ## Quest and game structure
 

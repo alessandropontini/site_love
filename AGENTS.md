@@ -31,6 +31,9 @@ Ruflo/Claude Flow may be used here **only as a local development orchestration l
 - `docs/visual-direction.md` — approved visual/design direction.
 - `docs/architecture.md` — architecture overview for maintainers and agents.
 - `docs/ai-workflow.md` — Codex + Ruflo workflow guidance.
+- `components/story/` — scrollytelling shell, scroll scenes, and progress indicator.
+- `components/games/` — lightweight scrollytelling mini-games.
+- `lib/storyConfig.ts` and `lib/useStoryProgress.ts` — scrollytelling content/config and progress state.
 
 ## Safe tasks for Codex/Ruflo
 
@@ -42,6 +45,8 @@ Codex and Ruflo are appropriate for low-risk maintenance such as:
 - Responsive layout polish that follows `docs/visual-direction.md`.
 - Copy updates in metadata/content files when explicitly requested.
 - Test, lint, and build troubleshooting that does not change deployment configuration.
+
+Before changing the scrollytelling feature, agents must read this `AGENTS.md`, `docs/architecture.md`, and the relevant story files. If Ruflo/Codex/MCP setup or orchestration is part of the work, also read `docs/ai-workflow.md`.
 
 ## Risky tasks
 
@@ -94,6 +99,18 @@ Documentation-only changes describing these files are allowed when they do not m
 - Avoid fixed-width layouts that break on phones.
 - Keep animation and real-time game loops performant; avoid unnecessary React re-renders in animation paths.
 - Preserve Next.js image/font optimizations and do not add heavyweight client libraries for orchestration or styling without approval.
+
+## Scrollytelling progression rules
+
+- The first intro chapter must always be readable.
+- Story gating applies to both mini-games and later narrative chapters.
+- Future narrative chapters must depend on completion of the previous required mini-game or story block.
+- The first game must be derived from story configuration such as `gameOrder`, not hardcoded in UI code.
+- If `started=false` and the user reaches the first game without using the intro CTA, show a local CTA such as `Inizia il capitolo`; do not rely only on the intro CTA.
+- Do not auto-start the story unless that behavior is explicitly requested.
+- Locked chapters should present one clear locked explanation; avoid duplicate locked copy from nested game slots.
+- The progress indicator must distinguish `complete`, `available/current`, and `locked`; never label an available but incomplete game as locked.
+- Anti-regression checklist for story changes: first chapter readable, future chapters gated, first game config-driven and locally startable, no duplicate locked copy, progress states correct, docs updated with the code.
 
 ## Ruflo/Claude Flow/Codex rules
 

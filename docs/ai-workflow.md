@@ -57,6 +57,17 @@ sed -n '1,260p' docs/visual-direction.md
 
 For feature work, also inspect the relevant component, schema, or CSS file.
 
+For scrollytelling work, inspect at minimum:
+
+```bash
+sed -n '1,220p' AGENTS.md
+sed -n '1,220p' docs/architecture.md
+sed -n '1,220p' components/story/StoryShell.tsx
+sed -n '1,180p' components/story/ProgressIndicator.tsx
+sed -n '1,180p' lib/useStoryProgress.ts
+sed -n '1,220p' lib/storyConfig.ts
+```
+
 ### 2. Plan
 
 Write a short implementation plan before changing files. Call out:
@@ -65,6 +76,7 @@ Write a short implementation plan before changing files. Call out:
 - Files intentionally avoided
 - Validation commands to run
 - Any risky areas, especially mini-games, visual assets, dependencies, or deployment configuration
+- For scrollytelling changes: how chapter gating, local start CTA, and progress states remain intact
 
 ### 3. Implement
 
@@ -127,6 +139,16 @@ Before merging or accepting changes, verify:
 - `npm run lint` passes.
 - `npm run build` passes.
 - Documentation reflects any workflow or architecture changes.
+
+For scrollytelling changes, also verify:
+
+- The first intro chapter remains readable.
+- Later narrative chapters are gated behind the previous required mini-game or story block.
+- The first game is derived from story config such as `gameOrder`, not hardcoded in UI code.
+- The first game has a local CTA if `started=false` and the user scrolls past the intro.
+- Locked chapters show one clear locked explanation without duplicate nested locked copy.
+- The progress indicator distinguishes `complete`, `available/current`, and `locked`.
+- Available but incomplete games are not announced as locked.
 
 ## Validation command reference
 

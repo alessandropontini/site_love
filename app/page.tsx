@@ -1,9 +1,9 @@
-import { QuestGame } from "@/components/QuestGame";
+import { StoryShell } from "@/components/story/StoryShell";
 
 export default function Home() {
   return (
-    <main className="quest-layout">
-      <QuestGame />
+    <main>
+      <StoryShell />
     </main>
   );
 }
