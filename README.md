@@ -45,6 +45,20 @@ The legacy arcade quest remains in `components/QuestGame.tsx` and `components/qu
 👉 For the current visual direction and character references, use `docs/visual-direction.md`.
 👉 For local AI patch workflow rules, use `docs/ai-workflow.md` and `docs/multiagent-workflow.md`.
 
+## Local Review Workflow
+
+Ruflo is not part of this project workflow. Real multi-agent review uses Codex CLI only:
+
+```bash
+npm run lint
+npm run build
+MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh
+RUN_DIR="$(ls -td .agent/reports/* | head -1)"
+cat "$RUN_DIR/99_final-verdict.md"
+```
+
+`noop` is only for smoke tests and must produce `INFRASTRUCTURE BLOCKED`; it is not review evidence. A valid review requires `Provider: codex` and `Real execution: yes` in the required reports. `PASS` and `PASS WITH NOTES` still require final human approval, and `PASS WITH NOTES` requires notes to be resolved or explicitly accepted before merge.
+
 ## Story Gating Checklist
 
 - The first intro chapter must stay readable.

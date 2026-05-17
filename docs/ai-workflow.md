@@ -4,7 +4,7 @@ Ruflo has been removed from the SITE LOVE workflow. Reviews no longer use Ruflo,
 
 The local Ruflo/WASM runtime was retired because it created agent records but did not produce autonomous review output without an external model provider/API key. Do not configure Anthropic/Claude managed agents, provider keys, or replacement orchestration tooling for this project unless the project owner explicitly approves a new workflow.
 
-The current multi-agent work is Phase 2B. The repository contains prompts, report locations, safe scripts, a provider abstraction, deterministic aggregation, and a Codex reviewer provider through `codex exec`. It can only produce real reviewer reports when Codex CLI is installed, configured, and returns valid separate reports. Otherwise the workflow verdict must be `INFRASTRUCTURE BLOCKED`, not `PASS`.
+The current multi-agent workflow uses Codex CLI as the active real review provider through `codex exec`. It can only produce valid reviewer reports when Codex CLI is installed, configured, and returns separate reports with `Provider: codex` and `Real execution: yes`. Otherwise the workflow verdict must be `INFRASTRUCTURE BLOCKED`, not `PASS`.
 
 ## What Codex is for
 
@@ -34,19 +34,25 @@ Phase 2A adds provider hooks:
 - `MULTIAGENT_PROVIDER=ollama` can call `ollama run "$MULTIAGENT_OLLAMA_MODEL"` and validate the returned report format.
 - `scripts/local-review.sh` writes separate minimum reviewer reports and a deterministic final verdict.
 
-Phase 2B enables Codex review execution:
+Codex review execution:
 
 ```bash
+npm run lint
+npm run build
 MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh
+RUN_DIR="$(ls -td .agent/reports/* | head -1)"
+cat "$RUN_DIR/99_final-verdict.md"
 ```
 
-The deterministic safe-provider check is:
+The deterministic safe-provider smoke check is:
 
 ```bash
-MULTIAGENT_PROVIDER=noop ./scripts/local-review.sh
+./scripts/test-multiagent-workflow.sh
 ```
 
-`local-review` can generate real reports only when Codex is configured and returns valid reports with `Real execution: yes`. Valid reviewer verdicts are `PASS`, `PASS WITH NOTES`, `CHANGES REQUESTED`, `BLOCKED`, and `INFRASTRUCTURE BLOCKED`. Any missing, placeholder, empty, invalid, or non-real report remains `INFRASTRUCTURE BLOCKED`.
+`noop` is only for smoke/regression testing workflow infrastructure. It must never be used as review evidence and can never approve a patch.
+
+`local-review` can generate real reports only when Codex is configured and returns valid reports with `Provider: codex` and `Real execution: yes`. Valid reviewer verdicts are `PASS`, `PASS WITH NOTES`, `CHANGES REQUESTED`, `BLOCKED`, and `INFRASTRUCTURE BLOCKED`. Any missing, placeholder, empty, invalid, or non-real report remains `INFRASTRUCTURE BLOCKED`.
 
 When Codex output is invalid, the wrapper keeps diagnostics in `.agent/reports/<run-id>/`, including `<agent>-codex-stdout.md`, `<agent>-codex-stderr.md`, `<agent>-codex-transcript.txt`, `<agent>-codex-diagnostics.md`, and `<agent>-codex-exit-code.txt`.
 
@@ -146,7 +152,9 @@ The review should verify:
 - Accessibility and mobile readability were preserved or improved.
 - Documentation reflects any workflow or architecture changes.
 
-Automatic approval is prohibited when separate reviewer reports are missing, simulated, incomplete, invalid, or marked `Real execution: no`. In that case the correct verdict is `INFRASTRUCTURE BLOCKED`.
+Automatic approval is prohibited. `PASS` and `PASS WITH NOTES` still require final human approval before merge. `PASS WITH NOTES` also requires the notes to be resolved or explicitly accepted before merge. `CHANGES REQUESTED`, `BLOCKED`, and `INFRASTRUCTURE BLOCKED` mean no merge.
+
+When separate reviewer reports are missing, simulated, incomplete, invalid, or marked `Real execution: no`, the correct verdict is `INFRASTRUCTURE BLOCKED`.
 
 For scrollytelling changes, also verify:
 

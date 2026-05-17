@@ -44,12 +44,13 @@ A patch is mergeable only when:
 
 - The diff is available.
 - Required validation was run: `git diff --check`, `npm run lint`, and `npm run build`.
-- Required reviewer reports are real, separate, and present.
+- Required reviewer reports are real, separate, present, and generated with `Provider: codex` plus `Real execution: yes`.
 - No required reviewer returned `CHANGES REQUESTED`, `BLOCKED`, or `INFRASTRUCTURE BLOCKED`.
+- Any `PASS WITH NOTES` findings were resolved or explicitly accepted.
 - The implementer did not approve their own patch.
 - Final human review approves the merge.
 
-If lint or build cannot run, or if they fail, the result must be documented and the patch cannot receive `PASS`.
+`PASS` and `PASS WITH NOTES` do not authorize automatic merge. If lint or build cannot run, or if they fail, the result must be documented and the patch cannot receive `PASS`.
 
 ## Infrastructure Blocked
 
@@ -79,18 +80,12 @@ Phase 1 does not execute real providers, does not configure Ollama, does not imp
 
 Phase 2A adds a small provider abstraction for real reviewer execution hooks without adding npm or Python dependencies.
 
-Provider selection is controlled by:
-
-```bash
-MULTIAGENT_PROVIDER=noop
-```
-
-If `MULTIAGENT_PROVIDER` is unset, the workflow uses `noop`.
+Provider selection is controlled by `MULTIAGENT_PROVIDER`. If it is unset, the workflow uses `noop` and cannot approve.
 
 Supported provider names:
 
-- `noop`: default safe provider. It does not call an LLM and always writes `Real execution: no` with `INFRASTRUCTURE BLOCKED`.
-- `codex`: Codex CLI reviewer provider. Phase 2B runs reviewers through `codex exec` when the CLI is installed and configured.
+- `noop`: smoke-test provider only. It does not call an LLM and always writes `Real execution: no` with `INFRASTRUCTURE BLOCKED`; it must never count as review.
+- `codex`: only active real reviewer provider. It runs reviewers through `codex exec` when the CLI is installed and configured.
 - `gemini`: nominal hook for future Gemini CLI execution. The script checks for the `gemini` command, but Phase 2A does not assume a stable non-interactive invocation syntax. Until an approved command is wired, it remains `INFRASTRUCTURE BLOCKED`.
 - `ollama`: experimental optional local model hook. It uses `MULTIAGENT_OLLAMA_MODEL` or defaults to `qwen2.5-coder:7b`, checks for the `ollama` command, and sends the agent prompt plus run context through `ollama run`. It is not the recommended primary provider on 8 GB Intel Macs.
 
@@ -142,7 +137,11 @@ Expect `INFRASTRUCTURE BLOCKED` when:
 Phase 2B makes Codex the first real reviewer provider:
 
 ```bash
+npm run lint
+npm run build
 MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh
+RUN_DIR="$(ls -td .agent/reports/* | head -1)"
+cat "$RUN_DIR/99_final-verdict.md"
 ```
 
 The script:
@@ -231,11 +230,13 @@ The smoke coverage checks:
 
 `INFRASTRUCTURE BLOCKED` is the expected smoke-test verdict for `noop`; it proves the validator and aggregator still reject non-real reviewer output. These smoke tests do not replace a real Codex review with `MULTIAGENT_PROVIDER=codex`.
 
-## Phase 2D: Additional Provider Integration
+When `scripts/test-multiagent-workflow.sh` is present and executable, `local-review` includes it in `04_validation.md` after `npm run build`. The smoke script sets `MULTIAGENT_SKIP_WORKFLOW_SMOKE=1` for its nested `local-review` runs so validation output records the smoke coverage without recursive smoke execution.
+
+## Future Provider Integration
 
 A future phase may connect additional providers, specialized reviewer selection, or executor automation. That integration must write separate reports per agent and preserve the same verdict rules.
 
-## Phase 3: Optional OpenClaw Layer
+## Optional OpenClaw Evaluation
 
 OpenClaw may be evaluated later as an optional orchestration layer. It must not become required unless explicitly approved, and it must not replace real separate reviewer output with simulated aggregation.
 

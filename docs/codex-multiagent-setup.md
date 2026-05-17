@@ -11,7 +11,11 @@ Do not add Codex CLI to this project's `dependencies` or `devDependencies`.
 ## Local Review
 
 ```bash
+npm run lint
+npm run build
 MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh
+RUN_DIR="$(ls -td .agent/reports/* | head -1)"
+cat "$RUN_DIR/99_final-verdict.md"
 ```
 
 Review scope selection is automatic:
@@ -35,6 +39,8 @@ The script runs the minimum independent reviewers through `codex exec`:
 
 Each reviewer runs in read-only sandbox mode and must write a separate final report with `Real execution: yes` and a valid `Verdict:`.
 
+A valid review requires `Provider: codex` and `Real execution: yes` in each required reviewer report. `noop` output is never valid review evidence.
+
 Accepted verdicts are:
 
 - `PASS`
@@ -43,23 +49,19 @@ Accepted verdicts are:
 - `BLOCKED`
 - `INFRASTRUCTURE BLOCKED`
 
-## Noop Safe Test
-
-```bash
-MULTIAGENT_PROVIDER=noop ./scripts/local-review.sh
-```
-
-`noop` never approves. It is useful for checking report generation and deterministic aggregation.
-
-The expected final verdict for `noop` is `INFRASTRUCTURE BLOCKED` because every generated reviewer report has `Real execution: no`.
-
-For repeatable local smoke coverage of all review modes, run:
+## Noop Smoke Tests
 
 ```bash
 ./scripts/test-multiagent-workflow.sh
 ```
 
+`noop` never approves. It is useful only for checking report generation, review-mode detection, and deterministic aggregation.
+
+The expected final verdict for `noop` is `INFRASTRUCTURE BLOCKED` because every generated reviewer report has `Real execution: no`.
+
 The smoke script uses a temporary detached Git worktree and runs `local-review` with `MULTIAGENT_PROVIDER=noop` for `explicit-range`, `committed-range`, and `working-tree` scenarios. Its expected verdicts are `INFRASTRUCTURE BLOCKED`, because `noop` is intentionally non-real. This checks workflow context, non-empty diffs, scope metadata, and aggregator blocking behavior; it does not replace a real Codex review.
+
+When the smoke script is present and executable, `local-review` also records its output in `04_validation.md`. Nested smoke runs set `MULTIAGENT_SKIP_WORKFLOW_SMOKE=1` to avoid recursive validation.
 
 ## Optional Variables
 
@@ -83,6 +85,9 @@ printf "Rispondi solo con OK. Non modificare file.\n" | codex exec -
 - Invalid, empty, missing, or non-real reports produce `INFRASTRUCTURE BLOCKED`.
 - Reports without `Real execution: yes` produce `INFRASTRUCTURE BLOCKED`.
 - Missing context files, invalid review scope, or empty diffs produce `INFRASTRUCTURE BLOCKED`.
+- `PASS` and `PASS WITH NOTES` still require final human approval before merge.
+- `PASS WITH NOTES` requires the notes to be resolved or explicitly accepted before merge.
+- `CHANGES REQUESTED`, `BLOCKED`, and `INFRASTRUCTURE BLOCKED` mean no merge.
 - Invalid Codex output is not repaired. The wrapper writes a deterministic fallback report and keeps raw diagnostics in `.agent/reports/<run-id>/`.
 - Codex raw files are named `<agent>-codex-stdout.md`, `<agent>-codex-stderr.md`, `<agent>-codex-transcript.txt`, `<agent>-codex-diagnostics.md`, and `<agent>-codex-exit-code.txt`.
 - The aggregator remains deterministic shell logic, not an LLM.

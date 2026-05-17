@@ -142,12 +142,14 @@ Documentation-only changes describing these files are allowed when they do not m
 - Reviewer reports must be real, separate, and stored under `.agent/reports/<run-id>/`.
 - A reviewer report is real only when it contains `Real execution: yes` and a valid verdict.
 - Valid reviewer verdicts are `PASS`, `PASS WITH NOTES`, `CHANGES REQUESTED`, `BLOCKED`, and `INFRASTRUCTURE BLOCKED`.
-- Codex real reviews are acceptable only when each separate report passes validation and contains `Real execution: yes`.
-- `noop` is the default provider and can never approve a patch.
+- Codex is the only active real review provider. A valid review must be run with `MULTIAGENT_PROVIDER=codex` and each required report must contain `Provider: codex` and `Real execution: yes`.
+- `noop` is only for smoke/regression testing workflow infrastructure and can never approve a patch or count as review.
 - The deterministic aggregator must treat missing, empty, invalid, or `Real execution: no` reports as `INFRASTRUCTURE BLOCKED`.
 - OpenClaw is not an active provider or orchestrator in the current workflow phase.
 - `git diff --check`, `npm run lint`, and `npm run build` are required validation inputs for approval.
 - If the diff is missing, lint/build output is missing, or required real reviewer reports are missing, the correct verdict is `INFRASTRUCTURE BLOCKED`.
 - If any reviewer returns `CHANGES REQUESTED`, `BLOCKED`, or `INFRASTRUCTURE BLOCKED`, the patch is not mergeable.
+- `PASS` and `PASS WITH NOTES` never authorize automatic merge; final human approval is always required.
+- `PASS WITH NOTES` requires every note to be resolved or explicitly accepted before merge.
 - Ruflo must not be reintroduced as a required workflow tool without an explicit project decision.
 - Simulated multi-agent reviews are prohibited; do not ask one model to pretend to be several independent reviewers.
