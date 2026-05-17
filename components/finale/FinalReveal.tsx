@@ -19,7 +19,7 @@ export function FinalReveal({ unlocked, onReset }: FinalRevealProps) {
         <div className={styles.promiseBox}>
           <strong>Alessandro & Bridget</strong>
           <span>Continue?</span>
-          <button type="button" onClick={onReset}>
+          <button type="button" onClick={onReset} aria-label="Replay the full story journey">
             Replay the journey
           </button>
         </div>
