@@ -12,6 +12,16 @@ OpenClaw is optional experimental orchestration only. It may coordinate Codex-ba
 
 CrewAI is being prepared as future orchestration infrastructure for SITE LOVE. Codex remains the tool for installation, project management, technical patches, validation, documentation, and real review. CrewAI may later coordinate implementation and review lanes, but a valid real review still requires Codex-backed reports with `Real execution: yes`. See `docs/crewai-orchestration.md`.
 
+For local CrewAI smoke checks, use the isolated repository venv when present:
+
+```bash
+source .venv-crewai/bin/activate
+python -c "import crewai; print(crewai.__version__ if hasattr(crewai, '__version__') else 'crewai import ok')"
+./scripts/crewai-orchestrate.sh smoke
+```
+
+The venv is not a runtime dependency for the Next.js app and is ignored by Git.
+
 ## Local Review
 
 ```bash

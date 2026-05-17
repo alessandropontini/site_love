@@ -76,6 +76,19 @@ Do not use CrewAI to replace real Codex review. Valid review evidence still requ
 
 ## Commands
 
+Activate the local CrewAI virtual environment when you want the wrapper to detect the installed CrewAI package:
+
+```bash
+source .venv-crewai/bin/activate
+```
+
+Verify the local install:
+
+```bash
+python -c "import crewai; print(crewai.__version__ if hasattr(crewai, '__version__') else 'crewai import ok')"
+crewai --help
+```
+
 Show wrapper help:
 
 ```bash
@@ -151,6 +164,8 @@ CrewAI not installed:
 
 - `./scripts/crewai-orchestrate.sh smoke` should say CrewAI is not installed and continue non-destructive scaffold checks.
 - This is acceptable in this phase because CrewAI is not executing site work yet.
+- If `.venv-crewai` exists, activate it with `source .venv-crewai/bin/activate` before running CrewAI-specific smoke checks.
+- The local venv is ignored by Git and must not be treated as a project runtime dependency.
 
 Codex auth, quota, or usage limit:
 
