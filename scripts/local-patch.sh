@@ -1,36 +1,43 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if ! ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"; then
-  echo "Run this script from inside a git repository." >&2
-  exit 1
-fi
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib/multiagent-provider.sh"
 
-if [[ "$(pwd -P)" != "$ROOT" ]]; then
-  echo "Run this script from the git repository root: $ROOT" >&2
-  exit 1
-fi
+require_git_root
 
 if [[ $# -lt 1 ]]; then
   echo "Usage: scripts/local-patch.sh \"patch description\"" >&2
   exit 2
 fi
 
-TIMESTAMP="$(date -u +"%Y%m%dT%H%M%SZ")"
-REPORT_DIR=".agent/reports/$TIMESTAMP"
-mkdir -p "$REPORT_DIR"
+REPORT_DIR="$(create_run_dir)"
+PROVIDER="${MULTIAGENT_PROVIDER:-noop}"
+REQUEST_FILE="$REPORT_DIR/patch-request.txt"
 
-printf '%s\n' "$*" > "$REPORT_DIR/patch-request.txt"
-git status --short > "$REPORT_DIR/git-status-before.txt"
+printf '%s\n' "$*" > "$REQUEST_FILE"
+write_context_files "$REPORT_DIR" "patch" "$REQUEST_FILE"
 
-cat > "$REPORT_DIR/implementer-placeholder.md" <<'EOF'
-# Implementer Placeholder
+write_infrastructure_blocked_report \
+  "$REPORT_DIR/09_implementer.md" \
+  "patch-implementer" \
+  "$PROVIDER" \
+  "$(provider_model "$PROVIDER")" \
+  "automatic patch implementation is not active in Phase 2A" \
+  "no"
 
-Automatic patch implementation is not active in Phase 1.
+cat > "$REPORT_DIR/99_final-verdict.md" <<EOF
+# Final Verdict
 
-No application code was modified by this script. A future phase may connect a real executor such as `codex exec` or another approved provider and write a real implementer report here.
+- Aggregator: deterministic shell
+- Provider: $PROVIDER
+- Verdict: INFRASTRUCTURE BLOCKED
+- Mergeable: no
+
+Patch automation is not active in Phase 2A. No application code was modified by this script.
 EOF
 
-echo "Saved patch request in $REPORT_DIR"
-echo "Automatic implementation is not active in Phase 1."
+echo "Provider: $PROVIDER"
+echo "Report directory: $REPORT_DIR"
+echo "Automatic implementation is not active in Phase 2A."
 echo "No application code was modified by this script."

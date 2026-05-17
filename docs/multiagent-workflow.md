@@ -74,7 +74,64 @@ Phase 1 is infrastructure/documentation only. It adds:
 
 Phase 1 does not execute real providers, does not configure Ollama, does not implement OpenClaw, and does not approve patches.
 
-## Phase 2: Real Provider Integration
+## Phase 2A: Provider Execution Hooks
+
+Phase 2A adds a small provider abstraction for real reviewer execution hooks without adding npm or Python dependencies.
+
+Provider selection is controlled by:
+
+```bash
+MULTIAGENT_PROVIDER=noop
+```
+
+If `MULTIAGENT_PROVIDER` is unset, the workflow uses `noop`.
+
+Supported provider names:
+
+- `noop`: default safe provider. It does not call an LLM and always writes `Real execution: no` with `INFRASTRUCTURE BLOCKED`.
+- `codex`: nominal hook for future Codex CLI execution. The script checks for the `codex` command, but Phase 2A does not assume a stable non-interactive invocation syntax. Until an approved command is wired, it remains `INFRASTRUCTURE BLOCKED`.
+- `gemini`: nominal hook for future Gemini CLI execution. The script checks for the `gemini` command, but Phase 2A does not assume a stable non-interactive invocation syntax. Until an approved command is wired, it remains `INFRASTRUCTURE BLOCKED`.
+- `ollama`: optional local model hook. It uses `MULTIAGENT_OLLAMA_MODEL` or defaults to `qwen2.5-coder:7b`, checks for the `ollama` command, and sends the agent prompt plus run context through `ollama run`.
+
+Phase 2A keeps `local-review` conservative:
+
+- It writes `00_context.md`, git status, git diff, git diff stat, and validation output.
+- It runs the minimum required reviewers: Code Review and QA / Regression.
+- It saves separate reports as `10_review-code.md` and `11_review-qa-regression.md`.
+- It writes `99_final-verdict.md` using deterministic shell aggregation.
+- It does not run OpenClaw.
+- It does not install dependencies.
+- It does not expose full environment variables or secrets in reports.
+
+Every agent report must include:
+
+```markdown
+# Agent Report
+
+- Agent:
+- Provider:
+- Model:
+- Real execution: yes/no
+- Input files:
+- Verdict:
+- Summary:
+- Findings:
+- Required changes:
+- Evidence:
+```
+
+The deterministic aggregator treats a report as real only when it exists, is non-empty, contains a valid `Verdict:`, and says `Real execution: yes`. `Real execution: no` always blocks approval.
+
+Expect `INFRASTRUCTURE BLOCKED` when:
+
+- The provider is `noop`.
+- A provider CLI is missing.
+- A provider hook is not yet wired to a confirmed non-interactive command.
+- A provider command fails or returns empty output.
+- A provider returns output that does not match the report format.
+- Required reports, diff/status files, or validation output are missing.
+
+## Phase 2B: Real Provider Integration
 
 A future phase may connect a real executor/reviewer provider such as `codex exec`, a local model CLI, Gemini CLI, or Ollama. That integration must write separate reports per agent and preserve the same verdict rules.
 

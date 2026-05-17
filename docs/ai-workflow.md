@@ -4,7 +4,7 @@ Ruflo has been removed from the SITE LOVE workflow. Reviews no longer use Ruflo,
 
 The local Ruflo/WASM runtime was retired because it created agent records but did not produce autonomous review output without an external model provider/API key. Do not configure Anthropic/Claude managed agents, provider keys, or replacement orchestration tooling for this project unless the project owner explicitly approves a new workflow.
 
-The current multi-agent work is Phase 1 only. The repository contains prompts, report locations, and safe placeholder scripts, but it does not yet connect real independent agent providers. Until real separate reviewer reports exist, the workflow verdict must be `INFRASTRUCTURE BLOCKED`, not `APPROVED`.
+The current multi-agent work is Phase 2A. The repository contains prompts, report locations, safe scripts, a provider abstraction, and deterministic aggregation. It can only produce real reviewer reports when an approved provider is configured and returns valid separate reports. Otherwise the workflow verdict must be `INFRASTRUCTURE BLOCKED`, not `APPROVED`.
 
 ## What Codex is for
 
@@ -18,17 +18,25 @@ Codex remains useful as an operational development assistant:
 
 Codex may be used as an executor for scoped patches, file inspection, command execution, and report preparation. Codex does not replace final review, and Codex output must not be presented as independent multi-agent review unless separate real reviewer runs produce separate reports.
 
-## Local multi-agent Phase 1
+## Local multi-agent phases
 
-Phase 1 adds the infrastructure for future local/freemium multi-agent review:
+Phase 1 added the infrastructure for future local/freemium multi-agent review:
 
 - Agent prompts live in `.agent/prompts/`.
 - Run reports belong in `.agent/reports/<run-id>/`.
-- `scripts/local-multiagent.sh` captures local diff/status context.
-- `scripts/local-patch.sh` records a patch request without modifying application code.
-- `scripts/local-review.sh` creates blocked placeholders until real providers are connected.
+- Safe scripts capture local diff/status context and blocked placeholders.
 
-These scripts are intentionally placeholders. They must not declare a patch approved, and their placeholder reports must be treated as `INFRASTRUCTURE BLOCKED`.
+Phase 2A adds provider hooks:
+
+- `MULTIAGENT_PROVIDER=noop` is the default and cannot approve a patch.
+- `MULTIAGENT_PROVIDER=codex` checks for Codex CLI but remains blocked until an approved non-interactive command is wired.
+- `MULTIAGENT_PROVIDER=gemini` checks for Gemini CLI but remains blocked until an approved non-interactive command is wired.
+- `MULTIAGENT_PROVIDER=ollama` can call `ollama run "$MULTIAGENT_OLLAMA_MODEL"` and validate the returned report format.
+- `scripts/local-review.sh` writes separate minimum reviewer reports and a deterministic final verdict.
+
+This is not a fully autonomous review system. `local-review` can generate real reports only when a provider is configured, available, and returns valid reports with `Real execution: yes`. Any missing, placeholder, empty, invalid, or non-real report remains `INFRASTRUCTURE BLOCKED`.
+
+OpenClaw is not part of Phase 2A.
 
 See `docs/multiagent-workflow.md` for the full policy.
 

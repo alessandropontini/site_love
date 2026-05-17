@@ -1,44 +1,27 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if ! ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"; then
-  echo "Run this script from inside a git repository." >&2
-  exit 1
-fi
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib/multiagent-provider.sh"
 
-if [[ "$(pwd -P)" != "$ROOT" ]]; then
-  echo "Run this script from the git repository root: $ROOT" >&2
-  exit 1
-fi
+require_git_root
 
-TIMESTAMP="$(date -u +"%Y%m%dT%H%M%SZ")"
-REPORT_DIR=".agent/reports/$TIMESTAMP"
-mkdir -p "$REPORT_DIR"
+REPORT_DIR="$(create_run_dir)"
+PROVIDER="${MULTIAGENT_PROVIDER:-noop}"
 
-git status --short > "$REPORT_DIR/git-status.txt"
-git diff --stat > "$REPORT_DIR/git-diff-stat.txt"
-git diff > "$REPORT_DIR/git-diff.patch"
+write_context_files "$REPORT_DIR" "review"
+run_validation_commands "$REPORT_DIR" || true
 
-for reviewer in code qa-regression frontend-architect ux-a11y performance git-workflow aggregator; do
-  cat > "$REPORT_DIR/review-$reviewer.md" <<EOF
-# ${reviewer} Review Placeholder
+run_agent "$REPORT_DIR" "review-code" ".agent/prompts/review-code.md" "$REPORT_DIR/10_review-code.md"
+run_agent "$REPORT_DIR" "review-qa-regression" ".agent/prompts/review-qa-regression.md" "$REPORT_DIR/11_review-qa-regression.md"
 
-Real independent reviewer execution is not active in Phase 1.
+aggregate_reports_basic \
+  "$REPORT_DIR" \
+  "$REPORT_DIR/99_final-verdict.md" \
+  "$REPORT_DIR/10_review-code.md" \
+  "$REPORT_DIR/11_review-qa-regression.md"
 
-This placeholder is not an approval and must not be treated as a simulated review.
-
-Verdict:
-INFRASTRUCTURE BLOCKED
-EOF
-done
-
-cat > "$REPORT_DIR/final-verdict.md" <<'EOF'
-# Final Verdict
-
-Real, separate multi-agent review reports are not available in Phase 1.
-
-INFRASTRUCTURE BLOCKED
-EOF
-
-echo "Prepared review placeholders in $REPORT_DIR"
-echo "No review was approved. Verdict: INFRASTRUCTURE BLOCKED"
+echo "Provider: $PROVIDER"
+echo "Report directory: $REPORT_DIR"
+echo "Final verdict:"
+sed -n 's/^- Verdict: //p' "$REPORT_DIR/99_final-verdict.md" | tail -n 1
