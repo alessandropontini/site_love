@@ -44,6 +44,7 @@ The legacy arcade quest remains in `components/QuestGame.tsx` and `components/qu
 👉 For deeper breakdowns, peek at `docs/quest-guide.md`.
 👉 For the current visual direction and character references, use `docs/visual-direction.md`.
 👉 For local AI patch workflow rules, use `docs/ai-workflow.md` and `docs/multiagent-workflow.md`.
+👉 For future CrewAI orchestration infrastructure, use `docs/crewai-orchestration.md`.
 
 ## Local Review Workflow
 
@@ -58,6 +59,8 @@ cat "$RUN_DIR/99_final-verdict.md"
 ```
 
 `noop` is only for smoke tests and must produce `INFRASTRUCTURE BLOCKED`; it is not review evidence. A valid review requires `Provider: codex` and `Real execution: yes` in the required reports. `PASS` and `PASS WITH NOTES` still require final human approval, and `PASS WITH NOTES` requires notes to be resolved or explicitly accepted before merge.
+
+CrewAI is scaffolded only for future orchestration of implementation and review lanes; it does not replace Codex review or approve patches.
 
 ## Story Gating Checklist
 

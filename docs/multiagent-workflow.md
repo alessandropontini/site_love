@@ -8,6 +8,8 @@ The goal is to prepare a local/freemium multi-agent workflow where implementatio
 
 OpenClaw is evaluated in Phase 5 as an optional orchestration layer above the existing workflow. It can coordinate reviewer roles and documented commands, but Codex remains the active real provider and this document remains the merge policy source of truth.
 
+CrewAI is being prepared as a future orchestration layer for site work. It may coordinate separate implementation, review, and aggregation lanes, but Codex remains the operational tool for setup, patching, validation, and real review. The existing Codex scripts, especially `scripts/local-review.sh`, remain the source of truth for real reviewer execution and final verdict evidence. See `docs/crewai-orchestration.md`.
+
 ## Implementer vs Reviewer
 
 The implementer applies the requested patch and writes an implementer report. The implementer cannot approve the patch.
