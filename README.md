@@ -1,6 +1,6 @@
 # Pixel Quest: Alessandro & Bridget
 
-A retro-styled Next.js microsite that opens like an arcade cartridge. Follow a map, drop into four pixel mini-games, and relive the love story of Alessandro and Bridget while collecting hearts and vow coins.
+A retro-styled Next.js microsite evolving into a playable scrollytelling love story. The current home experience moves through narrative chapters, lightweight interactions, and progressively unlocked mini-games before the final reveal.
 
 ## Getting Started
 
@@ -12,31 +12,48 @@ A retro-styled Next.js microsite that opens like an arcade cartridge. Follow a m
    ```bash
    npm run dev
    ```
-3. Open http://localhost:3000 and press **Start Quest**.
+3. Open http://localhost:3000 and press **Inizia**.
 
 ## Playing The Timeline
 
-The site launches with a title card and map. Complete each chapter in order to unlock the finale:
+The site launches with a cinematic intro and a scroll-driven route. Complete each interactive chapter in order to unlock the next narrative section and finale:
 
-1. **Block Party Beginnings** – stack classic tetrominoes to bank 50 hearts.
-2. **Hearts in the Arcade** – navigate a Pac-Maze, grabbing every heart while dodging doubts.
-3. **Skyline Letters** – flap rooftop love notes through the skyline gaps.
-4. **Side-Scroller Vows** – double-jump, glide, and sprint through the trail to gather every vow coin.
+1. **Signal quiz** – answer personal route-setting questions.
+2. **Memory pairs** – match places and feelings from the shared archive.
+3. **Picture sequence** – reorder the story beats.
+4. **Hidden clues** – find the objects that unlock the final reveal.
 
-Every win adds to the shared heart counter and advances the quest timeline. Finishing all four mini-games plays the epilogue panel.
+Story gating applies to both mini-games and later narrative chapters. The first intro chapter is always readable; future chapters depend on the previous required mini-game. If someone scrolls directly to the first game without pressing **Inizia**, a local **Inizia il capitolo** CTA starts the path without forcing auto-start.
+
+The legacy arcade quest remains in `components/QuestGame.tsx` and `components/quest/` for reuse or reference, but `app/page.tsx` currently mounts the scrollytelling shell.
 
 ## Where To Customize
 
-- `lib/profile.ts` – edit the hero headline and copy for the title screen.
-- `components/QuestGame.tsx` – tweak map order, rewards, and screen copy.
-- `components/quest/questSchema.ts` – adjust chapter metadata (titles, years, locations, reward hearts, render components).
-- `components/quest/games/*` – fine-tune mechanics, difficulty, and art for each mini-game.
+- `lib/storyConfig.ts` – edit scrollytelling chapters, game order, labels, questions, memory pairs, puzzle tiles, and hidden objects.
+- `lib/useStoryProgress.ts` – progress state, `localStorage`, game unlocks, and finale unlock logic.
+- `components/story/StoryShell.tsx` – scrollytelling assembly, chapter gating, and local start CTA.
+- `components/story/ProgressIndicator.tsx` – compact progress states: complete, available/current, and locked.
+- `components/games/*` – lightweight scrollytelling mini-games.
+- `components/QuestGame.tsx` – legacy arcade quest shell kept intact.
+- `components/quest/questSchema.ts` – legacy arcade chapter metadata.
+- `components/quest/games/*` – legacy arcade mini-game mechanics.
 - `components/pixel/PixelCharacter.tsx` – update pixel palettes or redraw the avatars.
 - `app/globals.css` – global palette, CRT overlays, and responsive layout tokens.
 - `data/` – still ignored; stash heavyweight concept art or exports here if needed.
 
 👉 For deeper breakdowns, peek at `docs/quest-guide.md`.
 👉 For the current visual direction and character references, use `docs/visual-direction.md`.
+👉 For local AI patch workflow rules, use `docs/ai-workflow.md` and `docs/multiagent-workflow.md`.
+
+## Story Gating Checklist
+
+- The first intro chapter must stay readable.
+- Future narrative chapters must stay gated behind the previous required mini-game.
+- The first game must be derived from `gameOrder`, not hardcoded in UI code.
+- The first mini-game must be startable locally if the user scrolls past the intro before pressing **Inizia**.
+- Locked chapters should expose one clear locked message, not duplicate locked copy in nested game slots.
+- The progress indicator must not label an available but incomplete game as locked.
+- Documentation should be updated with behavior changes to `StoryShell`, `ProgressIndicator`, or `useStoryProgress`.
 
 ## Dev Skip Button
 

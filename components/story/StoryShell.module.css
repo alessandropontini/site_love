@@ -1,0 +1,439 @@
+.storyShell {
+  min-height: 100vh;
+  color: #24351f;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(255, 253, 243, 0.96), transparent 28%),
+    linear-gradient(180deg, #dcebf2 0%, #f5f1df 48%, #dfe9cf 100%);
+}
+
+.intro {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(320px, 1.05fr);
+  align-items: center;
+  gap: clamp(28px, 6vw, 72px);
+  padding: clamp(28px, 6vw, 72px);
+}
+
+.introArt {
+  min-height: min(62vh, 580px);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(45, 67, 44, 0.22);
+  background:
+    linear-gradient(180deg, rgba(183, 220, 244, 0.92), rgba(246, 239, 202, 0.88) 55%, rgba(151, 184, 117, 0.72)),
+    linear-gradient(90deg, rgba(255, 253, 243, 0.42), transparent);
+  box-shadow: 0 28px 80px rgba(31, 49, 32, 0.18);
+}
+
+.introArt::before {
+  content: "";
+  position: absolute;
+  inset: auto -10% 0;
+  height: 34%;
+  background:
+    linear-gradient(135deg, rgba(72, 95, 55, 0.16) 25%, transparent 25%) 0 0 / 36px 36px,
+    linear-gradient(180deg, #d8c487, #9eba73);
+}
+
+.introArt::after {
+  content: "";
+  position: absolute;
+  left: 44%;
+  bottom: -10%;
+  width: 20%;
+  height: 52%;
+  transform: skewX(-10deg);
+  background: linear-gradient(180deg, rgba(237, 218, 151, 0.88), rgba(181, 148, 86, 0.92));
+  border-inline: 2px solid rgba(72, 95, 55, 0.24);
+}
+
+.citySign {
+  position: absolute;
+  left: 9%;
+  top: 18%;
+  z-index: 2;
+  border: 2px solid rgba(36, 53, 31, 0.62);
+  background: rgba(255, 253, 243, 0.9);
+  padding: 8px 18px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  box-shadow: 0 8px 0 rgba(36, 53, 31, 0.1);
+}
+
+.duomoFrame {
+  position: absolute;
+  right: 7%;
+  bottom: 28%;
+  z-index: 2;
+  width: min(46%, 270px);
+  aspect-ratio: 1 / 0.82;
+  display: grid;
+  place-items: end center;
+}
+
+.duomoFrame img {
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 18px 18px rgba(36, 53, 31, 0.18));
+}
+
+.routeMarker {
+  position: absolute;
+  z-index: 3;
+  width: 22px;
+  height: 22px;
+  border: 3px solid #fffdf3;
+  background: #ba7969;
+  box-shadow: 0 0 0 2px rgba(45, 67, 44, 0.38);
+}
+
+.routeMarker:nth-of-type(1) {
+  left: 34%;
+  bottom: 25%;
+}
+
+.routeMarker:nth-of-type(2) {
+  left: 48%;
+  bottom: 40%;
+}
+
+.routeMarker:nth-of-type(3) {
+  left: 64%;
+  bottom: 32%;
+}
+
+.introCopy {
+  max-width: 680px;
+  display: grid;
+  gap: 24px;
+}
+
+.eyebrow,
+.progressLabel {
+  color: rgba(36, 53, 31, 0.68);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.introCopy h1,
+.sceneCopy h2,
+.finalReveal h2 {
+  margin: 0;
+  font-size: clamp(2.5rem, 8vw, 6rem);
+  line-height: 0.94;
+  letter-spacing: 0;
+}
+
+.introCopy p,
+.sceneCopy p,
+.finalReveal p {
+  margin: 0;
+  max-width: 62ch;
+  color: rgba(36, 53, 31, 0.76);
+  font-size: clamp(1rem, 2vw, 1.18rem);
+  line-height: 1.7;
+}
+
+.introActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.primaryButton,
+.secondaryButton,
+.promiseBox button {
+  min-height: 46px;
+  border: 1px solid rgba(45, 67, 44, 0.34);
+  background: #24351f;
+  color: #fffdf3;
+  padding: 12px 18px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.secondaryButton {
+  background: rgba(255, 253, 243, 0.75);
+  color: #24351f;
+}
+
+.primaryButton:hover,
+.secondaryButton:hover,
+.promiseBox button:hover {
+  transform: translateY(-1px);
+}
+
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible,
+.promiseBox button:focus-visible {
+  outline: 3px solid rgba(111, 144, 198, 0.58);
+  outline-offset: 3px;
+}
+
+.progress {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid rgba(45, 67, 44, 0.18);
+  background: rgba(255, 253, 243, 0.86);
+  backdrop-filter: blur(14px);
+  padding: 10px 12px;
+  box-shadow: 0 12px 34px rgba(31, 49, 32, 0.12);
+}
+
+.progress strong {
+  display: block;
+  font-size: 1.05rem;
+}
+
+.progressSteps {
+  display: flex;
+  gap: 7px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.progressDot {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(45, 67, 44, 0.28);
+  background: rgba(255, 253, 243, 0.8);
+  color: rgba(36, 53, 31, 0.64);
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.progressDot[data-status="complete"] {
+  background: #38562c;
+  border-color: #38562c;
+  color: #fffdf3;
+}
+
+.progressDot[data-status="available"] {
+  background: #fffdf3;
+  border-color: #ba7969;
+  color: #24351f;
+  box-shadow: inset 0 0 0 2px rgba(186, 121, 105, 0.18);
+}
+
+.storyTrack {
+  display: grid;
+  gap: clamp(42px, 8vw, 96px);
+  padding: 0 clamp(18px, 5vw, 72px) clamp(64px, 10vw, 120px);
+}
+
+.scene {
+  min-height: 92vh;
+  display: grid;
+  grid-template-columns: minmax(280px, 0.86fr) minmax(0, 1.14fr);
+  align-items: center;
+  gap: clamp(24px, 6vw, 76px);
+  opacity: 0.56;
+  transition: opacity 200ms ease;
+}
+
+.scene[data-complete="true"],
+.scene:not([data-locked="true"]) {
+  opacity: 1;
+}
+
+.scene[data-locked="true"] .sceneVisual {
+  filter: grayscale(0.22);
+}
+
+.scene[data-locked="true"] .sceneCopy {
+  color: rgba(36, 53, 31, 0.74);
+}
+
+.sceneVisual {
+  position: sticky;
+  top: 88px;
+  min-height: min(68vh, 560px);
+  overflow: hidden;
+  border: 1px solid rgba(45, 67, 44, 0.2);
+  background:
+    linear-gradient(180deg, rgba(255, 253, 243, 0.84), rgba(255, 253, 243, 0.36)),
+    var(--scene-bg, #dcebf2);
+  box-shadow: 0 24px 70px rgba(31, 49, 32, 0.14);
+}
+
+.scene[data-tone="sky"] {
+  --scene-bg: linear-gradient(160deg, #cfe4ef, #eef2d8);
+}
+
+.scene[data-tone="olive"] {
+  --scene-bg: linear-gradient(160deg, #dce8cc, #f6ecd2);
+}
+
+.scene[data-tone="amber"] {
+  --scene-bg: linear-gradient(160deg, #f0dcac, #eef0d6);
+}
+
+.scene[data-tone="rose"] {
+  --scene-bg: linear-gradient(160deg, #efd7ca, #f6efd9);
+}
+
+.orbit {
+  position: absolute;
+  inset: 0;
+}
+
+.orbit span {
+  position: absolute;
+  width: 34%;
+  aspect-ratio: 1;
+  border: 1px solid rgba(36, 53, 31, 0.16);
+  background: rgba(255, 253, 243, 0.32);
+}
+
+.orbit span:nth-child(1) {
+  left: 8%;
+  top: 12%;
+}
+
+.orbit span:nth-child(2) {
+  right: 10%;
+  top: 34%;
+  transform: rotate(12deg);
+}
+
+.orbit span:nth-child(3) {
+  left: 28%;
+  bottom: 12%;
+  transform: rotate(-8deg);
+}
+
+.placeCard {
+  position: absolute;
+  left: 24px;
+  bottom: 24px;
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(45, 67, 44, 0.28);
+  background: rgba(255, 253, 243, 0.82);
+  padding: 14px 16px;
+}
+
+.placeCard span {
+  font-weight: 900;
+}
+
+.placeCard strong {
+  color: rgba(36, 53, 31, 0.66);
+}
+
+.sceneCopy {
+  display: grid;
+  gap: 18px;
+}
+
+.sceneCopy h2,
+.finalReveal h2 {
+  font-size: clamp(2rem, 5vw, 4.2rem);
+}
+
+.lockedNote {
+  border-left: 4px solid rgba(186, 121, 105, 0.58);
+  padding-left: 14px;
+  font-weight: 800;
+}
+
+.gameSlot {
+  margin-top: 10px;
+}
+
+.localStart {
+  display: grid;
+  gap: 12px;
+  border-left: 4px solid rgba(111, 144, 198, 0.58);
+  padding-left: 14px;
+}
+
+.localStart p {
+  margin: 0;
+  font-weight: 800;
+}
+
+.finalReveal {
+  display: grid;
+  gap: 18px;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: clamp(28px, 6vw, 64px);
+  border: 1px solid rgba(45, 67, 44, 0.24);
+  background: rgba(255, 253, 243, 0.86);
+  box-shadow: 0 24px 70px rgba(31, 49, 32, 0.14);
+}
+
+.finalReveal[data-unlocked="false"] {
+  filter: grayscale(0.2);
+}
+
+.promiseBox {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  border-top: 1px solid rgba(45, 67, 44, 0.18);
+  padding-top: 18px;
+}
+
+.promiseBox strong {
+  font-size: 1.2rem;
+}
+
+.promiseBox span {
+  color: rgba(36, 53, 31, 0.64);
+  margin-right: auto;
+}
+
+@media (max-width: 860px) {
+  .intro,
+  .scene {
+    min-height: auto;
+    grid-template-columns: 1fr;
+  }
+
+  .intro {
+    padding: 24px 18px 64px;
+  }
+
+  .introArt {
+    min-height: 330px;
+    order: 2;
+  }
+
+  .progress {
+    left: 12px;
+    right: 12px;
+    top: auto;
+    bottom: 12px;
+    justify-content: space-between;
+  }
+
+  .storyTrack {
+    padding-bottom: 110px;
+  }
+
+  .scene {
+    gap: 18px;
+  }
+
+  .sceneVisual {
+    position: relative;
+    top: auto;
+    min-height: 260px;
+  }
+}

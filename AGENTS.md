@@ -4,7 +4,7 @@
 
 This repository is `alessandropontini/site_love`, a private Next.js microsite named `dreamy-couple-gallery`. The shipped experience is **Pixel Quest: Alessandro & Bridget**: a retro/pixel-style love-story quest with a title screen, map progression, four mini-games, shared heart collection, and an epilogue.
 
-Ruflo/Claude Flow may be used here **only as a local development orchestration layer for OpenAI Codex CLI**. The project or workflow may be referred to as Ruflo, while the npm package used for setup may still be `claude-flow`. Ruflo/Claude Flow must never be imported by application code, bundled into the Next.js runtime, added to `dependencies` or `devDependencies`, or required for deployment.
+Ruflo has been removed from the SITE LOVE workflow. Reviews do not use Ruflo, Claude Flow, MCP, WASM agents, or automatic multi-agent orchestration. The local Ruflo/WASM runtime was retired because it did not produce autonomous review output without an external model provider/API key. Codex remains available as an operational coding assistant for implementation, file inspection, lint/build execution, and concise summaries.
 
 ## Tech stack
 
@@ -30,11 +30,20 @@ Ruflo/Claude Flow may be used here **only as a local development orchestration l
 - `docs/quest-guide.md` — gameplay customization guide.
 - `docs/visual-direction.md` — approved visual/design direction.
 - `docs/architecture.md` — architecture overview for maintainers and agents.
-- `docs/ai-workflow.md` — Codex + Ruflo workflow guidance.
+- `docs/ai-workflow.md` — Codex usage and manual review workflow guidance.
+- `docs/multiagent-workflow.md` — local multi-agent patch policy, provider hooks, and report rules.
+- `docs/codex-multiagent-setup.md` — operational Codex reviewer setup notes.
+- `.agent/prompts/` — separate implementer, reviewer, and aggregator prompts.
+- `.agent/reports/` — per-run implementer/reviewer reports and captured context.
+- `scripts/local-multiagent.sh`, `scripts/local-patch.sh`, `scripts/local-review.sh` — safe local workflow entrypoints.
+- `scripts/lib/multiagent-provider.sh` — provider abstraction and deterministic report aggregation.
+- `components/story/` — scrollytelling shell, scroll scenes, and progress indicator.
+- `components/games/` — lightweight scrollytelling mini-games.
+- `lib/storyConfig.ts` and `lib/useStoryProgress.ts` — scrollytelling content/config and progress state.
 
-## Safe tasks for Codex/Ruflo
+## Safe tasks for Codex
 
-Codex and Ruflo are appropriate for low-risk maintenance such as:
+Codex is appropriate for low-risk maintenance such as:
 
 - Documentation updates in `README.md`, `docs/`, or this `AGENTS.md`.
 - Small TypeScript refactors that preserve behavior and are backed by `npm run lint` and `npm run build`.
@@ -42,6 +51,8 @@ Codex and Ruflo are appropriate for low-risk maintenance such as:
 - Responsive layout polish that follows `docs/visual-direction.md`.
 - Copy updates in metadata/content files when explicitly requested.
 - Test, lint, and build troubleshooting that does not change deployment configuration.
+
+Before changing the scrollytelling feature, agents must read this `AGENTS.md`, `docs/architecture.md`, and the relevant story files. If AI-assisted implementation or validation is part of the work, also read `docs/ai-workflow.md`.
 
 ## Risky tasks
 
@@ -95,13 +106,48 @@ Documentation-only changes describing these files are allowed when they do not m
 - Keep animation and real-time game loops performant; avoid unnecessary React re-renders in animation paths.
 - Preserve Next.js image/font optimizations and do not add heavyweight client libraries for orchestration or styling without approval.
 
-## Ruflo/Claude Flow/Codex rules
+## Scrollytelling progression rules
 
-- Ruflo/Claude Flow is a **development-only orchestration tool** for Codex CLI, not a project runtime dependency.
-- The repository/workflow may use the Ruflo name, but the current npm command may be `npx claude-flow@alpha ...`.
-- Run Ruflo/Claude Flow through `npx`; do not add it to `dependencies` or `devDependencies` unless there is an explicit, reviewed decision.
+- The first intro chapter must always be readable.
+- Story gating applies to both mini-games and later narrative chapters.
+- Future narrative chapters must depend on completion of the previous required mini-game or story block.
+- The first game must be derived from story configuration such as `gameOrder`, not hardcoded in UI code.
+- If `started=false` and the user reaches the first game without using the intro CTA, show a local CTA such as `Inizia il capitolo`; do not rely only on the intro CTA.
+- Do not auto-start the story unless that behavior is explicitly requested.
+- Locked chapters should present one clear locked explanation; avoid duplicate locked copy from nested game slots.
+- The progress indicator must distinguish `complete`, `available/current`, and `locked`; never label an available but incomplete game as locked.
+- Anti-regression checklist for story changes: first chapter readable, future chapters gated, first game config-driven and locally startable, no duplicate locked copy, progress states correct, docs updated with the code.
+
+## AI assistance and review rules
+
+- Ruflo has been removed from this project and must not be reintroduced as a required workflow tool without an explicit project decision.
+- Do not add Ruflo, Claude Flow, MCP servers, WASM agents, Anthropic/Claude managed agents, or provider API keys to this repository.
+- Do not add orchestration tools to `dependencies` or `devDependencies`.
 - Install Codex CLI separately when needed with `npm i -g @openai/codex`.
-- Do not import Ruflo/Claude Flow from app, component, lib, or server code.
-- Do not require Ruflo/Claude Flow for `npm run dev`, `npm run build`, `npm run start`, `npm run lint`, or deployment.
-- Keep Ruflo/Codex project guidance files at the repository root when possible, with workflow documentation in `docs/`.
-- If MCP registration is needed, prefer the local command `codex mcp add ruflo -- npx claude-flow@alpha mcp start` and document any environment limitations.
+- Do not require Codex or any AI tool for `npm run dev`, `npm run build`, `npm run start`, `npm run lint`, or deployment.
+- Codex may implement scoped patches, read files, run commands, and summarize results, but it does not replace final manual/human review.
+- The review process is: keep patches small and limited, run `npm run lint`, run `npm run build`, document any known environment-only build limitation, then require manual/human review before merge.
+- Do not present simulated multi-agent output as an independent review.
+
+## Multi-Agent Patch Policy
+
+- Every patch requires independent review before merge.
+- The minimum required independent reviewers are Code Review and QA / Regression.
+- Add specialized reviewers when relevant:
+  - Frontend Architect for React, Next.js routing, state, components, scrollytelling, or architecture.
+  - UX / Accessibility for UI, copy, interactions, mobile, focus, keyboard, semantics, or ARIA.
+  - Performance for rendering, animation, scroll, bundle, images, or performance-sensitive paths.
+  - Git / Workflow Reviewer for scripts, CI, operational docs, package files, AI workflow, or this `AGENTS.md`.
+- The implementer cannot approve their own patch.
+- Reviewer reports must be real, separate, and stored under `.agent/reports/<run-id>/`.
+- A reviewer report is real only when it contains `Real execution: yes` and a valid verdict.
+- Valid reviewer verdicts are `PASS`, `PASS WITH NOTES`, `CHANGES REQUESTED`, `BLOCKED`, and `INFRASTRUCTURE BLOCKED`.
+- Codex real reviews are acceptable only when each separate report passes validation and contains `Real execution: yes`.
+- `noop` is the default provider and can never approve a patch.
+- The deterministic aggregator must treat missing, empty, invalid, or `Real execution: no` reports as `INFRASTRUCTURE BLOCKED`.
+- OpenClaw is not an active provider or orchestrator in the current workflow phase.
+- `git diff --check`, `npm run lint`, and `npm run build` are required validation inputs for approval.
+- If the diff is missing, lint/build output is missing, or required real reviewer reports are missing, the correct verdict is `INFRASTRUCTURE BLOCKED`.
+- If any reviewer returns `CHANGES REQUESTED`, `BLOCKED`, or `INFRASTRUCTURE BLOCKED`, the patch is not mergeable.
+- Ruflo must not be reintroduced as a required workflow tool without an explicit project decision.
+- Simulated multi-agent reviews are prohibited; do not ask one model to pretend to be several independent reviewers.

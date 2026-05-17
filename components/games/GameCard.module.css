@@ -1,0 +1,198 @@
+.gameCard {
+  border: 1px solid rgba(45, 67, 44, 0.28);
+  background: rgba(255, 253, 243, 0.9);
+  box-shadow: 0 18px 50px rgba(31, 49, 32, 0.14);
+  padding: clamp(18px, 4vw, 28px);
+  display: grid;
+  gap: 18px;
+}
+
+.gameCard header {
+  display: grid;
+  gap: 6px;
+}
+
+.gameCard h3 {
+  margin: 0;
+  font-size: clamp(1.15rem, 3vw, 1.55rem);
+  line-height: 1.1;
+}
+
+.gameCard p {
+  margin: 0;
+  color: rgba(36, 53, 31, 0.72);
+  line-height: 1.6;
+}
+
+.success {
+  border-color: rgba(73, 124, 83, 0.42);
+  background: rgba(235, 246, 222, 0.94);
+}
+
+.actions,
+.optionGrid,
+.memoryGrid,
+.puzzleGrid,
+.objectList {
+  display: grid;
+  gap: 10px;
+}
+
+.optionGrid {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.memoryGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.puzzleGrid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.button,
+.option,
+.memoryCard,
+.tile,
+.objectButton {
+  min-height: 44px;
+  border: 1px solid rgba(45, 67, 44, 0.28);
+  background: #fffdf3;
+  color: #24351f;
+  padding: 12px 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.button {
+  width: fit-content;
+  text-align: center;
+  font-weight: 800;
+}
+
+.option:hover:not(:disabled),
+.memoryCard:hover:not(:disabled),
+.tile:hover:not(:disabled),
+.objectButton:hover:not(:disabled),
+.button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(73, 124, 83, 0.62);
+  background: #f8fbec;
+}
+
+.option:focus-visible,
+.memoryCard:focus-visible,
+.tile:focus-visible,
+.objectButton:focus-visible,
+.button:focus-visible {
+  outline: 3px solid rgba(111, 144, 198, 0.52);
+  outline-offset: 3px;
+}
+
+.option:disabled,
+.memoryCard:disabled,
+.tile:disabled,
+.objectButton:disabled,
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.68;
+}
+
+.option[data-selected="true"],
+.memoryCard[data-active="true"],
+.tile[data-active="true"],
+.objectButton[data-found="true"] {
+  border-color: rgba(87, 123, 67, 0.68);
+  background: #e8f1d8;
+}
+
+.memoryCard {
+  min-height: 72px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font-weight: 800;
+}
+
+.tile {
+  min-height: 78px;
+  text-align: center;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+}
+
+.hiddenScene {
+  position: relative;
+  min-height: 250px;
+  overflow: hidden;
+  border: 1px solid rgba(45, 67, 44, 0.2);
+  background:
+    linear-gradient(180deg, rgba(180, 219, 251, 0.62), rgba(244, 246, 220, 0.94)),
+    linear-gradient(90deg, rgba(108, 152, 97, 0.18), transparent);
+}
+
+.hiddenScene::before {
+  content: "MILANO";
+  position: absolute;
+  left: 7%;
+  top: 22%;
+  border: 2px solid rgba(36, 53, 31, 0.56);
+  background: rgba(255, 253, 243, 0.86);
+  padding: 7px 14px;
+  font-weight: 900;
+}
+
+.hiddenScene::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 36%;
+  background:
+    linear-gradient(135deg, rgba(136, 160, 108, 0.35) 25%, transparent 25%) 0 0 / 34px 34px,
+    linear-gradient(180deg, #d7c486, #b8cf87);
+}
+
+.hotspot {
+  position: absolute;
+  z-index: 2;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 2px solid rgba(36, 53, 31, 0.5);
+  background: rgba(255, 253, 243, 0.76);
+  cursor: pointer;
+}
+
+.hotspot:focus-visible {
+  outline: 3px solid rgba(111, 144, 198, 0.65);
+  outline-offset: 3px;
+}
+
+.hotspot[data-found="true"] {
+  background: #e8f1d8;
+  border-color: rgba(73, 124, 83, 0.78);
+}
+
+.objectList {
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+}
+
+.status {
+  min-height: 24px;
+  font-weight: 800;
+  color: #38562c;
+}
+
+@media (max-width: 620px) {
+  .memoryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .puzzleGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
