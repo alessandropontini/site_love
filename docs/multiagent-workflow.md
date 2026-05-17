@@ -210,7 +210,28 @@ For newly added files in working-tree mode, prefer staging intended additions be
 
 Patch implementation automation is still disabled in Phase 2B. OpenClaw is excluded from this phase.
 
-## Phase 2C: Additional Provider Integration
+## Phase 2C: Local Workflow Smoke Tests
+
+Phase 2C adds a repeatable local smoke/regression check for the shell workflow:
+
+```bash
+./scripts/test-multiagent-workflow.sh
+```
+
+The smoke script creates a temporary detached Git worktree from `HEAD` and runs `local-review` with `MULTIAGENT_PROVIDER=noop`. It does not push, merge, use secrets, delete existing `.agent/reports` directories, or modify application code.
+
+The smoke coverage checks:
+
+- `explicit-range` with `REVIEW_BASE=HEAD~1 REVIEW_HEAD=HEAD`.
+- `committed-range` fallback with a clean temporary worktree.
+- `working-tree` detection using a temporary untracked fixture under `.agent/tmp/` inside the temporary worktree.
+- Non-empty diff and diff stat files.
+- Valid review scope metadata.
+- Deterministic `INFRASTRUCTURE BLOCKED` final verdicts for `noop`, because `noop` reports `Real execution: no`.
+
+`INFRASTRUCTURE BLOCKED` is the expected smoke-test verdict for `noop`; it proves the validator and aggregator still reject non-real reviewer output. These smoke tests do not replace a real Codex review with `MULTIAGENT_PROVIDER=codex`.
+
+## Phase 2D: Additional Provider Integration
 
 A future phase may connect additional providers, specialized reviewer selection, or executor automation. That integration must write separate reports per agent and preserve the same verdict rules.
 

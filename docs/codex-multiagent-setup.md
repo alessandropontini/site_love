@@ -53,6 +53,14 @@ MULTIAGENT_PROVIDER=noop ./scripts/local-review.sh
 
 The expected final verdict for `noop` is `INFRASTRUCTURE BLOCKED` because every generated reviewer report has `Real execution: no`.
 
+For repeatable local smoke coverage of all review modes, run:
+
+```bash
+./scripts/test-multiagent-workflow.sh
+```
+
+The smoke script uses a temporary detached Git worktree and runs `local-review` with `MULTIAGENT_PROVIDER=noop` for `explicit-range`, `committed-range`, and `working-tree` scenarios. Its expected verdicts are `INFRASTRUCTURE BLOCKED`, because `noop` is intentionally non-real. This checks workflow context, non-empty diffs, scope metadata, and aggregator blocking behavior; it does not replace a real Codex review.
+
 ## Optional Variables
 
 - `MULTIAGENT_PROVIDER=codex`
