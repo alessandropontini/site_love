@@ -285,6 +285,22 @@ run_validation_commands() {
       echo "Result: fail"
       status=1
     fi
+    echo
+    echo "## ./scripts/test-multiagent-workflow.sh"
+    if [[ "${MULTIAGENT_SKIP_WORKFLOW_SMOKE:-}" == "1" ]]; then
+      echo "Result: skipped"
+      echo "Reason: MULTIAGENT_SKIP_WORKFLOW_SMOKE=1 prevents recursive smoke validation."
+    elif [[ -x "./scripts/test-multiagent-workflow.sh" ]]; then
+      if ./scripts/test-multiagent-workflow.sh; then
+        echo "Result: pass"
+      else
+        echo "Result: fail"
+        status=1
+      fi
+    else
+      echo "Result: skipped"
+      echo "Reason: scripts/test-multiagent-workflow.sh is not present or not executable."
+    fi
   } > "$run_dir/04_validation.md" 2>&1
 
   return "$status"

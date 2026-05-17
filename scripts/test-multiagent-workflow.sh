@@ -125,7 +125,7 @@ smoke_explicit_range() {
 
   run_dir="$(run_local_review \
     "explicit-range smoke" \
-    env REVIEW_BASE=HEAD~1 REVIEW_HEAD=HEAD MULTIAGENT_PROVIDER=noop ./scripts/local-review.sh)"
+    env REVIEW_BASE=HEAD~1 REVIEW_HEAD=HEAD MULTIAGENT_PROVIDER=noop MULTIAGENT_SKIP_WORKFLOW_SMOKE=1 ./scripts/local-review.sh)"
 
   assert_common_noop_report "$run_dir" "explicit-range"
   assert_contains "$run_dir" "06_review_scope.md" "- Review base: HEAD~1"
@@ -145,7 +145,7 @@ smoke_committed_range() {
 
   run_dir="$(run_local_review \
     "committed-range smoke" \
-    env MULTIAGENT_PROVIDER=noop ./scripts/local-review.sh)"
+    env MULTIAGENT_PROVIDER=noop MULTIAGENT_SKIP_WORKFLOW_SMOKE=1 ./scripts/local-review.sh)"
 
   assert_common_noop_report "$run_dir" "committed-range"
   assert_contains "$run_dir" "06_review_scope.md" "- Review base: HEAD~1"
@@ -162,7 +162,7 @@ smoke_working_tree() {
 
   run_dir="$(run_local_review \
     "working-tree smoke" \
-    env MULTIAGENT_PROVIDER=noop ./scripts/local-review.sh)"
+    env MULTIAGENT_PROVIDER=noop MULTIAGENT_SKIP_WORKFLOW_SMOKE=1 ./scripts/local-review.sh)"
 
   assert_common_noop_report "$run_dir" "working-tree"
   assert_contains "$run_dir" "07_touched_files.txt" "$fixture"
