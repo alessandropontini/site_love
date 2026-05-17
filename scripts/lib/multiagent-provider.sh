@@ -5,6 +5,10 @@ ALLOWED_VERDICTS_REGEX='^(PASS|PASS WITH NOTES|CHANGES REQUESTED|BLOCKED|INFRAST
 DEFAULT_MAX_DIFF_CHARS=60000
 DEFAULT_AGENT_TIMEOUT_SECONDS=180
 
+status_without_generated_reports() {
+  git status --short --untracked-files=all | grep -v '^?? \.agent/reports/' || true
+}
+
 require_git_root() {
   local root
 
@@ -33,11 +37,61 @@ Environment note: this workflow intentionally does not record full environment v
 NOTE
 }
 
+review_scope_value() {
+  local run_dir="$1"
+  local key="$2"
+
+  if [[ ! -f "$run_dir/06_review_scope.md" ]]; then
+    return 0
+  fi
+
+  sed -n "s/^- ${key}: //p" "$run_dir/06_review_scope.md" | tail -n 1
+}
+
 write_context_files() {
   local run_dir="$1"
   local mode="${2:-review}"
   local request_file="${3:-}"
-  local untracked_files
+  local review_mode review_base review_head review_source scope_result scope_reason
+  local untracked_files tracked_diff_file untracked_diff_file
+
+  review_mode=""
+  review_base="${REVIEW_BASE:-}"
+  review_head="${REVIEW_HEAD:-}"
+  review_source=""
+  scope_result="pass"
+  scope_reason=""
+
+  if [[ -n "$review_base" || -n "$review_head" ]]; then
+    if [[ -n "$review_base" && -n "$review_head" ]]; then
+      review_mode="explicit-range"
+      review_source="committed range"
+    else
+      review_mode="explicit-range"
+      review_source="committed range"
+      scope_result="fail"
+      scope_reason="REVIEW_BASE and REVIEW_HEAD must both be set for explicit-range review."
+    fi
+  elif [[ -n "$(status_without_generated_reports)" ]]; then
+    review_mode="working-tree"
+    review_source="working tree"
+  else
+    review_mode="committed-range"
+    review_base="HEAD~1"
+    review_head="HEAD"
+    review_source="committed range"
+  fi
+
+  if [[ "$review_mode" == "committed-range" || "$review_mode" == "explicit-range" ]]; then
+    if [[ "$scope_result" == "pass" ]] && ! git rev-parse --verify --quiet "$review_base^{commit}" >/dev/null; then
+      scope_result="fail"
+      scope_reason="Review base '$review_base' is not a valid commit."
+    fi
+    if [[ "$scope_result" == "pass" ]] && ! git rev-parse --verify --quiet "$review_head^{commit}" >/dev/null; then
+      scope_result="fail"
+      scope_reason="Review head '$review_head' is not a valid commit."
+    fi
+  fi
 
   {
     echo "# Multi-Agent Run Context"
@@ -46,6 +100,12 @@ write_context_files() {
     echo "- Provider: ${MULTIAGENT_PROVIDER:-noop}"
     echo "- Created at UTC: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
     echo "- Repository: $(basename "$(git rev-parse --show-toplevel)")"
+    echo "- Review mode: $review_mode"
+    echo "- Review source: $review_source"
+    if [[ -n "$review_base" || -n "$review_head" ]]; then
+      echo "- Review base: ${review_base:-n/a}"
+      echo "- Review head: ${review_head:-n/a}"
+    fi
     echo
     sanitize_env_note
     if [[ -n "$request_file" && -f "$request_file" ]]; then
@@ -55,12 +115,33 @@ write_context_files() {
     fi
   } > "$run_dir/00_context.md"
 
-  git status --short --untracked-files=all | grep -v '^?? \.agent/reports/' > "$run_dir/01_git_status.txt" || true
-  git diff HEAD > "$run_dir/02_git_diff.patch"
-  git diff --stat HEAD > "$run_dir/03_git_diff_stat.txt"
+  status_without_generated_reports > "$run_dir/01_git_status.txt"
+  : > "$run_dir/02_git_diff.patch"
+  : > "$run_dir/03_git_diff_stat.txt"
+  : > "$run_dir/07_touched_files.txt"
+
+  tracked_diff_file="$run_dir/.tracked-diff.tmp"
+  untracked_diff_file="$run_dir/.untracked-diff.tmp"
+  : > "$tracked_diff_file"
+  : > "$untracked_diff_file"
+
+  if [[ "$scope_result" == "pass" ]]; then
+    case "$review_mode" in
+      working-tree)
+        git diff HEAD > "$tracked_diff_file"
+        git diff --stat HEAD > "$run_dir/03_git_diff_stat.txt"
+        git diff --name-only HEAD > "$run_dir/07_touched_files.txt"
+        ;;
+      committed-range | explicit-range)
+        git diff "$review_base" "$review_head" > "$tracked_diff_file"
+        git diff --stat "$review_base" "$review_head" > "$run_dir/03_git_diff_stat.txt"
+        git diff --name-only "$review_base" "$review_head" > "$run_dir/07_touched_files.txt"
+        ;;
+    esac
+  fi
 
   untracked_files="$(git ls-files --others --exclude-standard | grep -v '^.agent/reports/' || true)"
-  if [[ -n "$untracked_files" ]]; then
+  if [[ "$review_mode" == "working-tree" && "$scope_result" == "pass" && -n "$untracked_files" ]]; then
     {
       echo "# Untracked Files Context"
       echo
@@ -78,19 +159,57 @@ write_context_files() {
         if [[ ! -f "$file" ]]; then
           continue
         fi
+        printf '%s\n' "$file" >> "$run_dir/07_touched_files.txt"
         echo "## $file"
         echo
         if LC_ALL=C grep -Iq . "$file"; then
+          git diff --no-index --stat -- /dev/null "$file" >> "$run_dir/03_git_diff_stat.txt" 2>/dev/null || true
+          git diff --no-index -- /dev/null "$file" >> "$untracked_diff_file" 2>/dev/null || true
           echo '```'
           truncate_file_for_prompt "$file" 20000
           echo '```'
         else
+          git diff --no-index --stat -- /dev/null "$file" >> "$run_dir/03_git_diff_stat.txt" 2>/dev/null || true
+          {
+            echo "diff --git a/$file b/$file"
+            echo "new file mode 100644"
+            echo "Binary files /dev/null and b/$file differ"
+          } >> "$untracked_diff_file"
           echo "[SKIPPED: binary or non-text file.]"
         fi
         echo
       done <<< "$untracked_files"
     } > "$run_dir/05_untracked_files.md"
   fi
+
+  cat "$tracked_diff_file" "$untracked_diff_file" > "$run_dir/02_git_diff.patch"
+  rm -f "$tracked_diff_file" "$untracked_diff_file"
+  sort -u "$run_dir/07_touched_files.txt" -o "$run_dir/07_touched_files.txt"
+
+  if [[ "$scope_result" == "pass" && ! -s "$run_dir/02_git_diff.patch" ]]; then
+    scope_result="fail"
+    scope_reason="Review diff is empty for mode '$review_mode'."
+  fi
+
+  {
+    echo "# Review Scope"
+    echo
+    echo "- Review mode: $review_mode"
+    echo "- Review source: $review_source"
+    echo "- Review base: ${review_base:-n/a}"
+    echo "- Review head: ${review_head:-n/a}"
+    echo "- Scope result: $scope_result"
+    if [[ -n "$scope_reason" ]]; then
+      echo "- Scope reason: $scope_reason"
+    fi
+    echo
+    echo "## Touched Files"
+    if [[ -s "$run_dir/07_touched_files.txt" ]]; then
+      cat "$run_dir/07_touched_files.txt"
+    else
+      echo "[none]"
+    fi
+  } > "$run_dir/06_review_scope.md"
 }
 
 truncate_file_for_prompt() {
@@ -116,12 +235,35 @@ truncate_file_for_prompt() {
 run_validation_commands() {
   local run_dir="$1"
   local status=0
+  local review_mode review_base review_head
+
+  review_mode="$(review_scope_value "$run_dir" "Review mode")"
+  review_base="$(review_scope_value "$run_dir" "Review base")"
+  review_head="$(review_scope_value "$run_dir" "Review head")"
 
   {
     echo "# Validation"
     echo
-    echo "## git diff --check"
-    if git diff --check && git diff --cached --check; then
+    if [[ "$review_mode" == "committed-range" || "$review_mode" == "explicit-range" ]]; then
+      echo "## git diff --check $review_base $review_head"
+      if git diff --check "$review_base" "$review_head"; then
+        echo "Result: pass"
+      else
+        echo "Result: fail"
+        status=1
+      fi
+    else
+      echo "## git diff --check"
+      if git diff --check && git diff --cached --check; then
+        echo "Result: pass"
+      else
+        echo "Result: fail"
+        status=1
+      fi
+    fi
+    echo
+    echo "## review scope"
+    if [[ -f "$run_dir/06_review_scope.md" ]] && grep -q '^- Scope result: pass$' "$run_dir/06_review_scope.md"; then
       echo "Result: pass"
     else
       echo "Result: fail"
@@ -182,7 +324,7 @@ write_infrastructure_blocked_report() {
 - Provider: $provider
 - Model: $model
 - Real execution: $real_execution
-- Input files: 00_context.md, 01_git_status.txt, 02_git_diff.patch, 03_git_diff_stat.txt, 04_validation.md, 05_untracked_files.md if present
+- Input files: 00_context.md, 01_git_status.txt, 02_git_diff.patch, 03_git_diff_stat.txt, 04_validation.md, 06_review_scope.md, 07_touched_files.txt, 05_untracked_files.md if present
 - Verdict: INFRASTRUCTURE BLOCKED
 
 ## Summary
@@ -239,6 +381,16 @@ build_agent_prompt() {
     echo "## Git Diff Stat"
     cat "$run_dir/03_git_diff_stat.txt"
     echo
+    if [[ -f "$run_dir/06_review_scope.md" ]]; then
+      echo "## Review Scope"
+      cat "$run_dir/06_review_scope.md"
+      echo
+    fi
+    if [[ -f "$run_dir/07_touched_files.txt" ]]; then
+      echo "## Touched Files"
+      cat "$run_dir/07_touched_files.txt"
+      echo
+    fi
     echo "## Git Diff"
     truncate_file_for_prompt "$run_dir/02_git_diff.patch" "$max_diff_chars"
     if [[ -f "$run_dir/04_validation.md" ]]; then
@@ -262,7 +414,7 @@ build_agent_prompt() {
 - Provider: $provider
 - Model: $model
 - Real execution: yes
-- Input files: 00_context.md, 01_git_status.txt, 02_git_diff.patch, 03_git_diff_stat.txt, 04_validation.md, 05_untracked_files.md if present
+- Input files: 00_context.md, 01_git_status.txt, 02_git_diff.patch, 03_git_diff_stat.txt, 04_validation.md, 06_review_scope.md, 07_touched_files.txt, 05_untracked_files.md if present
 - Verdict: PASS | PASS WITH NOTES | CHANGES REQUESTED | BLOCKED | INFRASTRUCTURE BLOCKED
 
 ## Summary
@@ -643,7 +795,15 @@ aggregate_reports_basic() {
     esac
   done
 
-  if [[ ! -f "$run_dir/00_context.md" || ! -f "$run_dir/01_git_status.txt" || ! -f "$run_dir/02_git_diff.patch" || ! -f "$run_dir/03_git_diff_stat.txt" || ! -f "$run_dir/04_validation.md" ]]; then
+  if [[ ! -f "$run_dir/00_context.md" || ! -f "$run_dir/01_git_status.txt" || ! -f "$run_dir/02_git_diff.patch" || ! -f "$run_dir/03_git_diff_stat.txt" || ! -f "$run_dir/04_validation.md" || ! -f "$run_dir/06_review_scope.md" || ! -f "$run_dir/07_touched_files.txt" ]]; then
+    final_verdict="INFRASTRUCTURE BLOCKED"
+  fi
+
+  if [[ -f "$run_dir/02_git_diff.patch" && ! -s "$run_dir/02_git_diff.patch" ]]; then
+    final_verdict="INFRASTRUCTURE BLOCKED"
+  fi
+
+  if [[ -f "$run_dir/06_review_scope.md" ]] && ! grep -q '^- Scope result: pass$' "$run_dir/06_review_scope.md"; then
     final_verdict="INFRASTRUCTURE BLOCKED"
   fi
 
@@ -658,6 +818,12 @@ aggregate_reports_basic() {
     echo "- Provider: ${MULTIAGENT_PROVIDER:-noop}"
     echo "- Verdict: $final_verdict"
     echo "- Mergeable: $(if [[ "$final_verdict" == "PASS" || "$final_verdict" == "PASS WITH NOTES" ]]; then echo "requires final human approval"; else echo "no"; fi)"
+    if [[ -f "$run_dir/06_review_scope.md" ]]; then
+      echo "- Review mode: $(review_scope_value "$run_dir" "Review mode")"
+      echo "- Review source: $(review_scope_value "$run_dir" "Review source")"
+      echo "- Review base: $(review_scope_value "$run_dir" "Review base")"
+      echo "- Review head: $(review_scope_value "$run_dir" "Review head")"
+    fi
     echo
     echo "## Required Report Status"
     echo
@@ -674,7 +840,7 @@ aggregate_reports_basic() {
     echo
     echo "## Blocking Rules"
     echo
-    echo "- Missing required reports, missing diff/status/validation, invalid reports, or Real execution: no produce INFRASTRUCTURE BLOCKED."
+    echo "- Missing required reports, missing diff/status/scope/validation, empty diff, invalid reports, or Real execution: no produce INFRASTRUCTURE BLOCKED."
     echo "- Any reviewer verdict of CHANGES REQUESTED, BLOCKED, or INFRASTRUCTURE BLOCKED makes the patch non-mergeable."
     echo "- Final human approval is still required before merge."
   } > "$final_file"

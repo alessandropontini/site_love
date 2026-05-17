@@ -14,6 +14,20 @@ Do not add Codex CLI to this project's `dependencies` or `devDependencies`.
 MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh
 ```
 
+Review scope selection is automatic:
+
+- If both `REVIEW_BASE` and `REVIEW_HEAD` are set, the script reviews that explicit Git range.
+- If no explicit range is set and the working tree has staged or unstaged changes, the script reviews the working tree.
+- If no explicit range is set and the working tree is clean, the script reviews the last committed patch with `HEAD~1..HEAD`.
+
+Use explicit range review when the patch has already been committed or spans multiple commits:
+
+```bash
+REVIEW_BASE=HEAD~2 REVIEW_HEAD=HEAD MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh
+```
+
+If the range is invalid or the selected diff is empty, the workflow deterministically returns `INFRASTRUCTURE BLOCKED`.
+
 The script runs the minimum independent reviewers through `codex exec`:
 
 - `review-code`
@@ -42,6 +56,7 @@ The expected final verdict for `noop` is `INFRASTRUCTURE BLOCKED` because every 
 ## Optional Variables
 
 - `MULTIAGENT_PROVIDER=codex`
+- `REVIEW_BASE` and `REVIEW_HEAD` for explicit Git range review.
 - `MULTIAGENT_AGENT_TIMEOUT_SECONDS=180`
 - `MULTIAGENT_MAX_DIFF_CHARS=60000`
 - `MULTIAGENT_CODEX_ARGS` for explicit extra `codex exec` arguments when the local CLI supports them.
@@ -59,6 +74,7 @@ printf "Rispondi solo con OK. Non modificare file.\n" | codex exec -
 
 - Invalid, empty, missing, or non-real reports produce `INFRASTRUCTURE BLOCKED`.
 - Reports without `Real execution: yes` produce `INFRASTRUCTURE BLOCKED`.
+- Missing context files, invalid review scope, or empty diffs produce `INFRASTRUCTURE BLOCKED`.
 - Invalid Codex output is not repaired. The wrapper writes a deterministic fallback report and keeps raw diagnostics in `.agent/reports/<run-id>/`.
 - Codex raw files are named `<agent>-codex-stdout.md`, `<agent>-codex-stderr.md`, `<agent>-codex-transcript.txt`, `<agent>-codex-diagnostics.md`, and `<agent>-codex-exit-code.txt`.
 - The aggregator remains deterministic shell logic, not an LLM.

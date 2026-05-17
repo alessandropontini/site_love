@@ -96,7 +96,7 @@ Supported provider names:
 
 Phase 2A keeps `local-review` conservative:
 
-- It writes `00_context.md`, git status, full `git diff HEAD`, full `git diff --stat HEAD`, and validation output.
+- It writes `00_context.md`, git status, review scope, touched files, full diff, diff stat, and validation output.
 - It runs the minimum required reviewers: Code Review and QA / Regression.
 - It saves separate reports as `10_review-code.md` and `11_review-qa-regression.md`.
 - It writes `99_final-verdict.md` using deterministic shell aggregation.
@@ -135,6 +135,7 @@ Expect `INFRASTRUCTURE BLOCKED` when:
 - A provider command fails or returns empty output.
 - A provider returns output that does not match the report format.
 - Required reports, diff/status files, or validation output are missing.
+- The selected review scope is invalid or produces an empty diff.
 
 ## Phase 2B: Codex Real Reviewer Execution
 
@@ -146,7 +147,7 @@ MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh
 
 The script:
 
-- Captures context, git status, full `git diff HEAD`, full `git diff --stat HEAD`, and validation output.
+- Captures context, git status, review scope, touched files, full diff, diff stat, and validation output.
 - Builds a dedicated prompt for each minimum reviewer.
 - Calls `codex exec` non-interactively in read-only sandbox mode for `review-code` and `review-qa-regression`.
 - Saves separate stdout/stderr diagnostics per reviewer.
@@ -154,9 +155,24 @@ The script:
 - Validates each report before aggregation.
 - Keeps aggregation deterministic in shell.
 
+`local-review` supports three review modes:
+
+- `working-tree`: used when `REVIEW_BASE` and `REVIEW_HEAD` are unset and the working tree has staged or unstaged changes. The context captures `git status --short`, staged and unstaged tracked diffs, relevant untracked text files, diff stat, and touched files.
+- `committed-range`: used when `REVIEW_BASE` and `REVIEW_HEAD` are unset and the working tree is clean. The context falls back to `HEAD~1..HEAD` and captures `git diff --stat HEAD~1 HEAD`, `git diff HEAD~1 HEAD`, and `git diff --name-only HEAD~1 HEAD`.
+- `explicit-range`: used when both `REVIEW_BASE` and `REVIEW_HEAD` are set. The context captures `git diff --stat "$REVIEW_BASE" "$REVIEW_HEAD"`, `git diff "$REVIEW_BASE" "$REVIEW_HEAD"`, and `git diff --name-only "$REVIEW_BASE" "$REVIEW_HEAD"`.
+
+Use explicit ranges when the patch has already been committed and spans more than the last commit:
+
+```bash
+REVIEW_BASE=HEAD~2 REVIEW_HEAD=HEAD MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh
+```
+
+If only one of `REVIEW_BASE` or `REVIEW_HEAD` is set, the range does not resolve, or the selected diff is empty, the workflow records the scope failure and the deterministic final verdict is `INFRASTRUCTURE BLOCKED`.
+
 Supported Phase 2B variables:
 
 - `MULTIAGENT_PROVIDER=codex`
+- `REVIEW_BASE` and `REVIEW_HEAD` for explicit committed-range review.
 - `MULTIAGENT_AGENT_TIMEOUT_SECONDS=180`
 - `MULTIAGENT_MAX_DIFF_CHARS=60000`
 - `MULTIAGENT_CODEX_ARGS` for explicit extra `codex exec` arguments supported by the local CLI.
@@ -188,7 +204,7 @@ For Codex runs, raw diagnostics live under `.agent/reports/<run-id>/`:
 - `<agent>-codex-diagnostics.md`: command metadata without secrets.
 - `<agent>-codex-exit-code.txt`: process exit code.
 
-For newly added files, prefer staging intended additions before review so `git diff HEAD` includes them as normal patch content. Remaining untracked text files are captured separately in `05_untracked_files.md`.
+For newly added files in working-tree mode, prefer staging intended additions before review so they appear as normal patch content. Remaining untracked text files are still captured separately in `05_untracked_files.md`, included in touched files, and represented in the generated diff context when safe.
 
 `noop` remains the default safe provider and can never approve. Gemini remains a nominal hook. Ollama remains experimental and optional; it is not the primary provider for this hardware profile.
 
