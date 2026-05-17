@@ -31,8 +31,8 @@ Additional reviewers are required when relevant:
 - Do not invent missing reports.
 - Do not treat a simulated combined review as separate independent reports.
 - If any required report is missing, the final verdict is `INFRASTRUCTURE BLOCKED`.
-- If lint/build output is missing, the patch cannot be `APPROVED`.
-- If the diff is missing, the patch cannot be `APPROVED`.
+- If lint/build output is missing, the patch cannot be `PASS`.
+- If the diff is missing, the patch cannot be `PASS`.
 - If any reviewer verdict is `CHANGES REQUESTED`, `BLOCKED`, or `INFRASTRUCTURE BLOCKED`, the patch is not mergeable.
 - The implementer report is useful context but never counts as approval.
 - Final human approval is still required before merge.
@@ -48,10 +48,10 @@ Write a standalone aggregation report with:
 - Mergeability
 - Final verdict
 
-The final line must be exactly one of:
+The structured `- Verdict:` field must be exactly one of:
 
-- `APPROVED`
-- `APPROVED WITH NOTES`
+- `PASS`
+- `PASS WITH NOTES`
 - `CHANGES REQUESTED`
 - `BLOCKED`
 - `INFRASTRUCTURE BLOCKED`

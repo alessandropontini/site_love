@@ -31,10 +31,10 @@ Write a standalone report with:
 - Validation reviewed
 - Verdict
 
-The final line must be exactly one of:
+The structured `- Verdict:` field must be exactly one of:
 
-- `APPROVED`
-- `APPROVED WITH NOTES`
+- `PASS`
+- `PASS WITH NOTES`
 - `CHANGES REQUESTED`
 - `BLOCKED`
 - `INFRASTRUCTURE BLOCKED`

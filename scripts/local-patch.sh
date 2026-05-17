@@ -23,7 +23,7 @@ write_infrastructure_blocked_report \
   "patch-implementer" \
   "$PROVIDER" \
   "$(provider_model "$PROVIDER")" \
-  "automatic patch implementation is not active in Phase 2A" \
+  "automatic patch implementation is not active in Phase 2B" \
   "no"
 
 cat > "$REPORT_DIR/99_final-verdict.md" <<EOF
@@ -34,10 +34,10 @@ cat > "$REPORT_DIR/99_final-verdict.md" <<EOF
 - Verdict: INFRASTRUCTURE BLOCKED
 - Mergeable: no
 
-Patch automation is not active in Phase 2A. No application code was modified by this script.
+Patch automation is not active in Phase 2B. No application code was modified by this script.
 EOF
 
 echo "Provider: $PROVIDER"
 echo "Report directory: $REPORT_DIR"
-echo "Automatic implementation is not active in Phase 2A."
+echo "Automatic implementation is not active in Phase 2B."
 echo "No application code was modified by this script."

@@ -32,8 +32,8 @@ Use additional reviewers when the patch touches their area:
 
 Each reviewer and the aggregator must end with exactly one verdict:
 
-- `APPROVED`
-- `APPROVED WITH NOTES`
+- `PASS`
+- `PASS WITH NOTES`
 - `CHANGES REQUESTED`
 - `BLOCKED`
 - `INFRASTRUCTURE BLOCKED`
@@ -49,7 +49,7 @@ A patch is mergeable only when:
 - The implementer did not approve their own patch.
 - Final human review approves the merge.
 
-If lint or build cannot run, or if they fail, the result must be documented and the patch cannot receive a clean approval.
+If lint or build cannot run, or if they fail, the result must be documented and the patch cannot receive `PASS`.
 
 ## Infrastructure Blocked
 
@@ -60,6 +60,7 @@ If lint or build cannot run, or if they fail, the result must be documented and 
 - The diff is unavailable.
 - Lint/build output is unavailable.
 - Required reviewer coverage is missing.
+- A reviewer report is missing required fields, uses an invalid verdict, or omits `Real execution: yes`.
 
 This verdict is not a code-quality judgment. It means the patch is not mergeable through the multi-agent workflow yet.
 
@@ -89,13 +90,13 @@ If `MULTIAGENT_PROVIDER` is unset, the workflow uses `noop`.
 Supported provider names:
 
 - `noop`: default safe provider. It does not call an LLM and always writes `Real execution: no` with `INFRASTRUCTURE BLOCKED`.
-- `codex`: nominal hook for future Codex CLI execution. The script checks for the `codex` command, but Phase 2A does not assume a stable non-interactive invocation syntax. Until an approved command is wired, it remains `INFRASTRUCTURE BLOCKED`.
+- `codex`: Codex CLI reviewer provider. Phase 2B runs reviewers through `codex exec` when the CLI is installed and configured.
 - `gemini`: nominal hook for future Gemini CLI execution. The script checks for the `gemini` command, but Phase 2A does not assume a stable non-interactive invocation syntax. Until an approved command is wired, it remains `INFRASTRUCTURE BLOCKED`.
-- `ollama`: optional local model hook. It uses `MULTIAGENT_OLLAMA_MODEL` or defaults to `qwen2.5-coder:7b`, checks for the `ollama` command, and sends the agent prompt plus run context through `ollama run`.
+- `ollama`: experimental optional local model hook. It uses `MULTIAGENT_OLLAMA_MODEL` or defaults to `qwen2.5-coder:7b`, checks for the `ollama` command, and sends the agent prompt plus run context through `ollama run`. It is not the recommended primary provider on 8 GB Intel Macs.
 
 Phase 2A keeps `local-review` conservative:
 
-- It writes `00_context.md`, git status, git diff, git diff stat, and validation output.
+- It writes `00_context.md`, git status, full `git diff HEAD`, full `git diff --stat HEAD`, and validation output.
 - It runs the minimum required reviewers: Code Review and QA / Regression.
 - It saves separate reports as `10_review-code.md` and `11_review-qa-regression.md`.
 - It writes `99_final-verdict.md` using deterministic shell aggregation.
@@ -114,10 +115,14 @@ Every agent report must include:
 - Real execution: yes/no
 - Input files:
 - Verdict:
-- Summary:
-- Findings:
-- Required changes:
-- Evidence:
+
+## Summary
+
+## Findings
+
+## Required changes
+
+## Evidence
 ```
 
 The deterministic aggregator treats a report as real only when it exists, is non-empty, contains a valid `Verdict:`, and says `Real execution: yes`. `Real execution: no` always blocks approval.
@@ -131,9 +136,67 @@ Expect `INFRASTRUCTURE BLOCKED` when:
 - A provider returns output that does not match the report format.
 - Required reports, diff/status files, or validation output are missing.
 
-## Phase 2B: Real Provider Integration
+## Phase 2B: Codex Real Reviewer Execution
 
-A future phase may connect a real executor/reviewer provider such as `codex exec`, a local model CLI, Gemini CLI, or Ollama. That integration must write separate reports per agent and preserve the same verdict rules.
+Phase 2B makes Codex the first real reviewer provider:
+
+```bash
+MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh
+```
+
+The script:
+
+- Captures context, git status, full `git diff HEAD`, full `git diff --stat HEAD`, and validation output.
+- Builds a dedicated prompt for each minimum reviewer.
+- Calls `codex exec` non-interactively in read-only sandbox mode for `review-code` and `review-qa-regression`.
+- Saves separate stdout/stderr diagnostics per reviewer.
+- Uses Codex's final-message output file as the agent report, avoiding CLI transcript noise in report validation.
+- Validates each report before aggregation.
+- Keeps aggregation deterministic in shell.
+
+Supported Phase 2B variables:
+
+- `MULTIAGENT_PROVIDER=codex`
+- `MULTIAGENT_AGENT_TIMEOUT_SECONDS=180`
+- `MULTIAGENT_MAX_DIFF_CHARS=60000`
+- `MULTIAGENT_CODEX_ARGS` for explicit extra `codex exec` arguments supported by the local CLI.
+- `MULTIAGENT_CODEX_MODEL` for report metadata; pass a model flag via `MULTIAGENT_CODEX_ARGS` only when the local CLI supports it.
+
+The script uses `timeout` or `gtimeout` when available. If neither command is available, it uses a portable bash timeout fallback that starts the provider process in the background, monitors it, terminates it after `MULTIAGENT_AGENT_TIMEOUT_SECONDS`, and returns exit code `124` on timeout.
+
+Codex reports are accepted only when they contain:
+
+- `# Agent Report`
+- `- Agent: <agent-name>`
+- `- Provider: codex`
+- `- Model: <model-or-codex-config-default>`
+- `- Real execution: yes`
+- `- Input files: ...`
+- `- Verdict:` with `PASS`, `PASS WITH NOTES`, `CHANGES REQUESTED`, `BLOCKED`, or `INFRASTRUCTURE BLOCKED`
+- `## Summary`
+- `## Findings`
+- `## Required changes`
+- `## Evidence`
+
+If Codex is missing, not configured, fails, returns empty output, times out, returns `Real execution: no`, or returns an invalid report, that reviewer report is replaced with `INFRASTRUCTURE BLOCKED`. The fallback report must explain the exact validation failure and point to raw files in the same run directory.
+
+For Codex runs, raw diagnostics live under `.agent/reports/<run-id>/`:
+
+- `<agent>-codex-stdout.md`: Codex final-message output used as the raw reviewer report.
+- `<agent>-codex-stderr.md`: raw stderr from `codex exec`.
+- `<agent>-codex-transcript.txt`: CLI stdout transcript.
+- `<agent>-codex-diagnostics.md`: command metadata without secrets.
+- `<agent>-codex-exit-code.txt`: process exit code.
+
+For newly added files, prefer staging intended additions before review so `git diff HEAD` includes them as normal patch content. Remaining untracked text files are captured separately in `05_untracked_files.md`.
+
+`noop` remains the default safe provider and can never approve. Gemini remains a nominal hook. Ollama remains experimental and optional; it is not the primary provider for this hardware profile.
+
+Patch implementation automation is still disabled in Phase 2B. OpenClaw is excluded from this phase.
+
+## Phase 2C: Additional Provider Integration
+
+A future phase may connect additional providers, specialized reviewer selection, or executor automation. That integration must write separate reports per agent and preserve the same verdict rules.
 
 ## Phase 3: Optional OpenClaw Layer
 

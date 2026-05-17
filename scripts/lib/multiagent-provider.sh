@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ALLOWED_VERDICTS_REGEX='^(APPROVED|APPROVED WITH NOTES|CHANGES REQUESTED|BLOCKED|INFRASTRUCTURE BLOCKED)$'
+ALLOWED_VERDICTS_REGEX='^(PASS|PASS WITH NOTES|CHANGES REQUESTED|BLOCKED|INFRASTRUCTURE BLOCKED)$'
+DEFAULT_MAX_DIFF_CHARS=60000
+DEFAULT_AGENT_TIMEOUT_SECONDS=180
 
 require_git_root() {
   local root
@@ -35,6 +37,7 @@ write_context_files() {
   local run_dir="$1"
   local mode="${2:-review}"
   local request_file="${3:-}"
+  local untracked_files
 
   {
     echo "# Multi-Agent Run Context"
@@ -52,9 +55,62 @@ write_context_files() {
     fi
   } > "$run_dir/00_context.md"
 
-  git status --short > "$run_dir/01_git_status.txt"
-  git diff > "$run_dir/02_git_diff.patch"
-  git diff --stat > "$run_dir/03_git_diff_stat.txt"
+  git status --short --untracked-files=all | grep -v '^?? \.agent/reports/' > "$run_dir/01_git_status.txt" || true
+  git diff HEAD > "$run_dir/02_git_diff.patch"
+  git diff --stat HEAD > "$run_dir/03_git_diff_stat.txt"
+
+  untracked_files="$(git ls-files --others --exclude-standard | grep -v '^.agent/reports/' || true)"
+  if [[ -n "$untracked_files" ]]; then
+    {
+      echo "# Untracked Files Context"
+      echo
+      echo "Generated report directories under .agent/reports/ are intentionally excluded."
+      echo
+      while IFS= read -r file; do
+        [[ -n "$file" ]] || continue
+        if [[ "$file" == .env || "$file" == .env.* ]]; then
+          echo "## $file"
+          echo
+          echo "[SKIPPED: environment file contents are never captured.]"
+          echo
+          continue
+        fi
+        if [[ ! -f "$file" ]]; then
+          continue
+        fi
+        echo "## $file"
+        echo
+        if LC_ALL=C grep -Iq . "$file"; then
+          echo '```'
+          truncate_file_for_prompt "$file" 20000
+          echo '```'
+        else
+          echo "[SKIPPED: binary or non-text file.]"
+        fi
+        echo
+      done <<< "$untracked_files"
+    } > "$run_dir/05_untracked_files.md"
+  fi
+}
+
+truncate_file_for_prompt() {
+  local input_file="$1"
+  local max_chars="${2:-$DEFAULT_MAX_DIFF_CHARS}"
+
+  if [[ ! -f "$input_file" ]]; then
+    return 0
+  fi
+
+  local char_count
+  char_count="$(wc -c < "$input_file" | tr -d ' ')"
+  if [[ "$char_count" -le "$max_chars" ]]; then
+    cat "$input_file"
+  else
+    head -c "$max_chars" "$input_file"
+    echo
+    echo
+    echo "[TRUNCATED: original file had $char_count bytes; prompt included first $max_chars bytes.]"
+  fi
 }
 
 run_validation_commands() {
@@ -65,7 +121,7 @@ run_validation_commands() {
     echo "# Validation"
     echo
     echo "## git diff --check"
-    if git diff --check; then
+    if git diff --check && git diff --cached --check; then
       echo "Result: pass"
     else
       echo "Result: fail"
@@ -96,10 +152,13 @@ provider_model() {
   local provider="$1"
 
   case "$provider" in
+    codex)
+      printf '%s\n' "${MULTIAGENT_CODEX_MODEL:-codex-config-default}"
+      ;;
     ollama)
       printf '%s\n' "${MULTIAGENT_OLLAMA_MODEL:-qwen2.5-coder:7b}"
       ;;
-    codex | gemini | noop)
+    gemini | noop)
       printf '%s\n' "n/a"
       ;;
     *)
@@ -123,15 +182,24 @@ write_infrastructure_blocked_report() {
 - Provider: $provider
 - Model: $model
 - Real execution: $real_execution
-- Input files: 00_context.md, 01_git_status.txt, 02_git_diff.patch, 03_git_diff_stat.txt, 04_validation.md
+- Input files: 00_context.md, 01_git_status.txt, 02_git_diff.patch, 03_git_diff_stat.txt, 04_validation.md, 05_untracked_files.md if present
 - Verdict: INFRASTRUCTURE BLOCKED
-- Summary: The workflow could not produce a valid independent reviewer report.
-- Findings:
-  - $reason
-- Required changes:
-  - Configure a real provider and rerun the workflow.
-- Evidence:
-  - $reason
+
+## Summary
+
+The workflow could not produce a valid independent reviewer report.
+
+## Findings
+
+- $reason
+
+## Required changes
+
+- Configure a real provider and rerun the workflow.
+
+## Evidence
+
+- $reason
 EOF
 }
 
@@ -139,16 +207,28 @@ build_agent_prompt() {
   local run_dir="$1"
   local agent="$2"
   local prompt_file="$3"
+  local provider="${4:-${MULTIAGENT_PROVIDER:-noop}}"
+  local model="${5:-$(provider_model "$provider")}"
+  local max_diff_chars="${MULTIAGENT_MAX_DIFF_CHARS:-$DEFAULT_MAX_DIFF_CHARS}"
 
   {
     echo "# SITE LOVE Agent Execution"
     echo
-    echo "You must produce a report in the required Agent Report format."
-    echo "The report must include exactly one valid Verdict line using: APPROVED, APPROVED WITH NOTES, CHANGES REQUESTED, BLOCKED, or INFRASTRUCTURE BLOCKED."
-    echo "Use 'Real execution: yes' only if you are actually reviewing the supplied inputs as this agent."
+    echo "You are running as a real independent reviewer for SITE LOVE."
+    echo "Review only the supplied context. Do not edit files. Do not approve unless the supplied diff, status, and validation support approval."
+    echo "Return only the markdown report. Do not wrap it in code fences. Do not include analysis before or after the report."
+    echo "Your first line must be exactly: # Agent Report"
+    echo "The report must include exactly one valid Verdict line using: PASS, PASS WITH NOTES, CHANGES REQUESTED, BLOCKED, or INFRASTRUCTURE BLOCKED."
+    echo "Do not use APPROVED or APPROVED WITH NOTES; those are obsolete verdict labels for this workflow."
+    echo "Do not put a bare verdict on the final line. The verdict must appear only as '- Verdict: <allowed verdict>'."
+    echo "Use 'Real execution: yes' because you are actually reviewing the supplied inputs as this agent."
+    echo "If required inputs are missing, unclear, truncated in a way that prevents review, or validation is missing/failing, use INFRASTRUCTURE BLOCKED or CHANGES REQUESTED as appropriate."
     echo
     echo "## Agent Prompt"
     cat "$prompt_file"
+    echo
+    echo "The required report format at the end of this prompt supersedes any older output format described in the agent prompt above."
+    echo "You must include the exact markdown headings: ## Summary, ## Findings, ## Required changes, and ## Evidence."
     echo
     echo "## Run Context"
     cat "$run_dir/00_context.md"
@@ -160,27 +240,38 @@ build_agent_prompt() {
     cat "$run_dir/03_git_diff_stat.txt"
     echo
     echo "## Git Diff"
-    cat "$run_dir/02_git_diff.patch"
+    truncate_file_for_prompt "$run_dir/02_git_diff.patch" "$max_diff_chars"
     if [[ -f "$run_dir/04_validation.md" ]]; then
       echo
       echo "## Validation Output"
       cat "$run_dir/04_validation.md"
     fi
+    if [[ -f "$run_dir/05_untracked_files.md" ]]; then
+      echo
+      echo "## Untracked Files Context"
+      cat "$run_dir/05_untracked_files.md"
+    fi
     echo
     echo "## Required Report Format"
+    echo
+    echo "Copy this template exactly. Replace only the text after '- Verdict:' and the body text under each required section."
     cat <<EOF
 # Agent Report
 
 - Agent: $agent
-- Provider:
-- Model:
+- Provider: $provider
+- Model: $model
 - Real execution: yes
-- Input files:
-- Verdict:
-- Summary:
-- Findings:
-- Required changes:
-- Evidence:
+- Input files: 00_context.md, 01_git_status.txt, 02_git_diff.patch, 03_git_diff_stat.txt, 04_validation.md, 05_untracked_files.md if present
+- Verdict: PASS | PASS WITH NOTES | CHANGES REQUESTED | BLOCKED | INFRASTRUCTURE BLOCKED
+
+## Summary
+
+## Findings
+
+## Required changes
+
+## Evidence
 EOF
   }
 }
@@ -198,12 +289,137 @@ is_real_execution() {
 validate_agent_report() {
   local report_file="$1"
   local verdict
+  local verdict_count
 
   [[ -s "$report_file" ]] || return 1
-  grep -q '^- Verdict:' "$report_file" || return 1
+  head -n 1 "$report_file" | grep -qx '# Agent Report' || return 1
+  grep -q '^- Agent:[[:space:]]*[^[:space:]]' "$report_file" || return 1
+  grep -q '^- Provider:[[:space:]]*[^[:space:]]' "$report_file" || return 1
+  grep -q '^- Model:[[:space:]]*[^[:space:]]' "$report_file" || return 1
+  grep -Eq '^- Real execution:[[:space:]]*(yes|no)[[:space:]]*$' "$report_file" || return 1
+  grep -q '^- Input files:[[:space:]]*[^[:space:]]' "$report_file" || return 1
+  grep -q '^- Verdict:[[:space:]]*[^[:space:]]' "$report_file" || return 1
+  verdict_count="$(grep -Ec '^- Verdict:' "$report_file" || true)"
+  [[ "$verdict_count" -eq 1 ]] || return 1
+  grep -q '^## Summary[[:space:]]*$' "$report_file" || return 1
+  grep -q '^## Findings[[:space:]]*$' "$report_file" || return 1
+  grep -q '^## Required changes[[:space:]]*$' "$report_file" || return 1
+  grep -q '^## Evidence[[:space:]]*$' "$report_file" || return 1
 
   verdict="$(extract_verdict "$report_file")"
   [[ "$verdict" =~ $ALLOWED_VERDICTS_REGEX ]] || return 1
+}
+
+agent_report_validation_errors() {
+  local report_file="$1"
+  local verdict verdict_count errors=""
+
+  if [[ ! -s "$report_file" ]]; then
+    printf '%s\n' "report file is missing or empty"
+    return 0
+  fi
+
+  head -n 1 "$report_file" | grep -qx '# Agent Report' || errors="${errors}; first line is not exactly '# Agent Report'"
+  grep -q '^- Agent:[[:space:]]*[^[:space:]]' "$report_file" || errors="${errors}; missing non-empty '- Agent:' field"
+  grep -q '^- Provider:[[:space:]]*[^[:space:]]' "$report_file" || errors="${errors}; missing non-empty '- Provider:' field"
+  grep -q '^- Model:[[:space:]]*[^[:space:]]' "$report_file" || errors="${errors}; missing non-empty '- Model:' field"
+  grep -Eq '^- Real execution:[[:space:]]*(yes|no)[[:space:]]*$' "$report_file" || errors="${errors}; missing '- Real execution: yes|no' field"
+  grep -q '^- Input files:[[:space:]]*[^[:space:]]' "$report_file" || errors="${errors}; missing non-empty '- Input files:' field"
+  grep -q '^- Verdict:[[:space:]]*[^[:space:]]' "$report_file" || errors="${errors}; missing non-empty '- Verdict:' field"
+  verdict_count="$(grep -Ec '^- Verdict:' "$report_file" || true)"
+  [[ "$verdict_count" -eq 1 ]] || errors="${errors}; expected exactly one '- Verdict:' field, found $verdict_count"
+  grep -q '^## Summary[[:space:]]*$' "$report_file" || errors="${errors}; missing '## Summary' section"
+  grep -q '^## Findings[[:space:]]*$' "$report_file" || errors="${errors}; missing '## Findings' section"
+  grep -q '^## Required changes[[:space:]]*$' "$report_file" || errors="${errors}; missing '## Required changes' section"
+  grep -q '^## Evidence[[:space:]]*$' "$report_file" || errors="${errors}; missing '## Evidence' section"
+
+  verdict="$(extract_verdict "$report_file")"
+  if [[ -n "$verdict" && ! "$verdict" =~ $ALLOWED_VERDICTS_REGEX ]]; then
+    errors="${errors}; invalid verdict '$verdict' (allowed: PASS, PASS WITH NOTES, CHANGES REQUESTED, BLOCKED, INFRASTRUCTURE BLOCKED)"
+  fi
+
+  if [[ -z "$errors" ]]; then
+    printf '%s\n' "unknown validation failure"
+  else
+    printf '%s\n' "${errors#; }"
+  fi
+}
+
+validate_real_agent_report() {
+  local report_file="$1"
+
+  validate_agent_report "$report_file" || return 1
+  is_real_execution "$report_file" || return 1
+}
+
+run_command_with_timeout() {
+  local timeout_seconds="$1"
+  local stdout_file="$2"
+  local stderr_file="$3"
+  local diag_file="$4"
+  local stdin_file="$5"
+  shift 5
+  local timeout_bin=""
+  local command_pid exit_code elapsed
+
+  if command -v timeout >/dev/null 2>&1; then
+    timeout_bin="timeout"
+  elif command -v gtimeout >/dev/null 2>&1; then
+    timeout_bin="gtimeout"
+  fi
+
+  if [[ -n "$timeout_bin" ]]; then
+    if "$timeout_bin" "$timeout_seconds" "$@" < "$stdin_file" > "$stdout_file" 2> "$stderr_file"; then
+      return 0
+    fi
+    return $?
+  fi
+
+  {
+    echo
+    echo "External timeout command not available; using portable bash timeout."
+  } >> "$diag_file"
+
+  "$@" < "$stdin_file" > "$stdout_file" 2> "$stderr_file" &
+  command_pid=$!
+  elapsed=0
+
+  while kill -0 "$command_pid" 2>/dev/null; do
+    if [[ "$elapsed" -ge "$timeout_seconds" ]]; then
+      echo "Command timed out after ${timeout_seconds}s; terminating process ${command_pid}." >> "$diag_file"
+      kill "$command_pid" 2>/dev/null || true
+
+      local grace_elapsed=0
+      while kill -0 "$command_pid" 2>/dev/null && [[ "$grace_elapsed" -lt 2 ]]; do
+        sleep 1
+        grace_elapsed=$((grace_elapsed + 1))
+      done
+
+      if kill -0 "$command_pid" 2>/dev/null; then
+        kill -9 "$command_pid" 2>/dev/null || true
+        sleep 1
+      fi
+
+      if kill -0 "$command_pid" 2>/dev/null; then
+        echo "Process ${command_pid} did not exit after SIGKILL; returning timeout without blocking." >> "$diag_file"
+      else
+        set +e
+        wait "$command_pid" 2>/dev/null
+        set -e
+      fi
+      return 124
+    fi
+
+    sleep 1
+    elapsed=$((elapsed + 1))
+  done
+
+  set +e
+  wait "$command_pid"
+  exit_code=$?
+  set -e
+
+  return "$exit_code"
 }
 
 run_noop_agent() {
@@ -218,15 +434,77 @@ run_noop_agent() {
 run_codex_agent() {
   local run_dir="$1"
   local agent="$2"
-  local _prompt_file="$3"
+  local prompt_file="$3"
   local output_file="$4"
+  local model
+  local prompt_tmp raw_tmp transcript_tmp stderr_tmp diag_tmp exit_tmp validation_reason
+  local timeout_seconds="${MULTIAGENT_AGENT_TIMEOUT_SECONDS:-$DEFAULT_AGENT_TIMEOUT_SECONDS}"
+  local exit_code=0
+  local -a codex_cmd
 
   if ! command -v codex >/dev/null 2>&1; then
     write_infrastructure_blocked_report "$output_file" "$agent" "codex" "n/a" "codex CLI not found" "no"
     return 0
   fi
 
-  write_infrastructure_blocked_report "$output_file" "$agent" "codex" "n/a" "codex CLI found, but Phase 2A does not assume a stable non-interactive invocation syntax; TODO: wire an approved codex exec command" "no"
+  model="$(provider_model codex)"
+  prompt_tmp="$run_dir/${agent}-codex-prompt.md"
+  raw_tmp="$run_dir/${agent}-codex-stdout.md"
+  transcript_tmp="$run_dir/${agent}-codex-transcript.txt"
+  stderr_tmp="$run_dir/${agent}-codex-stderr.md"
+  diag_tmp="$run_dir/${agent}-codex-diagnostics.md"
+  exit_tmp="$run_dir/${agent}-codex-exit-code.txt"
+
+  build_agent_prompt "$run_dir" "$agent" "$prompt_file" "codex" "$model" > "$prompt_tmp"
+  : > "$raw_tmp"
+
+  codex_cmd=(codex exec --color never --sandbox read-only --output-last-message "$raw_tmp")
+  if [[ -n "${MULTIAGENT_CODEX_ARGS:-}" ]]; then
+    # shellcheck disable=SC2206
+    codex_cmd+=(${MULTIAGENT_CODEX_ARGS})
+  fi
+  codex_cmd+=("-")
+
+  {
+    echo "# Codex Diagnostics"
+    echo
+    echo "- Agent: $agent"
+    echo "- Provider: codex"
+    echo "- Model: $model"
+    echo "- Timeout seconds: $timeout_seconds"
+    echo "- Prompt file: $(basename "$prompt_tmp")"
+    echo "- Output last message file: $(basename "$raw_tmp")"
+    echo "- Transcript file: $(basename "$transcript_tmp")"
+    echo "- Stderr file: $(basename "$stderr_tmp")"
+    echo "- Environment: full environment intentionally not recorded."
+  } > "$diag_tmp"
+
+  if run_command_with_timeout "$timeout_seconds" "$transcript_tmp" "$stderr_tmp" "$diag_tmp" "$prompt_tmp" "${codex_cmd[@]}"; then
+    exit_code=0
+  else
+    exit_code=$?
+  fi
+  printf '%s\n' "$exit_code" > "$exit_tmp"
+
+  if [[ "$exit_code" -ne 0 ]]; then
+    write_infrastructure_blocked_report "$output_file" "$agent" "codex" "$model" "codex exec failed with exit code $exit_code; raw output saved to $(basename "$raw_tmp"); raw stderr saved to $(basename "$stderr_tmp"); see $(basename "$diag_tmp")" "no"
+    return 0
+  fi
+
+  if [[ ! -s "$raw_tmp" ]]; then
+    write_infrastructure_blocked_report "$output_file" "$agent" "codex" "$model" "codex exec returned empty output" "no"
+    return 0
+  fi
+
+  cp "$raw_tmp" "$output_file"
+
+  if ! validate_real_agent_report "$output_file"; then
+    validation_reason="$(agent_report_validation_errors "$output_file")"
+    if validate_agent_report "$output_file" && ! is_real_execution "$output_file"; then
+      validation_reason="report did not contain 'Real execution: yes'"
+    fi
+    write_infrastructure_blocked_report "$output_file" "$agent" "codex" "$model" "codex output was invalid: ${validation_reason}; raw output saved to $(basename "$raw_tmp"); raw stderr saved to $(basename "$stderr_tmp")" "no"
+  fi
 }
 
 run_gemini_agent() {
@@ -274,7 +552,7 @@ run_ollama_agent() {
 
   cp "$raw_tmp" "$output_file"
 
-  if ! validate_agent_report "$output_file" || ! is_real_execution "$output_file"; then
+  if ! validate_real_agent_report "$output_file"; then
     write_infrastructure_blocked_report "$output_file" "$agent" "ollama" "$model" "ollama output did not match the required report format or did not mark Real execution: yes; raw output saved to ${agent}-raw-output.md" "no"
   fi
 }
@@ -314,7 +592,7 @@ aggregate_reports_basic() {
   local final_file="$2"
   shift 2
   local reports=("$@")
-  local final_verdict="APPROVED"
+  local final_verdict="PASS"
   local report verdict real
   local missing=()
   local rows=()
@@ -357,15 +635,19 @@ aggregate_reports_basic() {
           final_verdict="CHANGES REQUESTED"
         fi
         ;;
-      APPROVED\ WITH\ NOTES)
-        if [[ "$final_verdict" == "APPROVED" ]]; then
-          final_verdict="APPROVED WITH NOTES"
+      PASS\ WITH\ NOTES)
+        if [[ "$final_verdict" == "PASS" ]]; then
+          final_verdict="PASS WITH NOTES"
         fi
         ;;
     esac
   done
 
-  if [[ ! -f "$run_dir/02_git_diff.patch" || ! -f "$run_dir/01_git_status.txt" || ! -f "$run_dir/04_validation.md" ]]; then
+  if [[ ! -f "$run_dir/00_context.md" || ! -f "$run_dir/01_git_status.txt" || ! -f "$run_dir/02_git_diff.patch" || ! -f "$run_dir/03_git_diff_stat.txt" || ! -f "$run_dir/04_validation.md" ]]; then
+    final_verdict="INFRASTRUCTURE BLOCKED"
+  fi
+
+  if [[ -f "$run_dir/04_validation.md" ]] && grep -q 'Result: fail' "$run_dir/04_validation.md"; then
     final_verdict="INFRASTRUCTURE BLOCKED"
   fi
 
@@ -375,7 +657,7 @@ aggregate_reports_basic() {
     echo "- Aggregator: deterministic shell"
     echo "- Provider: ${MULTIAGENT_PROVIDER:-noop}"
     echo "- Verdict: $final_verdict"
-    echo "- Mergeable: $(if [[ "$final_verdict" == "APPROVED" || "$final_verdict" == "APPROVED WITH NOTES" ]]; then echo "requires final human approval"; else echo "no"; fi)"
+    echo "- Mergeable: $(if [[ "$final_verdict" == "PASS" || "$final_verdict" == "PASS WITH NOTES" ]]; then echo "requires final human approval"; else echo "no"; fi)"
     echo
     echo "## Required Report Status"
     echo

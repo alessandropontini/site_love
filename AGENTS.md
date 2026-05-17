@@ -32,6 +32,7 @@ Ruflo has been removed from the SITE LOVE workflow. Reviews do not use Ruflo, Cl
 - `docs/architecture.md` — architecture overview for maintainers and agents.
 - `docs/ai-workflow.md` — Codex usage and manual review workflow guidance.
 - `docs/multiagent-workflow.md` — local multi-agent patch policy, provider hooks, and report rules.
+- `docs/codex-multiagent-setup.md` — operational Codex reviewer setup notes.
 - `.agent/prompts/` — separate implementer, reviewer, and aggregator prompts.
 - `.agent/reports/` — per-run implementer/reviewer reports and captured context.
 - `scripts/local-multiagent.sh`, `scripts/local-patch.sh`, `scripts/local-review.sh` — safe local workflow entrypoints.
@@ -140,8 +141,11 @@ Documentation-only changes describing these files are allowed when they do not m
 - The implementer cannot approve their own patch.
 - Reviewer reports must be real, separate, and stored under `.agent/reports/<run-id>/`.
 - A reviewer report is real only when it contains `Real execution: yes` and a valid verdict.
+- Valid reviewer verdicts are `PASS`, `PASS WITH NOTES`, `CHANGES REQUESTED`, `BLOCKED`, and `INFRASTRUCTURE BLOCKED`.
+- Codex real reviews are acceptable only when each separate report passes validation and contains `Real execution: yes`.
 - `noop` is the default provider and can never approve a patch.
 - The deterministic aggregator must treat missing, empty, invalid, or `Real execution: no` reports as `INFRASTRUCTURE BLOCKED`.
+- OpenClaw is not an active provider or orchestrator in the current workflow phase.
 - `git diff --check`, `npm run lint`, and `npm run build` are required validation inputs for approval.
 - If the diff is missing, lint/build output is missing, or required real reviewer reports are missing, the correct verdict is `INFRASTRUCTURE BLOCKED`.
 - If any reviewer returns `CHANGES REQUESTED`, `BLOCKED`, or `INFRASTRUCTURE BLOCKED`, the patch is not mergeable.

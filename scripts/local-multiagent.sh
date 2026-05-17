@@ -24,7 +24,7 @@ write_infrastructure_blocked_report \
   "patch-implementer" \
   "$PROVIDER" \
   "$(provider_model "$PROVIDER")" \
-  "automatic patch implementation remains disabled in Phase 2A; this script does not modify application code" \
+  "automatic patch implementation remains disabled in Phase 2B; this script does not modify application code" \
   "no"
 
 run_agent "$REPORT_DIR" "review-code" ".agent/prompts/review-code.md" "$REPORT_DIR/10_review-code.md"
@@ -38,6 +38,6 @@ aggregate_reports_basic \
 
 echo "Provider: $PROVIDER"
 echo "Report directory: $REPORT_DIR"
-echo "Automatic implementation is disabled in Phase 2A."
+echo "Automatic implementation is disabled in Phase 2B."
 echo "Final verdict:"
 sed -n 's/^- Verdict: //p' "$REPORT_DIR/99_final-verdict.md" | tail -n 1

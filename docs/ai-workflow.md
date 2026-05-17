@@ -4,7 +4,7 @@ Ruflo has been removed from the SITE LOVE workflow. Reviews no longer use Ruflo,
 
 The local Ruflo/WASM runtime was retired because it created agent records but did not produce autonomous review output without an external model provider/API key. Do not configure Anthropic/Claude managed agents, provider keys, or replacement orchestration tooling for this project unless the project owner explicitly approves a new workflow.
 
-The current multi-agent work is Phase 2A. The repository contains prompts, report locations, safe scripts, a provider abstraction, and deterministic aggregation. It can only produce real reviewer reports when an approved provider is configured and returns valid separate reports. Otherwise the workflow verdict must be `INFRASTRUCTURE BLOCKED`, not `APPROVED`.
+The current multi-agent work is Phase 2B. The repository contains prompts, report locations, safe scripts, a provider abstraction, deterministic aggregation, and a Codex reviewer provider through `codex exec`. It can only produce real reviewer reports when Codex CLI is installed, configured, and returns valid separate reports. Otherwise the workflow verdict must be `INFRASTRUCTURE BLOCKED`, not `PASS`.
 
 ## What Codex is for
 
@@ -29,16 +29,30 @@ Phase 1 added the infrastructure for future local/freemium multi-agent review:
 Phase 2A adds provider hooks:
 
 - `MULTIAGENT_PROVIDER=noop` is the default and cannot approve a patch.
-- `MULTIAGENT_PROVIDER=codex` checks for Codex CLI but remains blocked until an approved non-interactive command is wired.
+- `MULTIAGENT_PROVIDER=codex` uses Codex CLI as the first real reviewer provider through `codex exec`.
 - `MULTIAGENT_PROVIDER=gemini` checks for Gemini CLI but remains blocked until an approved non-interactive command is wired.
 - `MULTIAGENT_PROVIDER=ollama` can call `ollama run "$MULTIAGENT_OLLAMA_MODEL"` and validate the returned report format.
 - `scripts/local-review.sh` writes separate minimum reviewer reports and a deterministic final verdict.
 
-This is not a fully autonomous review system. `local-review` can generate real reports only when a provider is configured, available, and returns valid reports with `Real execution: yes`. Any missing, placeholder, empty, invalid, or non-real report remains `INFRASTRUCTURE BLOCKED`.
+Phase 2B enables Codex review execution:
 
-OpenClaw is not part of Phase 2A.
+```bash
+MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh
+```
 
-See `docs/multiagent-workflow.md` for the full policy.
+The deterministic safe-provider check is:
+
+```bash
+MULTIAGENT_PROVIDER=noop ./scripts/local-review.sh
+```
+
+`local-review` can generate real reports only when Codex is configured and returns valid reports with `Real execution: yes`. Valid reviewer verdicts are `PASS`, `PASS WITH NOTES`, `CHANGES REQUESTED`, `BLOCKED`, and `INFRASTRUCTURE BLOCKED`. Any missing, placeholder, empty, invalid, or non-real report remains `INFRASTRUCTURE BLOCKED`.
+
+When Codex output is invalid, the wrapper keeps diagnostics in `.agent/reports/<run-id>/`, including `<agent>-codex-stdout.md`, `<agent>-codex-stderr.md`, `<agent>-codex-transcript.txt`, `<agent>-codex-diagnostics.md`, and `<agent>-codex-exit-code.txt`.
+
+Gemini remains a nominal hook. Ollama remains experimental and optional, especially on 8 GB Intel Macs. OpenClaw is not part of Phase 2B. Automatic patch implementation is still disabled.
+
+See `docs/multiagent-workflow.md` and `docs/codex-multiagent-setup.md` for the full policy and local setup.
 
 ## Runtime boundary
 
@@ -132,7 +146,7 @@ The review should verify:
 - Accessibility and mobile readability were preserved or improved.
 - Documentation reflects any workflow or architecture changes.
 
-Automatic approval is prohibited when separate reviewer reports are missing, simulated, or incomplete. In that case the correct verdict is `INFRASTRUCTURE BLOCKED`.
+Automatic approval is prohibited when separate reviewer reports are missing, simulated, incomplete, invalid, or marked `Real execution: no`. In that case the correct verdict is `INFRASTRUCTURE BLOCKED`.
 
 For scrollytelling changes, also verify:
 

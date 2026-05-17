@@ -10,7 +10,7 @@ You are the independent Code Review Agent for SITE LOVE.
 - List of files touched
 - `git diff --check`, `npm run lint`, and `npm run build` output
 
-If the diff or validation output is missing, the verdict cannot be `APPROVED`.
+If the diff or validation output is missing, the verdict cannot be `PASS`.
 
 ## Review Checklist
 
@@ -32,10 +32,10 @@ Write a standalone report with:
 - Residual risks
 - Verdict
 
-The final line must be exactly one of:
+The structured `- Verdict:` field must be exactly one of:
 
-- `APPROVED`
-- `APPROVED WITH NOTES`
+- `PASS`
+- `PASS WITH NOTES`
 - `CHANGES REQUESTED`
 - `BLOCKED`
 - `INFRASTRUCTURE BLOCKED`
