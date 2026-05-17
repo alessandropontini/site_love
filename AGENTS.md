@@ -4,7 +4,9 @@
 
 This repository is `alessandropontini/site_love`, a private Next.js microsite named `dreamy-couple-gallery`. The shipped experience is **Pixel Quest: Alessandro & Bridget**: a retro/pixel-style love-story quest with a title screen, map progression, four mini-games, shared heart collection, and an epilogue.
 
-Ruflo has been removed from the SITE LOVE workflow. Reviews do not use Ruflo, Claude Flow, MCP, WASM agents, or automatic multi-agent orchestration. The local Ruflo/WASM runtime was retired because it did not produce autonomous review output without an external model provider/API key. Codex remains available as an operational coding assistant for implementation, file inspection, lint/build execution, and concise summaries.
+Ruflo has been removed from the SITE LOVE workflow. Reviews do not use Ruflo, Claude Flow, MCP, WASM agents, or unvalidated automatic multi-agent orchestration. The local Ruflo/WASM runtime was retired because it did not produce autonomous review output without an external model provider/API key. Codex remains the active real executor/provider for implementation support, file inspection, lint/build execution, and independent reviewer reports.
+
+OpenClaw is being evaluated as an optional experimental orchestrator above the existing Codex-backed workflow. It may coordinate reviewer roles and launch documented local workflow commands, but it must not replace Codex as the real provider, bypass `scripts/local-review.sh`, invent reports, auto-merge, push, or become required for runtime, lint, build, start, or deployment. See `docs/openclaw-orchestration.md`.
 
 ## Tech stack
 
@@ -33,9 +35,12 @@ Ruflo has been removed from the SITE LOVE workflow. Reviews do not use Ruflo, Cl
 - `docs/ai-workflow.md` — Codex usage and manual review workflow guidance.
 - `docs/multiagent-workflow.md` — local multi-agent patch policy, provider hooks, and report rules.
 - `docs/codex-multiagent-setup.md` — operational Codex reviewer setup notes.
+- `docs/openclaw-orchestration.md` — optional OpenClaw orchestration spike and fallback rules.
+- `.openclaw/` — experimental OpenClaw role and workflow templates.
 - `.agent/prompts/` — separate implementer, reviewer, and aggregator prompts.
 - `.agent/reports/` — per-run implementer/reviewer reports and captured context.
 - `scripts/local-multiagent.sh`, `scripts/local-patch.sh`, `scripts/local-review.sh` — safe local workflow entrypoints.
+- `scripts/openclaw-orchestrate.sh` — experimental safe OpenClaw wrapper and Codex fallback helper.
 - `scripts/lib/multiagent-provider.sh` — provider abstraction and deterministic report aggregation.
 - `components/story/` — scrollytelling shell, scroll scenes, and progress indicator.
 - `components/games/` — lightweight scrollytelling mini-games.
@@ -123,6 +128,8 @@ Documentation-only changes describing these files are allowed when they do not m
 - Ruflo has been removed from this project and must not be reintroduced as a required workflow tool without an explicit project decision.
 - Do not add Ruflo, Claude Flow, MCP servers, WASM agents, Anthropic/Claude managed agents, or provider API keys to this repository.
 - Do not add orchestration tools to `dependencies` or `devDependencies`.
+- OpenClaw may be used only as an optional experimental orchestrator unless a future reviewed project decision promotes it.
+- OpenClaw output is not valid review evidence unless it preserves real Codex-backed reviewer execution and the existing report contract.
 - Install Codex CLI separately when needed with `npm i -g @openai/codex`.
 - Do not require Codex or any AI tool for `npm run dev`, `npm run build`, `npm run start`, `npm run lint`, or deployment.
 - Codex may implement scoped patches, read files, run commands, and summarize results, but it does not replace final manual/human review.
@@ -145,7 +152,7 @@ Documentation-only changes describing these files are allowed when they do not m
 - Codex is the only active real review provider. A valid review must be run with `MULTIAGENT_PROVIDER=codex` and each required report must contain `Provider: codex` and `Real execution: yes`.
 - `noop` is only for smoke/regression testing workflow infrastructure and can never approve a patch or count as review.
 - The deterministic aggregator must treat missing, empty, invalid, or `Real execution: no` reports as `INFRASTRUCTURE BLOCKED`.
-- OpenClaw is not an active provider or orchestrator in the current workflow phase.
+- OpenClaw is an optional experimental orchestrator in the Phase 5 spike. It is not a provider and cannot approve patches independently of the Codex-backed workflow.
 - `git diff --check`, `npm run lint`, and `npm run build` are required validation inputs for approval.
 - If the diff is missing, lint/build output is missing, or required real reviewer reports are missing, the correct verdict is `INFRASTRUCTURE BLOCKED`.
 - If any reviewer returns `CHANGES REQUESTED`, `BLOCKED`, or `INFRASTRUCTURE BLOCKED`, the patch is not mergeable.

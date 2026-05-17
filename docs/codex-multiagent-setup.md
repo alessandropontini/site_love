@@ -8,6 +8,8 @@
 
 Do not add Codex CLI to this project's `dependencies` or `devDependencies`.
 
+OpenClaw is optional experimental orchestration only. It may coordinate Codex-backed review commands during the Phase 5 spike, but valid review evidence still comes from `scripts/local-review.sh` with `MULTIAGENT_PROVIDER=codex`, separate reports, and `Real execution: yes`. See `docs/openclaw-orchestration.md`.
+
 ## Local Review
 
 ```bash
@@ -80,6 +82,22 @@ Before running the full workflow, a quick CLI sanity check is:
 printf "Rispondi solo con OK. Non modificare file.\n" | codex exec -
 ```
 
+## Optional OpenClaw Spike
+
+OpenClaw can be checked through the safe wrapper:
+
+```bash
+./scripts/openclaw-orchestrate.sh
+```
+
+If `openclaw` is not installed, the wrapper exits with a controlled message and points back to:
+
+```bash
+MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh
+```
+
+The wrapper is experimental. It does not auto-merge, push, create real review reports by itself, or declare a patch mergeable.
+
 ## Notes
 
 - Invalid, empty, missing, or non-real reports produce `INFRASTRUCTURE BLOCKED`.
@@ -92,5 +110,5 @@ printf "Rispondi solo con OK. Non modificare file.\n" | codex exec -
 - Codex raw files are named `<agent>-codex-stdout.md`, `<agent>-codex-stderr.md`, `<agent>-codex-transcript.txt`, `<agent>-codex-diagnostics.md`, and `<agent>-codex-exit-code.txt`.
 - The aggregator remains deterministic shell logic, not an LLM.
 - Final human approval is still required before merge.
-- Patch implementation automation is not enabled in Phase 2B.
-- OpenClaw is not active in this phase.
+- Patch implementation automation is not enabled.
+- OpenClaw orchestration is optional and experimental in Phase 5; Codex remains the active real provider.

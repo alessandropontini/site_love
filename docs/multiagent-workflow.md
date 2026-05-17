@@ -6,6 +6,8 @@ SITE LOVE uses a conservative patch workflow: small scoped changes, objective va
 
 The goal is to prepare a local/freemium multi-agent workflow where implementation and review are traceable. The repository must not rely on simulated review output, and it must not reintroduce Ruflo as a required workflow tool.
 
+OpenClaw is evaluated in Phase 5 as an optional orchestration layer above the existing workflow. It can coordinate reviewer roles and documented commands, but Codex remains the active real provider and this document remains the merge policy source of truth.
+
 ## Implementer vs Reviewer
 
 The implementer applies the requested patch and writes an implementer report. The implementer cannot approve the patch.
@@ -232,13 +234,51 @@ The smoke coverage checks:
 
 When `scripts/test-multiagent-workflow.sh` is present and executable, `local-review` includes it in `04_validation.md` after `npm run build`. The smoke script sets `MULTIAGENT_SKIP_WORKFLOW_SMOKE=1` for its nested `local-review` runs so validation output records the smoke coverage without recursive smoke execution.
 
+## Phase 5: OpenClaw Orchestration Spike
+
+Phase 5 documents and safely scaffolds OpenClaw as an optional orchestrator above Codex. The scope is workflow documentation, `.openclaw/` templates, and a safe wrapper script. It does not refactor application code, change React components, add dependencies, push, merge, or make OpenClaw mandatory.
+
+OpenClaw's role is orchestration:
+
+- Coordinate the approved reviewer roles.
+- Use the same prompt mapping described in `.openclaw/agents.md`.
+- Preserve `scripts/local-review.sh` as the validated execution and aggregation path.
+- Preserve report output under `.agent/reports/<run-id>/`.
+- Fall back to Codex-backed local review when OpenClaw is unavailable or not yet wired.
+
+Codex's role remains real execution/provider:
+
+- Valid reviewer reports require `Provider: codex`.
+- Valid reviewer reports require `Real execution: yes`.
+- Missing, invalid, simulated, or non-real reports produce `INFRASTRUCTURE BLOCKED`.
+
+Spike command:
+
+```bash
+./scripts/openclaw-orchestrate.sh
+```
+
+Validated fallback command:
+
+```bash
+MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh
+```
+
+Infrastructure smoke command:
+
+```bash
+MULTIAGENT_PROVIDER=noop ./scripts/local-review.sh
+```
+
+Success criterion: OpenClaw usage is documented, the wrapper fails safely when the CLI is unavailable or not wired, and the existing Codex report contract remains unchanged.
+
+Blocking criterion: OpenClaw output is simulated, validation is skipped, `.agent/reports/<run-id>/` is not preserved, real Codex-backed reviewer execution is missing, or any required report is invalid. The correct verdict is then `BLOCKED` or `INFRASTRUCTURE BLOCKED`.
+
+Next step after the spike: verify a concrete non-interactive OpenClaw CLI invocation before wiring it to execute the fallback workflow. Until then, OpenClaw remains optional and experimental. See `docs/openclaw-orchestration.md`.
+
 ## Future Provider Integration
 
-A future phase may connect additional providers, specialized reviewer selection, or executor automation. That integration must write separate reports per agent and preserve the same verdict rules.
-
-## Optional OpenClaw Evaluation
-
-OpenClaw may be evaluated later as an optional orchestration layer. It must not become required unless explicitly approved, and it must not replace real separate reviewer output with simulated aggregation.
+A future phase may connect additional providers, specialized reviewer selection, OpenClaw orchestration, or executor automation. That integration must write separate reports per agent and preserve the same verdict rules.
 
 ## Prohibited
 
