@@ -43,6 +43,7 @@ The legacy arcade quest remains in `components/QuestGame.tsx` and `components/qu
 
 👉 For deeper breakdowns, peek at `docs/quest-guide.md`.
 👉 For the current visual direction and character references, use `docs/visual-direction.md`.
+👉 For local AI patch workflow rules, use `docs/ai-workflow.md` and `docs/multiagent-workflow.md`.
 
 ## Story Gating Checklist
 
