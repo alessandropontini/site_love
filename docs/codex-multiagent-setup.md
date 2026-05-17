@@ -10,6 +10,18 @@ Do not add Codex CLI to this project's `dependencies` or `devDependencies`.
 
 OpenClaw is optional experimental orchestration only. It may coordinate Codex-backed review commands during the Phase 5 spike, but valid review evidence still comes from `scripts/local-review.sh` with `MULTIAGENT_PROVIDER=codex`, separate reports, and `Real execution: yes`. See `docs/openclaw-orchestration.md`.
 
+CrewAI is being prepared as future orchestration infrastructure for SITE LOVE. Codex remains the tool for installation, project management, technical patches, validation, documentation, and real review. CrewAI may later coordinate implementation and review lanes, but a valid real review still requires Codex-backed reports with `Real execution: yes`. See `docs/crewai-orchestration.md`.
+
+For local CrewAI smoke checks, use the isolated repository venv when present:
+
+```bash
+source .venv-crewai/bin/activate
+python -c "import crewai; print(crewai.__version__ if hasattr(crewai, '__version__') else 'crewai import ok')"
+./scripts/crewai-orchestrate.sh smoke
+```
+
+The venv is not a runtime dependency for the Next.js app and is ignored by Git.
+
 ## Local Review
 
 ```bash
@@ -18,6 +30,18 @@ npm run build
 MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh
 RUN_DIR="$(ls -td .agent/reports/* | head -1)"
 cat "$RUN_DIR/99_final-verdict.md"
+```
+
+Recommended bridge through the CrewAI scaffold wrapper:
+
+```bash
+MULTIAGENT_PROVIDER=codex ./scripts/crewai-orchestrate.sh review
+```
+
+Direct review remains valid:
+
+```bash
+MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh
 ```
 
 Review scope selection is automatic:

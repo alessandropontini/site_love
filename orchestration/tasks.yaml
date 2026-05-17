@@ -1,0 +1,147 @@
+tasks:
+  plan_patch:
+    description: Define the intended patch scope, touched areas, risk level, validation plan, and required reviewer roles before implementation.
+    expected_output: A scoped implementation plan that does not approve work and lists validation plus reviewer requirements.
+    assigned_agent: patch_planner
+    lane: implementation
+    allowed_actions:
+      - "Read repository context."
+      - "Draft a patch plan."
+      - "Identify authorized file scope and risks."
+    forbidden_actions:
+      - "Modify files."
+      - "Approve the patch."
+      - "Commit, merge, push, or auto-merge."
+    execution_engine: "CrewAI orchestrates the task. Codex CLI and existing scripts perform real repository work when explicitly authorized. scripts/local-review.sh remains the source of truth for real review."
+
+  implement_patch:
+    description: Apply a future authorized patch within the exact file scope approved for the task.
+    expected_output: A minimal implementation diff plus implementation notes, without any approval claim.
+    assigned_agent: patch_implementer
+    lane: implementation
+    allowed_actions:
+      - "Inspect files in authorized scope."
+      - "Edit files in authorized scope only."
+      - "Record implementation notes."
+    forbidden_actions:
+      - "Edit files outside authorized scope."
+      - "Edit reviewer reports to influence approval."
+      - "Approve its own work."
+      - "Commit, merge, push, or auto-merge."
+    execution_engine: "CrewAI coordinates the lane. Codex CLI is the real executor for file changes. scripts/local-review.sh remains the source of truth for real review."
+
+  run_validation:
+    description: Run deterministic validation commands after implementation and record outcomes without changing product code.
+    expected_output: Validation result summary with command names, pass/fail status, and relevant report paths.
+    assigned_agent: validation_runner
+    lane: implementation
+    allowed_actions:
+      - "Run git diff --check."
+      - "Run npm run lint."
+      - "Run npm run build."
+      - "Run approved smoke scripts such as scripts/test-multiagent-workflow.sh."
+    forbidden_actions:
+      - "Modify app, components, lib, public assets, dependencies, or lockfiles."
+      - "Approve the patch."
+      - "Commit, merge, push, or auto-merge."
+    execution_engine: "CrewAI schedules validation. Codex CLI and Bash execute real validation commands. scripts/local-review.sh remains the source of truth for real review."
+
+  review_frontend_architecture:
+    description: Review React, Next.js, state, routing, scrollytelling, and architectural impact from a supplied diff and evidence.
+    expected_output: Read-only reviewer report with findings, evidence, and one allowed verdict.
+    assigned_agent: frontend_architect_reviewer
+    lane: review
+    allowed_actions:
+      - "Read supplied diff, context, and validation evidence."
+      - "Write a read-only review report."
+    forbidden_actions:
+      - "Modify files."
+      - "Implement fixes."
+      - "Commit, merge, push, or auto-merge."
+    execution_engine: "CrewAI may assign this task, but Codex CLI / scripts/local-review.sh provide real review execution and report validation."
+
+  review_code_quality:
+    description: Review code correctness, maintainability, behavior regressions, and missing validation evidence.
+    expected_output: Read-only code review report with findings, evidence, and one allowed verdict.
+    assigned_agent: code_reviewer
+    lane: review
+    allowed_actions:
+      - "Read supplied diff, context, and validation evidence."
+      - "Write a read-only review report."
+    forbidden_actions:
+      - "Modify files."
+      - "Implement fixes."
+      - "Commit, merge, push, or auto-merge."
+    execution_engine: "CrewAI may assign this task. Codex CLI / existing scripts execute real review. scripts/local-review.sh remains the review source of truth."
+
+  review_ux_accessibility:
+    description: Review UI, copy, interaction, keyboard, focus, semantic, contrast, and mobile accessibility risks.
+    expected_output: Read-only UX/accessibility report with findings, evidence, and one allowed verdict.
+    assigned_agent: ux_accessibility_reviewer
+    lane: review
+    allowed_actions:
+      - "Read supplied diff, context, and validation evidence."
+      - "Write a read-only review report."
+    forbidden_actions:
+      - "Modify files."
+      - "Rewrite UI or copy during review."
+      - "Commit, merge, push, or auto-merge."
+    execution_engine: "CrewAI orchestrates role assignment. Codex CLI / scripts/local-review.sh provide real review execution."
+
+  review_performance:
+    description: Review rendering, animation, scroll, bundle, image, and runtime performance risks from supplied evidence.
+    expected_output: Read-only performance review report with findings, evidence, and one allowed verdict.
+    assigned_agent: performance_reviewer
+    lane: review
+    allowed_actions:
+      - "Read supplied diff, context, and validation evidence."
+      - "Write a read-only review report."
+    forbidden_actions:
+      - "Modify files."
+      - "Optimize implementation during review."
+      - "Commit, merge, push, or auto-merge."
+    execution_engine: "CrewAI may coordinate this task. Codex CLI / existing scripts provide real review execution. local-review.sh is authoritative for real review."
+
+  review_qa_regression:
+    description: Review regression risk, behavior coverage, validation evidence, and manual test gaps.
+    expected_output: Read-only QA/regression report with findings, evidence, and one allowed verdict.
+    assigned_agent: qa_regression_reviewer
+    lane: review
+    allowed_actions:
+      - "Read supplied diff, context, and validation evidence."
+      - "Write a read-only review report."
+    forbidden_actions:
+      - "Modify files."
+      - "Implement fixes."
+      - "Commit, merge, push, or auto-merge."
+    execution_engine: "CrewAI may assign this task. Codex CLI / scripts/local-review.sh provide real review execution and report validation."
+
+  review_git_workflow:
+    description: Review branch policy, scripts, operational guardrails, AI workflow docs, and report-contract integrity.
+    expected_output: Read-only Git/workflow report with findings, evidence, and one allowed verdict.
+    assigned_agent: git_workflow_reviewer
+    lane: review
+    allowed_actions:
+      - "Read supplied diff, context, validation evidence, and workflow docs."
+      - "Write a read-only review report."
+    forbidden_actions:
+      - "Modify files."
+      - "Commit, merge, push, or auto-merge."
+      - "Invent missing review evidence."
+    execution_engine: "CrewAI may route this task. Codex CLI / scripts/local-review.sh remain the real execution and review source of truth."
+
+  aggregate_verdict:
+    description: Aggregate independent reviewer reports and validation evidence into a final status without changing files.
+    expected_output: Aggregated verdict summary derived from reviewer reports, validation files, and allowed verdict rules.
+    assigned_agent: review_aggregator
+    lane: aggregation
+    allowed_actions:
+      - "Read reviewer reports."
+      - "Read validation evidence."
+      - "Summarize final status using allowed verdict rules."
+    forbidden_actions:
+      - "Depend on implementer self-approval."
+      - "Invent, upgrade, or repair reviewer verdicts."
+      - "Modify implementation files."
+      - "Commit, merge, push, or auto-merge."
+    execution_engine: "CrewAI may coordinate aggregation. Deterministic scripts and Codex-backed reports remain authoritative. scripts/local-review.sh is the source of truth for real review."
