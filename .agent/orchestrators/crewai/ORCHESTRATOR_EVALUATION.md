@@ -1,6 +1,6 @@
 # CrewAI Orchestrator Evaluation Matrix
 
-This matrix defines how SITE LOVE evaluates CrewAI as a pluggable orchestrator candidate. Fase 5c evaluates real CrewAI dry-run execution while keeping Codex as the operational executor. Fase 5d adds the executor boundary documented in `.agent/contracts/crewai-codex-executor-contract.md`. The evaluation is limited to orchestration behavior, request/response contracts, and report quality. It does not change the merge gate.
+This matrix defines how SITE LOVE evaluates CrewAI as a pluggable orchestrator candidate. Fase 5c evaluates real CrewAI dry-run execution while keeping Codex as the operational executor. Fase 5d adds the executor boundary documented in `.agent/contracts/crewai-codex-executor-contract.md`. Fase 5e tests a real CrewAI Executor Request dry-run without executing Codex. The evaluation is limited to orchestration behavior, request/response contracts, and report quality. It does not change the merge gate.
 
 ## 1. Role Separation
 
@@ -78,3 +78,10 @@ This matrix defines how SITE LOVE evaluates CrewAI as a pluggable orchestrator c
 - Why it matters: Orchestration, execution, policy, reports, and human approval must remain separate layers.
 - How to verify: Inspect `.agent/contracts/crewai-codex-executor-contract.md` and confirm no merge-gate scripts require CrewAI.
 - Passing condition: CrewAI remains optional and pluggable, Codex remains the executor for real repository operations, and no automatic bridge changes `scripts/local-review.sh`.
+
+## 12. Executor Request Dry-Run
+
+- Description: CrewAI generates a structured Executor Request and the script validates required fields and safety constraints.
+- Why it matters: The project can test orchestration-to-executor handoff shape before allowing any real Codex patch execution.
+- How to verify: Run `.agent/orchestrators/crewai/run_executor_request_dry_run.py` from the CrewAI venv and inspect `.agent/reports/<timestamp>/executor-request.md`.
+- Passing condition: `Real CrewAI execution: yes`, `Executor Request valid: yes`, `Real Codex execution: no`, `Repo modification: no`, `Git operations: no`, and the final verdict is `PASS WITH NOTES`.

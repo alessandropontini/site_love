@@ -32,3 +32,28 @@ aggregator:
   role: Review Aggregator
   goal: Aggregate outputs and produce canonical final verdict
   phase_5c_execution: real_crewai_dry_run
+
+request_planner:
+  role: Executor Request Planner
+  goal: Plan a safe no-write request for Codex
+  phase_5e_execution: real_crewai_executor_request_dry_run
+
+scope_guardian:
+  role: Scope Guardian
+  goal: Enforce forbidden files, commands, and Git restrictions
+  phase_5e_execution: real_crewai_executor_request_dry_run
+
+executor_request_writer:
+  role: Executor Request Writer
+  goal: Write the final markdown Executor Request
+  phase_5e_execution: real_crewai_executor_request_dry_run
+
+contract_reviewer:
+  role: Contract Reviewer
+  goal: Review the generated request against the executor contract
+  phase_5e_execution: real_crewai_executor_request_dry_run
+
+dry_run_aggregator:
+  role: Dry-Run Aggregator
+  goal: Aggregate Executor Request dry-run evidence into a canonical verdict
+  phase_5e_execution: real_crewai_executor_request_dry_run

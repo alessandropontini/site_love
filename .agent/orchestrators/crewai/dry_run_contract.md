@@ -65,3 +65,34 @@ If CrewAI executes, required agent outputs are present, repository writes remain
 `PASS WITH NOTES` reflects that CrewAI remains a candidate orchestrator and is not integrated with Codex executor, `scripts/local-review.sh`, or merge governance.
 
 Future CrewAI-to-Codex requests must use the contract and templates under `.agent/contracts/` before any executor bridge is considered.
+
+Fase 5e adds an Executor Request dry-run report shape:
+
+```markdown
+# CrewAI Executor Request Dry-Run Report
+
+- Phase: Fase 5e — CrewAI Executor Request Dry-Run
+- Orchestrator: CrewAI
+- Real CrewAI execution: yes/no
+- CrewAI importable: yes/no
+- CrewAI version:
+- Executor Request generated: yes/no
+- Executor Request valid: yes/no
+- Executor Response generated: no-op/example
+- Real Codex execution: no
+- Repo modification: no
+- Git operations: no
+- Agent separation: yes/no
+- Final verdict: PASS | PASS WITH NOTES | CHANGES REQUESTED | BLOCKED | INFRASTRUCTURE BLOCKED
+
+## Scenario
+## Agent outputs
+## Executor Request validation
+## Safety checks
+## Evidence
+## Limitations
+## Final decision
+## Next step
+```
+
+The Fase 5e response is always no-op/example unless a later reviewed phase explicitly authorizes real Codex execution. It must not be represented as a real Executor Response from Codex.
