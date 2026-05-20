@@ -2,6 +2,8 @@
 
 Fase 5c evaluates CrewAI through a real dry-run execution. The goal is to test whether CrewAI can orchestrate distinct agents and tasks, capture separate outputs, and produce a canonical report without becoming part of the merge gate.
 
+Fase 5d defines the CrewAI-to-Codex executor boundary in `.agent/contracts/crewai-codex-executor-contract.md`. CrewAI may generate an Executor Request and Codex may produce an Executor Response, but no automatic executor bridge, merge-gate integration, or direct CrewAI repository modification is active.
+
 CrewAI is only an orchestrator candidate. Codex remains the operational executor for repository work: reading and editing files, running commands, preparing patches, executing validation, handling Git operations, and summarizing results.
 
 ## Layer Boundaries
@@ -16,6 +18,12 @@ SITE LOVE keeps these layers separate:
 
 The orchestrator must be replaceable. It must not own policy, write application code, approve work, or change the merge process.
 
+See also:
+
+- `.agent/contracts/crewai-codex-executor-contract.md`
+- `.agent/contracts/executor-request-template.md`
+- `.agent/contracts/executor-response-template.md`
+
 ## This Phase Does Not
 
 - Modify application code.
@@ -24,6 +32,8 @@ The orchestrator must be replaceable. It must not own policy, write application 
 - Install dependencies.
 - Replace `scripts/local-review.sh`.
 - Add CrewAI to the merge gate.
+- Connect CrewAI automatically to Codex execution.
+- Authorize CrewAI to modify code directly.
 - Declare dry-run output as real code review.
 - Auto-merge, push, commit, or delete branches.
 

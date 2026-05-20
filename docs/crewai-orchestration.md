@@ -1,6 +1,6 @@
 # CrewAI Orchestration
 
-SITE LOVE prepares CrewAI as future orchestration infrastructure, not as the active site worker. This is a CrewAI infra setup/cleanup phase only, not a complete site automation phase. Codex remains the operational tool for installation, repository management, technical patches, validation, documentation, and real review.
+SITE LOVE prepares CrewAI as future orchestration infrastructure, not as the active site worker. Codex remains the operational tool for installation, repository management, technical patches, validation, documentation, and real review.
 
 ## Architectural Decision
 
@@ -8,11 +8,14 @@ SITE LOVE prepares CrewAI as future orchestration infrastructure, not as the act
 - CrewAI may coordinate future multi-agent work on the site, separating implementation roles from review roles.
 - Bash and Git provide deterministic guardrails.
 - `.agent/prompts/` defines reviewer contracts and role expectations.
+- `.agent/contracts/` defines the CrewAI/Codex executor boundary, request template, response template, and document-only examples.
 - `.agent/reports/` stores the audit trail and final verdict evidence.
 - `scripts/local-review.sh` remains the source of truth for real Codex-backed review.
 - Human approval is mandatory before merge.
 
-CrewAI does not replace Codex. In this phase it does not modify app code, generate UI patches, run creative site tasks, or produce valid review evidence.
+CrewAI does not replace Codex. In this phase it may prepare structured Executor Requests for Codex, but it does not modify app code directly, generate UI patches by itself, run creative site tasks, or produce valid review evidence.
+
+See `.agent/contracts/crewai-codex-executor-contract.md` for the executor contract.
 
 The local CrewAI installation is isolated in:
 
@@ -82,10 +85,11 @@ Use Codex directly for:
 Use CrewAI later for:
 
 - Coordinating future site work across implementation and review crews.
+- Generating structured Executor Requests for Codex.
 - Assigning roles and tasks from `orchestration/agents.yaml` and `orchestration/tasks.yaml`.
 - Keeping implementation, review, and aggregation lanes separate.
 
-Do not use CrewAI to replace real Codex review. Valid review evidence still requires separate reports with `Provider: codex` and `Real execution: yes`.
+Do not use CrewAI to replace real Codex review. Do not let CrewAI modify the repository directly. Valid review evidence still requires separate reports with `Provider: codex` and `Real execution: yes`.
 
 ## Commands
 

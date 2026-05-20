@@ -8,6 +8,8 @@ Ruflo has been removed from the SITE LOVE workflow. Reviews do not use Ruflo, Cl
 
 OpenClaw is being evaluated as an optional experimental orchestrator above the existing Codex-backed workflow. It may coordinate reviewer roles and launch documented local workflow commands, but it must not replace Codex as the real provider, bypass `scripts/local-review.sh`, invent reports, auto-merge, push, or become required for runtime, lint, build, start, or deployment. See `docs/openclaw-orchestration.md`.
 
+CrewAI is being evaluated as a pluggable orchestrator with a documented Codex executor boundary. CrewAI may generate structured Executor Requests and Codex may produce Executor Responses, but CrewAI must not directly modify the repository, bypass local review, or enter the merge gate without a separate reviewed project decision. See `.agent/contracts/crewai-codex-executor-contract.md`.
+
 ## Tech stack
 
 - Next.js 14 App Router
@@ -38,6 +40,7 @@ OpenClaw is being evaluated as an optional experimental orchestrator above the e
 - `docs/openclaw-orchestration.md` — optional OpenClaw orchestration spike and fallback rules.
 - `.openclaw/` — experimental OpenClaw role and workflow templates.
 - `.agent/prompts/` — separate implementer, reviewer, and aggregator prompts.
+- `.agent/contracts/` — CrewAI/Codex executor contract, request/response templates, and document-only examples.
 - `.agent/reports/` — per-run implementer/reviewer reports and captured context.
 - `scripts/local-multiagent.sh`, `scripts/local-patch.sh`, `scripts/local-review.sh` — safe local workflow entrypoints.
 - `scripts/openclaw-orchestrate.sh` — experimental safe OpenClaw wrapper and Codex fallback helper.
@@ -130,6 +133,8 @@ Documentation-only changes describing these files are allowed when they do not m
 - Do not add orchestration tools to `dependencies` or `devDependencies`.
 - OpenClaw may be used only as an optional experimental orchestrator unless a future reviewed project decision promotes it.
 - OpenClaw output is not valid review evidence unless it preserves real Codex-backed reviewer execution and the existing report contract.
+- CrewAI may be used only as a pluggable orchestrator candidate unless a future reviewed project decision promotes it.
+- CrewAI may generate Executor Requests for Codex, but it must not modify repository files directly or become merge-gate evidence by itself.
 - Install Codex CLI separately when needed with `npm i -g @openai/codex`.
 - Do not require Codex or any AI tool for `npm run dev`, `npm run build`, `npm run start`, `npm run lint`, or deployment.
 - Codex may implement scoped patches, read files, run commands, and summarize results, but it does not replace final manual/human review.

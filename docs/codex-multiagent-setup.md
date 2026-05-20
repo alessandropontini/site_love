@@ -10,7 +10,7 @@ Do not add Codex CLI to this project's `dependencies` or `devDependencies`.
 
 OpenClaw is optional experimental orchestration only. It may coordinate Codex-backed review commands during the Phase 5 spike, but valid review evidence still comes from `scripts/local-review.sh` with `MULTIAGENT_PROVIDER=codex`, separate reports, and `Real execution: yes`. See `docs/openclaw-orchestration.md`.
 
-CrewAI is being prepared as future orchestration infrastructure for SITE LOVE. This branch is only a CrewAI infra setup/cleanup phase, not a complete automation phase for the site. Codex remains the tool that reads and edits files, runs repository commands, updates documentation, prepares scoped patches, launches validation, manages the repo workflow, and produces implementation and validation summaries. CrewAI may later coordinate implementation and review lanes, but a valid real review still requires Codex-backed reports with `Real execution: yes`. See `docs/crewai-orchestration.md`.
+CrewAI is being prepared as future orchestration infrastructure for SITE LOVE. Codex remains the tool that reads and edits files, runs repository commands, updates documentation, prepares scoped patches, launches validation, manages the repo workflow, and produces implementation and validation summaries. CrewAI may later coordinate implementation and review lanes, but a valid real review still requires Codex-backed reports with `Real execution: yes`. The executor boundary is documented in `.agent/contracts/crewai-codex-executor-contract.md`. See `docs/crewai-orchestration.md`.
 
 For local CrewAI smoke checks, use the isolated repository venv when present. The local CrewAI environment lives at `.venv-crewai`, uses Python 3.11.9, and has CrewAI 1.9.3 installed. Do not use the global `python3` for CrewAI work; it may be a newer incompatible Python such as 3.14.x.
 
@@ -31,6 +31,8 @@ CrewAI is not the mandatory review engine yet. It is preparatory infrastructure 
 - Performance Reviewer
 - QA / Regression Reviewer
 - Git / Workflow Reviewer
+
+CrewAI may generate an Executor Request for Codex, and Codex may return an Executor Response. This is a contract only; no automatic CrewAI-to-Codex execution bridge is active.
 
 The non-negotiable rules remain:
 
