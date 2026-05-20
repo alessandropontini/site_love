@@ -2,6 +2,8 @@
 
 Every CrewAI evaluation report must contain at least the following fields and sections.
 
+The dry-run report contract is separate from the executor bridge contract in `.agent/contracts/crewai-codex-executor-contract.md`. Fase 5d allows CrewAI to describe an Executor Request and Codex to describe an Executor Response, but it does not activate automatic Codex execution, direct CrewAI repository writes, or merge-gate integration.
+
 ```markdown
 # CrewAI Orchestrator Evaluation Report
 
@@ -61,3 +63,5 @@ If CrewAI executes, required agent outputs are present, repository writes remain
 ```
 
 `PASS WITH NOTES` reflects that CrewAI remains a candidate orchestrator and is not integrated with Codex executor, `scripts/local-review.sh`, or merge governance.
+
+Future CrewAI-to-Codex requests must use the contract and templates under `.agent/contracts/` before any executor bridge is considered.

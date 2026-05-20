@@ -8,6 +8,8 @@ The current multi-agent workflow uses Codex CLI as the active real review provid
 
 OpenClaw is documented as an optional Phase 5 orchestration spike in `docs/openclaw-orchestration.md`. In SITE LOVE, OpenClaw may coordinate reviewer roles and point to the existing local workflow, but Codex remains the real provider and `scripts/local-review.sh` remains the source of truth for validation capture, report validation, and deterministic aggregation.
 
+CrewAI has a documented executor boundary in `.agent/contracts/crewai-codex-executor-contract.md`. CrewAI may prepare structured Executor Requests for Codex and Codex may return Executor Responses, but this does not activate direct CrewAI repository writes or merge-gate integration.
+
 ## What Codex is for
 
 Codex remains useful as an operational development assistant:
@@ -60,7 +62,7 @@ When Codex output is invalid, the wrapper keeps diagnostics in `.agent/reports/<
 
 Gemini remains a nominal hook. Ollama remains experimental and optional, especially on 8 GB Intel Macs. OpenClaw is optional experimental orchestration only; it is not a provider and cannot approve patches outside the existing report contract. Automatic patch implementation is still disabled.
 
-See `docs/multiagent-workflow.md`, `docs/codex-multiagent-setup.md`, and `docs/openclaw-orchestration.md` for the full policy, local setup, and OpenClaw spike rules.
+See `docs/multiagent-workflow.md`, `docs/codex-multiagent-setup.md`, `.agent/contracts/crewai-codex-executor-contract.md`, and `docs/openclaw-orchestration.md` for the full policy, local setup, executor contract, and orchestration spike rules.
 
 ## Runtime boundary
 

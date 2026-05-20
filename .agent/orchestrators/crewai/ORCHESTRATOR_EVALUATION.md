@@ -1,6 +1,6 @@
 # CrewAI Orchestrator Evaluation Matrix
 
-This matrix defines how SITE LOVE evaluates CrewAI as a pluggable orchestrator candidate. Fase 5c evaluates real CrewAI dry-run execution while keeping Codex as the operational executor. The evaluation is limited to orchestration behavior and report quality. It does not change the merge gate.
+This matrix defines how SITE LOVE evaluates CrewAI as a pluggable orchestrator candidate. Fase 5c evaluates real CrewAI dry-run execution while keeping Codex as the operational executor. Fase 5d adds the executor boundary documented in `.agent/contracts/crewai-codex-executor-contract.md`. The evaluation is limited to orchestration behavior, request/response contracts, and report quality. It does not change the merge gate.
 
 ## 1. Role Separation
 
@@ -71,3 +71,10 @@ This matrix defines how SITE LOVE evaluates CrewAI as a pluggable orchestrator c
 - Why it matters: SITE LOVE requires final human approval for every merge.
 - How to verify: Inspect `Final decision` and `Next step`.
 - Passing condition: The report states that the spike does not authorize merge and that human approval remains mandatory.
+
+## 11. Executor Contract Preserved
+
+- Description: CrewAI may prepare an Executor Request for Codex, and Codex may return an Executor Response, but CrewAI does not execute repository writes directly.
+- Why it matters: Orchestration, execution, policy, reports, and human approval must remain separate layers.
+- How to verify: Inspect `.agent/contracts/crewai-codex-executor-contract.md` and confirm no merge-gate scripts require CrewAI.
+- Passing condition: CrewAI remains optional and pluggable, Codex remains the executor for real repository operations, and no automatic bridge changes `scripts/local-review.sh`.

@@ -8,7 +8,7 @@ The goal is to prepare a local/freemium multi-agent workflow where implementatio
 
 OpenClaw is evaluated in Phase 5 as an optional orchestration layer above the existing workflow. It can coordinate reviewer roles and documented commands, but Codex remains the active real provider and this document remains the merge policy source of truth.
 
-CrewAI is being prepared as a future orchestration layer for site work. It may coordinate separate implementation, review, and aggregation lanes, but Codex remains the operational tool for setup, patching, validation, and real review. The existing Codex scripts, especially `scripts/local-review.sh`, remain the source of truth for real reviewer execution and final verdict evidence. See `docs/crewai-orchestration.md`.
+CrewAI is being prepared as a future orchestration layer for site work. It may coordinate separate implementation, review, and aggregation lanes, but Codex remains the operational tool for setup, patching, validation, and real review. The existing Codex scripts, especially `scripts/local-review.sh`, remain the source of truth for real reviewer execution and final verdict evidence. The CrewAI/Codex boundary is documented in `.agent/contracts/crewai-codex-executor-contract.md`. See `docs/crewai-orchestration.md`.
 
 ## Implementer vs Reviewer
 
@@ -280,7 +280,7 @@ Next step after the spike: verify a concrete non-interactive OpenClaw CLI invoca
 
 ## Future Provider Integration
 
-A future phase may connect additional providers, specialized reviewer selection, OpenClaw orchestration, or executor automation. That integration must write separate reports per agent and preserve the same verdict rules.
+A future phase may connect additional providers, specialized reviewer selection, OpenClaw orchestration, CrewAI request generation, or executor automation. That integration must write separate reports per agent, preserve the same verdict rules, and keep CrewAI outside the merge gate unless a separate reviewed project decision changes the policy.
 
 ## Prohibited
 
