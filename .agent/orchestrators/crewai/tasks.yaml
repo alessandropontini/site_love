@@ -83,3 +83,44 @@ executor_request_dry_run:
       description: Aggregate Executor Request dry-run outputs into a canonical verdict without approving merge.
       destructive_tools_allowed: false
       expected_phase_5e_output: Separate CrewAI task output captured in the report.
+
+codex_no_write_handshake:
+  scenario: "Testare il primo handshake reale tra CrewAI orchestrator e Codex executor, mantenendo Codex in modalita read-only/no-write."
+  phase: "Fase 5f — CrewAI to Codex No-Write Executor Handshake"
+  codex_execution_allowed: true
+  codex_execution_mode: read-only/no-write
+  codex_repo_writes_allowed: false
+  codex_git_operations_allowed: false
+  merge_gate_integration: false
+  repo_modification_allowed: false
+  executor_response_type: real_no_write
+  tasks:
+    - id: plan_executor_request
+      agent: request_planner
+      description: Plan a no-write Executor Request for Codex.
+      destructive_tools_allowed: false
+      expected_phase_5f_output: Separate CrewAI task output captured in the report.
+
+    - id: guard_scope
+      agent: scope_guardian
+      description: Verify forbidden files, commands, Git operations, patch execution, and merge-gate changes remain disallowed.
+      destructive_tools_allowed: false
+      expected_phase_5f_output: Scope guard notes captured in the report.
+
+    - id: write_executor_request
+      agent: executor_request_writer
+      description: Write a complete markdown Executor Request for the Codex no-write adapter.
+      destructive_tools_allowed: false
+      expected_phase_5f_output: Structured Executor Request captured as evidence.
+
+    - id: review_contract
+      agent: contract_reviewer
+      description: Review the Executor Request against required contract fields and safety constraints.
+      destructive_tools_allowed: false
+      expected_phase_5f_output: Contract review notes captured in the report.
+
+    - id: aggregate_verdict
+      agent: handshake_aggregator
+      description: Aggregate no-write handshake outputs into a canonical verdict without approving merge.
+      destructive_tools_allowed: false
+      expected_phase_5f_output: Separate CrewAI task output captured in the report.

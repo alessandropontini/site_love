@@ -1,6 +1,6 @@
 # CrewAI Orchestrator Evaluation Matrix
 
-This matrix defines how SITE LOVE evaluates CrewAI as a pluggable orchestrator candidate. Fase 5c evaluates real CrewAI dry-run execution while keeping Codex as the operational executor. Fase 5d adds the executor boundary documented in `.agent/contracts/crewai-codex-executor-contract.md`. Fase 5e tests a real CrewAI Executor Request dry-run without executing Codex. The evaluation is limited to orchestration behavior, request/response contracts, and report quality. It does not change the merge gate.
+This matrix defines how SITE LOVE evaluates CrewAI as a pluggable orchestrator candidate. Fase 5c evaluates real CrewAI dry-run execution while keeping Codex as the operational executor. Fase 5d adds the executor boundary documented in `.agent/contracts/crewai-codex-executor-contract.md`. Fase 5e tests a real CrewAI Executor Request dry-run without executing Codex. Fase 5f tests a real no-write handshake where CrewAI generates the request and a local Codex no-write adapter reads it and produces a response. The evaluation is limited to orchestration behavior, request/response contracts, and report quality. It does not change the merge gate.
 
 ## 1. Role Separation
 
@@ -85,3 +85,11 @@ This matrix defines how SITE LOVE evaluates CrewAI as a pluggable orchestrator c
 - Why it matters: The project can test orchestration-to-executor handoff shape before allowing any real Codex patch execution.
 - How to verify: Run `.agent/orchestrators/crewai/run_executor_request_dry_run.py` from the CrewAI venv and inspect `.agent/reports/<timestamp>/executor-request.md`.
 - Passing condition: `Real CrewAI execution: yes`, `Executor Request valid: yes`, `Real Codex execution: no`, `Repo modification: no`, `Git operations: no`, and the final verdict is `PASS WITH NOTES`.
+
+## 13. Codex No-Write Handshake
+
+- Description: CrewAI generates a structured Executor Request and the Codex no-write adapter reads that actual request to produce a compliant Executor Response.
+- Why it matters: The project can test the executor handoff before permitting write-capable Codex patches or merge-gate integration.
+- How to verify: Run `.agent/orchestrators/crewai/run_codex_no_write_handshake.py` from the CrewAI venv and inspect `.agent/reports/<timestamp>/crewai-codex-no-write-handshake.md`, `executor-request.md`, and `executor-response.md`.
+- Passing condition: `Real CrewAI execution: yes`, `Executor Request valid: yes`, `Real Codex execution: yes`, `Codex execution mode: read-only/no-write`, `Executor Response valid: yes`, `Repo modification: no`, `Git operations: no`, and the final verdict is `PASS WITH NOTES`.
+- Non-goals: no repository patch, no real code review on a diff, no CrewAI repository write permission, no commit/push/merge by CrewAI or the adapter, and no merge-gate connection.
