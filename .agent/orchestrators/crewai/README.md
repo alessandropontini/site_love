@@ -4,6 +4,8 @@ Fase 5c evaluates CrewAI through a real dry-run execution. The goal is to test w
 
 Fase 5d defines the CrewAI-to-Codex executor boundary in `.agent/contracts/crewai-codex-executor-contract.md`. CrewAI may generate an Executor Request and Codex may produce an Executor Response, but no automatic executor bridge, merge-gate integration, or direct CrewAI repository modification is active.
 
+Fase 5e tests a real CrewAI Executor Request dry-run. CrewAI generates a structured request, the local script validates the request format and safety fields, and a no-op/example Executor Response is written. Codex is not executed in this phase.
+
 CrewAI is only an orchestrator candidate. Codex remains the operational executor for repository work: reading and editing files, running commands, preparing patches, executing validation, handling Git operations, and summarizing results.
 
 ## Layer Boundaries
@@ -34,6 +36,7 @@ See also:
 - Add CrewAI to the merge gate.
 - Connect CrewAI automatically to Codex execution.
 - Authorize CrewAI to modify code directly.
+- Execute real Codex patches from CrewAI.
 - Declare dry-run output as real code review.
 - Auto-merge, push, commit, or delete branches.
 
@@ -46,10 +49,25 @@ source .venv-crewai/bin/activate
 python .agent/orchestrators/crewai/run_crewai_dry_run.py
 ```
 
+Run the Executor Request dry-run:
+
+```bash
+source .venv-crewai/bin/activate
+python .agent/orchestrators/crewai/run_executor_request_dry_run.py
+```
+
 The script writes a report to:
 
 ```text
 .agent/reports/<timestamp>/crewai-orchestrator-evaluation.md
+```
+
+The Executor Request dry-run writes:
+
+```text
+.agent/reports/<timestamp>/crewai-executor-request-dry-run.md
+.agent/reports/<timestamp>/executor-request.md
+.agent/reports/<timestamp>/executor-response.md
 ```
 
 ## Expected Result
