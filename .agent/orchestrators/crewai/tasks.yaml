@@ -1,0 +1,37 @@
+scenario: "Valutare una futura modifica accessibile al pulsante finale Replay nel componente finale, senza modificare il repository."
+
+tasks:
+  - id: plan_dry_run
+    agent: planner
+    description: Define a safe dry-run task sequence without modifying repository files.
+    destructive_tools_allowed: false
+
+  - id: simulate_implementation
+    agent: implementer_simulator
+    description: Produce an implementation plan for the Replay button accessibility change without editing files.
+    destructive_tools_allowed: false
+
+  - id: frontend_architecture_review
+    agent: frontend_architect_reviewer
+    description: Review possible frontend architecture impact independently.
+    destructive_tools_allowed: false
+
+  - id: ux_accessibility_review
+    agent: ux_a11y_reviewer
+    description: Review accessibility and user experience implications independently.
+    destructive_tools_allowed: false
+
+  - id: qa_regression_review
+    agent: qa_regression_reviewer
+    description: Review test and regression risk independently.
+    destructive_tools_allowed: false
+
+  - id: git_workflow_review
+    agent: git_workflow_reviewer
+    description: Review branch, merge, approval, and evidence policy independently.
+    destructive_tools_allowed: false
+
+  - id: aggregate_verdict
+    agent: aggregator
+    description: Aggregate dry-run outputs into one canonical verdict without approving merge.
+    destructive_tools_allowed: false

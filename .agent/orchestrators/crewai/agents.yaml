@@ -1,0 +1,27 @@
+planner:
+  role: Orchestration Planner
+  goal: Define task sequence without modifying repo
+
+implementer_simulator:
+  role: Implementer Simulator
+  goal: Produce an implementation plan but do not edit files
+
+frontend_architect_reviewer:
+  role: Frontend Architect Reviewer
+  goal: Review architectural impact independently
+
+ux_a11y_reviewer:
+  role: UX Accessibility Reviewer
+  goal: Review accessibility and user experience independently
+
+qa_regression_reviewer:
+  role: QA Regression Reviewer
+  goal: Review test and regression risk independently
+
+git_workflow_reviewer:
+  role: Git Workflow Reviewer
+  goal: Review branch, merge and approval policy independently
+
+aggregator:
+  role: Review Aggregator
+  goal: Aggregate outputs and produce canonical final verdict
