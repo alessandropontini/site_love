@@ -11,6 +11,8 @@ This contract defines the safe boundary between CrewAI and Codex for SITE LOVE w
 
 CrewAI is a candidate orchestrator. Codex remains the operational executor. This contract does not connect CrewAI to the merge gate and does not authorize CrewAI to modify the repository directly.
 
+Fase 5f adds a no-write handshake test of this contract. CrewAI may generate a structured Executor Request, and a local Codex no-write adapter may read that request and generate an Executor Response. That adapter mode is `read-only/no-write`: it must not edit repository files, execute patches, run Git operations, perform real code review on a diff, or change the merge gate.
+
 ## 2. Layer Boundaries
 
 ### CrewAI may
@@ -35,6 +37,7 @@ CrewAI is a candidate orchestrator. Codex remains the operational executor. This
 ### Codex may
 
 - Read repository context and inspect files.
+- Read an Executor Request and generate a no-write Executor Response when the request explicitly requires `read-only/no-write`.
 - Propose a patch plan.
 - Apply a scoped patch after an explicit task grants repository writes.
 - Run allowed validation commands.
@@ -139,6 +142,23 @@ Codex-to-CrewAI responses must use a stable markdown format:
 
 The response must separate actual execution from plan-only, dry-run, or example output.
 
+For no-write handshakes, Codex responses must also state:
+
+```markdown
+- Execution mode: read-only/no-write
+- Real execution: yes
+- Files changed: none
+- Commands run: none
+- Diff summary: none
+- Report path:
+
+## Evidence
+## Output
+## Follow-up
+```
+
+`Real execution: yes` in a no-write handshake means the executor adapter actually read and processed the Executor Request. It does not mean a patch was executed, a Git operation was performed, or a real code review occurred.
+
 ## 7. Review Separation
 
 - The implementer cannot approve their own patch.
@@ -175,6 +195,8 @@ Required evidence includes:
 - Final verdict using the canonical set.
 
 `Real execution: yes` may only be used when the executor or reviewer actually ran. Dry-run, example, simulated, placeholder, or deterministic contract-only output must use `Real execution: no` unless the report is specifically about real CrewAI dry-run execution and not real code review.
+
+For Fase 5f, `PASS WITH NOTES` is the maximum expected passing verdict because Codex remains no-write, there is no repository patch, and no real review on a diff exists.
 
 ## 9. Failure Modes
 

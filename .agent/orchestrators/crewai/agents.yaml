@@ -57,3 +57,8 @@ dry_run_aggregator:
   role: Dry-Run Aggregator
   goal: Aggregate Executor Request dry-run evidence into a canonical verdict
   phase_5e_execution: real_crewai_executor_request_dry_run
+
+handshake_aggregator:
+  role: Handshake Aggregator
+  goal: Aggregate CrewAI-to-Codex no-write handshake evidence into a canonical verdict
+  phase_5f_execution: real_crewai_codex_no_write_handshake

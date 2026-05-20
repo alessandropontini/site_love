@@ -96,3 +96,41 @@ Fase 5e adds an Executor Request dry-run report shape:
 ```
 
 The Fase 5e response is always no-op/example unless a later reviewed phase explicitly authorizes real Codex execution. It must not be represented as a real Executor Response from Codex.
+
+Fase 5f adds a CrewAI-to-Codex no-write handshake report shape:
+
+```markdown
+# CrewAI to Codex No-Write Handshake Report
+
+- Phase: Fase 5f — CrewAI to Codex No-Write Executor Handshake
+- Orchestrator: CrewAI
+- Executor: Codex no-write adapter
+- Real CrewAI execution: yes/no
+- CrewAI importable: yes/no
+- CrewAI version:
+- Executor Request generated: yes/no
+- Executor Request valid: yes/no
+- Real Codex execution: yes/no
+- Codex execution mode: read-only/no-write
+- Executor Response generated: yes/no
+- Executor Response valid: yes/no
+- Repo modification: no
+- Git operations: no
+- Agent separation: yes/no
+- Final verdict: PASS | PASS WITH NOTES | CHANGES REQUESTED | BLOCKED | INFRASTRUCTURE BLOCKED
+
+## Scenario
+## CrewAI agent outputs
+## Executor Request validation
+## Codex no-write execution
+## Executor Response validation
+## Safety checks
+## Evidence
+## Limitations
+## Final decision
+## Next step
+```
+
+The Fase 5f Executor Response is real only in the limited sense that the Codex no-write adapter reads the generated `executor-request.md`, validates it, and writes `executor-response.md`. It must declare `Execution mode: read-only/no-write`, `Files changed: none`, `Commands run: none`, and `Diff summary: none`.
+
+Fase 5f must not claim a real code review, a repository patch, merge approval, or merge-gate integration. The maximum expected verdict is `PASS WITH NOTES`.
