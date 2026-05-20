@@ -1,6 +1,6 @@
 # CrewAI Orchestration
 
-SITE LOVE prepares CrewAI as future orchestration infrastructure, not as the active site worker. Codex remains the operational tool for installation, repository management, technical patches, validation, documentation, and real review.
+SITE LOVE prepares CrewAI as future orchestration infrastructure, not as the active site worker. This is a CrewAI infra setup/cleanup phase only, not a complete site automation phase. Codex remains the operational tool for installation, repository management, technical patches, validation, documentation, and real review.
 
 ## Architectural Decision
 
@@ -13,6 +13,14 @@ SITE LOVE prepares CrewAI as future orchestration infrastructure, not as the act
 - Human approval is mandatory before merge.
 
 CrewAI does not replace Codex. In this phase it does not modify app code, generate UI patches, run creative site tasks, or produce valid review evidence.
+
+The local CrewAI installation is isolated in:
+
+```text
+.venv-crewai
+```
+
+Use the Python from that virtual environment for CrewAI work. The global `python3` may be a newer incompatible version, such as Python 3.14.x, and must not be used for CrewAI. The expected local venv Python is Python 3.11.9. The CrewAI version observed for this setup is 1.9.3.
 
 ## Why OpenClaw Is Paused
 
@@ -58,10 +66,15 @@ Who implements does not review. Who reviews does not modify. The aggregator does
 Use Codex directly for:
 
 - Infrastructure setup.
+- Reading and editing files.
+- Running repository commands.
 - Tool installation and local workflow maintenance.
 - Script fixes.
 - Documentation patches.
 - Technical repository changes.
+- Preparing scoped patches.
+- Launching validation commands.
+- Producing implementation and validation summaries.
 - Real review through `scripts/local-review.sh`.
 
 ## When To Use CrewAI
@@ -80,13 +93,15 @@ Activate the local CrewAI virtual environment when you want the wrapper to detec
 
 ```bash
 source .venv-crewai/bin/activate
+python --version
+crewai --version
 ```
 
 Verify the local install:
 
 ```bash
-python -c "import crewai; print(crewai.__version__ if hasattr(crewai, '__version__') else 'crewai import ok')"
-crewai --help
+python --version
+crewai --version
 ```
 
 Show wrapper help:
@@ -144,6 +159,7 @@ feature/* -> system -> prod
 - Real review requires `Provider: codex`.
 - Real review requires `Real execution: yes`.
 - `noop` is never approving review evidence.
+- A simulated review must never be declared as real review evidence.
 - If the provider does not execute for real, the verdict must be `INFRASTRUCTURE BLOCKED`, not `PASS`.
 - Missing reports, invalid reports, empty diffs, missing validation, or non-real execution block approval.
 
