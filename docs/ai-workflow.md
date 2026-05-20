@@ -1,10 +1,14 @@
 # AI Workflow: Codex and Multi-Agent Review Preparation
 
-Ruflo has been removed from the SITE LOVE workflow. Reviews no longer use Ruflo, Claude Flow, MCP, WASM agents, or automatic multi-agent orchestration.
+Ruflo has been removed from the SITE LOVE workflow. Reviews no longer use Ruflo, Claude Flow, MCP, WASM agents, or unvalidated automatic multi-agent orchestration.
 
 The local Ruflo/WASM runtime was retired because it created agent records but did not produce autonomous review output without an external model provider/API key. Do not configure Anthropic/Claude managed agents, provider keys, or replacement orchestration tooling for this project unless the project owner explicitly approves a new workflow.
 
 The current multi-agent workflow uses Codex CLI as the active real review provider through `codex exec`. It can only produce valid reviewer reports when Codex CLI is installed, configured, and returns separate reports with `Provider: codex` and `Real execution: yes`. Otherwise the workflow verdict must be `INFRASTRUCTURE BLOCKED`, not `PASS`.
+
+OpenClaw is documented as an optional Phase 5 orchestration spike in `docs/openclaw-orchestration.md`. In SITE LOVE, OpenClaw may coordinate reviewer roles and point to the existing local workflow, but Codex remains the real provider and `scripts/local-review.sh` remains the source of truth for validation capture, report validation, and deterministic aggregation.
+
+CrewAI has a documented executor boundary in `.agent/contracts/crewai-codex-executor-contract.md`. CrewAI may prepare structured Executor Requests for Codex and Codex may return Executor Responses, but this does not activate direct CrewAI repository writes or merge-gate integration.
 
 ## What Codex is for
 
@@ -56,9 +60,9 @@ The deterministic safe-provider smoke check is:
 
 When Codex output is invalid, the wrapper keeps diagnostics in `.agent/reports/<run-id>/`, including `<agent>-codex-stdout.md`, `<agent>-codex-stderr.md`, `<agent>-codex-transcript.txt`, `<agent>-codex-diagnostics.md`, and `<agent>-codex-exit-code.txt`.
 
-Gemini remains a nominal hook. Ollama remains experimental and optional, especially on 8 GB Intel Macs. OpenClaw is not part of Phase 2B. Automatic patch implementation is still disabled.
+Gemini remains a nominal hook. Ollama remains experimental and optional, especially on 8 GB Intel Macs. OpenClaw is optional experimental orchestration only; it is not a provider and cannot approve patches outside the existing report contract. Automatic patch implementation is still disabled.
 
-See `docs/multiagent-workflow.md` and `docs/codex-multiagent-setup.md` for the full policy and local setup.
+See `docs/multiagent-workflow.md`, `docs/codex-multiagent-setup.md`, `.agent/contracts/crewai-codex-executor-contract.md`, and `docs/openclaw-orchestration.md` for the full policy, local setup, executor contract, and orchestration spike rules.
 
 ## Runtime boundary
 
@@ -72,6 +76,8 @@ npm run lint
 ```
 
 Do not add AI orchestration tools to `dependencies` or `devDependencies`. Do not require AI tooling, MCP servers, local agent runtimes, provider API keys, or external review services for deployment.
+
+OpenClaw, if installed locally by a developer, is outside the app runtime. It must not become required for `npm run dev`, `npm run build`, `npm run start`, `npm run lint`, or deployment until an explicit reviewed project decision changes the workflow.
 
 ## Recommended workflow
 

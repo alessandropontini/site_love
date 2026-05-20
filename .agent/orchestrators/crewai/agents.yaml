@@ -1,0 +1,69 @@
+planner:
+  role: Orchestration Planner
+  goal: Define task sequence without modifying repo
+  phase_5c_execution: real_crewai_dry_run
+
+implementer_simulator:
+  role: Implementer Simulator
+  goal: Produce an implementation plan but do not edit files
+  phase_5c_execution: real_crewai_dry_run
+
+frontend_architect_reviewer:
+  role: Frontend Architect Reviewer
+  goal: Review architectural impact independently
+  phase_5c_execution: real_crewai_dry_run
+
+ux_a11y_reviewer:
+  role: UX Accessibility Reviewer
+  goal: Review accessibility and user experience independently
+  phase_5c_execution: real_crewai_dry_run
+
+qa_regression_reviewer:
+  role: QA Regression Reviewer
+  goal: Review test and regression risk independently
+  phase_5c_execution: real_crewai_dry_run
+
+git_workflow_reviewer:
+  role: Git Workflow Reviewer
+  goal: Review branch, merge and approval policy independently
+  phase_5c_execution: real_crewai_dry_run
+
+aggregator:
+  role: Review Aggregator
+  goal: Aggregate outputs and produce canonical final verdict
+  phase_5c_execution: real_crewai_dry_run
+
+request_planner:
+  role: Executor Request Planner
+  goal: Plan a safe no-write request for Codex
+  phase_5e_execution: real_crewai_executor_request_dry_run
+
+scope_guardian:
+  role: Scope Guardian
+  goal: Enforce forbidden files, commands, and Git restrictions
+  phase_5e_execution: real_crewai_executor_request_dry_run
+
+executor_request_writer:
+  role: Executor Request Writer
+  goal: Write the final markdown Executor Request
+  phase_5e_execution: real_crewai_executor_request_dry_run
+
+contract_reviewer:
+  role: Contract Reviewer
+  goal: Review the generated request against the executor contract
+  phase_5e_execution: real_crewai_executor_request_dry_run
+
+dry_run_aggregator:
+  role: Dry-Run Aggregator
+  goal: Aggregate Executor Request dry-run evidence into a canonical verdict
+  phase_5e_execution: real_crewai_executor_request_dry_run
+
+handshake_aggregator:
+  role: Handshake Aggregator
+  goal: Aggregate CrewAI-to-Codex no-write handshake evidence into a canonical verdict
+  phase_5f_execution: real_crewai_codex_no_write_handshake
+
+plan_aggregator:
+  role: Scoped Patch Plan Aggregator
+  goal: Aggregate CrewAI-to-Codex scoped patch plan evidence into a canonical verdict
+  phase_5g_execution: real_crewai_scoped_patch_plan

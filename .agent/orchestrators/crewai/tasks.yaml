@@ -1,0 +1,169 @@
+scenario: "Valutare una futura modifica accessibile al pulsante finale Replay nel componente finale, senza modificare il repository."
+phase: "Fase 5c — Real CrewAI Dry-Run Execution"
+merge_gate_integration: false
+repo_modification_allowed: false
+
+tasks:
+  - id: plan_dry_run
+    agent: planner
+    description: Define a safe dry-run task sequence without modifying repository files.
+    destructive_tools_allowed: false
+    expected_phase_5c_output: Separate CrewAI task output captured in the report.
+
+  - id: simulate_implementation
+    agent: implementer_simulator
+    description: Produce an implementation plan for the Replay button accessibility change without editing files.
+    destructive_tools_allowed: false
+    expected_phase_5c_output: Separate CrewAI task output captured in the report.
+
+  - id: frontend_architecture_review
+    agent: frontend_architect_reviewer
+    description: Review possible frontend architecture impact independently.
+    destructive_tools_allowed: false
+    expected_phase_5c_output: Separate CrewAI task output captured in the report.
+
+  - id: ux_accessibility_review
+    agent: ux_a11y_reviewer
+    description: Review accessibility and user experience implications independently.
+    destructive_tools_allowed: false
+    expected_phase_5c_output: Separate CrewAI task output captured in the report.
+
+  - id: qa_regression_review
+    agent: qa_regression_reviewer
+    description: Review test and regression risk independently.
+    destructive_tools_allowed: false
+    expected_phase_5c_output: Separate CrewAI task output captured in the report.
+
+  - id: git_workflow_review
+    agent: git_workflow_reviewer
+    description: Review branch, merge, approval, and evidence policy independently.
+    destructive_tools_allowed: false
+    expected_phase_5c_output: Separate CrewAI task output captured in the report.
+
+  - id: aggregate_verdict
+    agent: aggregator
+    description: Aggregate dry-run outputs into one canonical verdict without approving merge.
+    destructive_tools_allowed: false
+    expected_phase_5c_output: Separate CrewAI task output captured in the report.
+
+executor_request_dry_run:
+  scenario: "Preparare una richiesta per Codex per valutare una futura modifica accessibile al pulsante finale Replay nel componente finale, senza modificare il repository."
+  phase: "Fase 5e — CrewAI Executor Request Dry-Run"
+  codex_execution_allowed: false
+  merge_gate_integration: false
+  repo_modification_allowed: false
+  executor_response_type: no-op/example
+  tasks:
+    - id: plan_executor_request
+      agent: request_planner
+      description: Plan a no-write Executor Request for Codex.
+      destructive_tools_allowed: false
+      expected_phase_5e_output: Separate CrewAI task output captured in the report.
+
+    - id: guard_scope
+      agent: scope_guardian
+      description: Verify forbidden files, commands, Git operations, and merge-gate changes remain disallowed.
+      destructive_tools_allowed: false
+      expected_phase_5e_output: Separate CrewAI task output captured in the report.
+
+    - id: write_executor_request
+      agent: executor_request_writer
+      description: Write a complete markdown Executor Request according to the Fase 5e contract.
+      destructive_tools_allowed: false
+      expected_phase_5e_output: Structured Executor Request captured as evidence.
+
+    - id: review_contract
+      agent: contract_reviewer
+      description: Review the Executor Request against required contract fields and safety constraints.
+      destructive_tools_allowed: false
+      expected_phase_5e_output: Contract review notes captured in the report.
+
+    - id: aggregate_verdict
+      agent: dry_run_aggregator
+      description: Aggregate Executor Request dry-run outputs into a canonical verdict without approving merge.
+      destructive_tools_allowed: false
+      expected_phase_5e_output: Separate CrewAI task output captured in the report.
+
+codex_no_write_handshake:
+  scenario: "Testare il primo handshake reale tra CrewAI orchestrator e Codex executor, mantenendo Codex in modalita read-only/no-write."
+  phase: "Fase 5f — CrewAI to Codex No-Write Executor Handshake"
+  codex_execution_allowed: true
+  codex_execution_mode: read-only/no-write
+  codex_repo_writes_allowed: false
+  codex_git_operations_allowed: false
+  merge_gate_integration: false
+  repo_modification_allowed: false
+  executor_response_type: real_no_write
+  tasks:
+    - id: plan_executor_request
+      agent: request_planner
+      description: Plan a no-write Executor Request for Codex.
+      destructive_tools_allowed: false
+      expected_phase_5f_output: Separate CrewAI task output captured in the report.
+
+    - id: guard_scope
+      agent: scope_guardian
+      description: Verify forbidden files, commands, Git operations, patch execution, and merge-gate changes remain disallowed.
+      destructive_tools_allowed: false
+      expected_phase_5f_output: Scope guard notes captured in the report.
+
+    - id: write_executor_request
+      agent: executor_request_writer
+      description: Write a complete markdown Executor Request for the Codex no-write adapter.
+      destructive_tools_allowed: false
+      expected_phase_5f_output: Structured Executor Request captured as evidence.
+
+    - id: review_contract
+      agent: contract_reviewer
+      description: Review the Executor Request against required contract fields and safety constraints.
+      destructive_tools_allowed: false
+      expected_phase_5f_output: Contract review notes captured in the report.
+
+    - id: aggregate_verdict
+      agent: handshake_aggregator
+      description: Aggregate no-write handshake outputs into a canonical verdict without approving merge.
+      destructive_tools_allowed: false
+      expected_phase_5f_output: Separate CrewAI task output captured in the report.
+
+scoped_patch_plan:
+  scenario: "Preparare un piano patch per migliorare o verificare l'accessibilita del pulsante finale Replay nel componente finale, senza modificare il repository."
+  phase: "Fase 5g — CrewAI to Codex Scoped Patch Plan"
+  codex_execution_allowed: true
+  codex_execution_mode: read-only/no-write
+  codex_repo_writes_allowed: false
+  codex_git_operations_allowed: false
+  patch_application_allowed: false
+  real_code_diff_review: false
+  merge_gate_integration: false
+  repo_modification_allowed: false
+  executor_response_type: real_no_write_plan
+  tasks:
+    - id: plan_executor_request
+      agent: request_planner
+      description: Plan a no-write Executor Request for a scoped patch plan.
+      destructive_tools_allowed: false
+      expected_phase_5g_output: Separate CrewAI task output captured in the report.
+
+    - id: guard_scope
+      agent: scope_guardian
+      description: Verify forbidden files, commands, Git operations, patch execution, and merge-gate changes remain disallowed.
+      destructive_tools_allowed: false
+      expected_phase_5g_output: Scope guard notes captured in the report.
+
+    - id: write_executor_request
+      agent: executor_request_writer
+      description: Write a complete markdown Executor Request for the Codex no-write scoped patch plan adapter.
+      destructive_tools_allowed: false
+      expected_phase_5g_output: Structured Executor Request captured as evidence.
+
+    - id: review_contract
+      agent: contract_reviewer
+      description: Review the Executor Request against required contract fields and safety constraints.
+      destructive_tools_allowed: false
+      expected_phase_5g_output: Contract review notes captured in the report.
+
+    - id: aggregate_verdict
+      agent: plan_aggregator
+      description: Aggregate scoped patch plan outputs into a canonical verdict without approving merge.
+      destructive_tools_allowed: false
+      expected_phase_5g_output: Separate CrewAI task output captured in the report.

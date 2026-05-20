@@ -8,6 +8,41 @@
 
 Do not add Codex CLI to this project's `dependencies` or `devDependencies`.
 
+OpenClaw is optional experimental orchestration only. It may coordinate Codex-backed review commands during the Phase 5 spike, but valid review evidence still comes from `scripts/local-review.sh` with `MULTIAGENT_PROVIDER=codex`, separate reports, and `Real execution: yes`. See `docs/openclaw-orchestration.md`.
+
+CrewAI is being prepared as future orchestration infrastructure for SITE LOVE. Codex remains the tool that reads and edits files, runs repository commands, updates documentation, prepares scoped patches, launches validation, manages the repo workflow, and produces implementation and validation summaries. CrewAI may later coordinate implementation and review lanes, but a valid real review still requires Codex-backed reports with `Real execution: yes`. The executor boundary is documented in `.agent/contracts/crewai-codex-executor-contract.md`. See `docs/crewai-orchestration.md`.
+
+For local CrewAI smoke checks, use the isolated repository venv when present. The local CrewAI environment lives at `.venv-crewai`, uses Python 3.11.9, and has CrewAI 1.9.3 installed. Do not use the global `python3` for CrewAI work; it may be a newer incompatible Python such as 3.14.x.
+
+```bash
+source .venv-crewai/bin/activate
+python --version
+crewai --version
+```
+
+The venv is not a runtime dependency for the Next.js app and is ignored by Git.
+
+CrewAI is not the mandatory review engine yet. It is preparatory infrastructure for future specialized-agent orchestration, with separate implementation and review roles such as:
+
+- Implementer agent
+- Frontend Architect Reviewer
+- Code Reviewer
+- UX / Accessibility Reviewer
+- Performance Reviewer
+- QA / Regression Reviewer
+- Git / Workflow Reviewer
+
+CrewAI may generate an Executor Request for Codex, and Codex may return an Executor Response. This is a contract only; no automatic CrewAI-to-Codex execution bridge is active.
+
+The non-negotiable rules remain:
+
+- The implementer cannot approve its own patch.
+- Review must be real, or the result must be `BLOCKED` or `INFRASTRUCTURE BLOCKED`.
+- Simulated review must never be declared as real review evidence.
+- No auto-merge.
+- Final human approval is mandatory.
+- The branch flow is `feature/* -> system -> prod`.
+
 ## Local Review
 
 ```bash
@@ -16,6 +51,18 @@ npm run build
 MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh
 RUN_DIR="$(ls -td .agent/reports/* | head -1)"
 cat "$RUN_DIR/99_final-verdict.md"
+```
+
+Recommended bridge through the CrewAI scaffold wrapper:
+
+```bash
+MULTIAGENT_PROVIDER=codex ./scripts/crewai-orchestrate.sh review
+```
+
+Direct review remains valid:
+
+```bash
+MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh
 ```
 
 Review scope selection is automatic:
@@ -80,6 +127,22 @@ Before running the full workflow, a quick CLI sanity check is:
 printf "Rispondi solo con OK. Non modificare file.\n" | codex exec -
 ```
 
+## Optional OpenClaw Spike
+
+OpenClaw can be checked through the safe wrapper:
+
+```bash
+./scripts/openclaw-orchestrate.sh
+```
+
+If `openclaw` is not installed, the wrapper exits with a controlled message and points back to:
+
+```bash
+MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh
+```
+
+The wrapper is experimental. It does not auto-merge, push, create real review reports by itself, or declare a patch mergeable.
+
 ## Notes
 
 - Invalid, empty, missing, or non-real reports produce `INFRASTRUCTURE BLOCKED`.
@@ -92,5 +155,5 @@ printf "Rispondi solo con OK. Non modificare file.\n" | codex exec -
 - Codex raw files are named `<agent>-codex-stdout.md`, `<agent>-codex-stderr.md`, `<agent>-codex-transcript.txt`, `<agent>-codex-diagnostics.md`, and `<agent>-codex-exit-code.txt`.
 - The aggregator remains deterministic shell logic, not an LLM.
 - Final human approval is still required before merge.
-- Patch implementation automation is not enabled in Phase 2B.
-- OpenClaw is not active in this phase.
+- Patch implementation automation is not enabled.
+- OpenClaw orchestration is optional and experimental in Phase 5; Codex remains the active real provider.
