@@ -91,6 +91,10 @@ Use CrewAI later for:
 
 Do not use CrewAI to replace real Codex review. Do not let CrewAI modify the repository directly. Valid review evidence still requires separate reports with `Provider: codex` and `Real execution: yes`.
 
+## Operational Smoke Scope
+
+The first operational smoke should use a small, reversible documentation patch on a `feature/*` branch. CrewAI may coordinate the workflow, Codex remains the executor, reviewers stay separate from implementers, and any accepted patch must merge to `system` before `prod`.
+
 ## Commands
 
 Activate the local CrewAI virtual environment when you want the wrapper to detect the installed CrewAI package:
