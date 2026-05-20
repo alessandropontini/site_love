@@ -1,6 +1,6 @@
 # CrewAI Orchestrator Evaluation Spike
 
-Fase 5b evaluates CrewAI as a candidate pluggable orchestrator for SITE LOVE. The goal is to test whether CrewAI can coordinate roles, task order, and report shape without becoming part of the merge gate.
+Fase 5c evaluates CrewAI through a real dry-run execution. The goal is to test whether CrewAI can orchestrate distinct agents and tasks, capture separate outputs, and produce a canonical report without becoming part of the merge gate.
 
 CrewAI is only an orchestrator candidate. Codex remains the operational executor for repository work: reading and editing files, running commands, preparing patches, executing validation, handling Git operations, and summarizing results.
 
@@ -24,7 +24,7 @@ The orchestrator must be replaceable. It must not own policy, write application 
 - Install dependencies.
 - Replace `scripts/local-review.sh`.
 - Add CrewAI to the merge gate.
-- Declare dry-run output as real review.
+- Declare dry-run output as real code review.
 - Auto-merge, push, commit, or delete branches.
 
 ## Dry Run
@@ -46,12 +46,17 @@ The script writes a report to:
 
 The dry-run should produce an auditable markdown report that states whether CrewAI was importable and whether real CrewAI agent execution happened.
 
-An honest `INFRASTRUCTURE BLOCKED` is acceptable when CrewAI cannot be imported or when the script only validates the report contract without running real CrewAI agents.
+- `Real CrewAI execution: no` means CrewAI was unavailable or the script could not complete a real crew run.
+- `Real CrewAI execution: yes` means CrewAI `Agent`, `Task`, and `Crew` objects were instantiated and `Crew.kickoff()` completed.
+
+The Fase 5c script uses a deterministic local LLM adapter to avoid external provider requirements. This proves orchestration mechanics, not real model quality.
+
+An honest `INFRASTRUCTURE BLOCKED` is required when CrewAI cannot be imported or cannot run. `PASS WITH NOTES` is acceptable when CrewAI executes distinct agents and tasks, produces separate outputs, avoids repository writes, and keeps CrewAI outside the merge gate.
 
 ## Verdict Meanings
 
 - `PASS`: CrewAI ran real dry-run agents, preserved role separation, produced the required report, and did not modify the repository.
-- `PASS WITH NOTES`: CrewAI ran real dry-run agents and preserved safety rules, but follow-up improvements remain.
+- `PASS WITH NOTES`: CrewAI ran real dry-run agents and preserved safety rules, but follow-up work remains because CrewAI is still not connected to Codex executor or merge governance.
 - `INFRASTRUCTURE BLOCKED`: CrewAI was unavailable, did not execute real agents, or report evidence was insufficient for a real evaluation.
 
 Other canonical verdicts may appear in reports:

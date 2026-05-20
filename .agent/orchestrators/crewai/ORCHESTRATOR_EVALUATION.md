@@ -1,13 +1,13 @@
 # CrewAI Orchestrator Evaluation Matrix
 
-This matrix defines how SITE LOVE evaluates CrewAI as a pluggable orchestrator candidate. The evaluation is limited to orchestration behavior and report quality. It does not change the merge gate.
+This matrix defines how SITE LOVE evaluates CrewAI as a pluggable orchestrator candidate. Fase 5c evaluates real CrewAI dry-run execution while keeping Codex as the operational executor. The evaluation is limited to orchestration behavior and report quality. It does not change the merge gate.
 
 ## 1. Role Separation
 
-- Description: Implementation, review, and aggregation roles are defined as separate agents or task lanes.
+- Description: Implementation, review, and aggregation roles are defined as separate CrewAI agents or task lanes.
 - Why it matters: The implementer cannot approve its own patch, and reviewers must remain independent.
 - How to verify: Inspect `agents.yaml`, `tasks.yaml`, and the generated report for separate implementer, reviewer, and aggregator outputs.
-- Passing condition: The report shows separate role outputs and no role both implements and approves.
+- Passing condition: The report shows separate role outputs from CrewAI task execution and no role both implements and approves.
 
 ## 2. Deterministic Report Path
 
@@ -32,24 +32,24 @@ This matrix defines how SITE LOVE evaluates CrewAI as a pluggable orchestrator c
 
 ## 5. Failure Transparency
 
-- Description: Import failures, missing CrewAI execution, or incomplete evidence are declared plainly.
+- Description: Import failures, missing CrewAI execution, incomplete output, or incomplete evidence are declared plainly.
 - Why it matters: A blocked evaluation is safer than a false approval.
 - How to verify: Inspect `Evidence`, `Limitations`, and `Final decision`.
-- Passing condition: Any missing real execution produces `INFRASTRUCTURE BLOCKED` and explains why.
+- Passing condition: Missing real execution produces `INFRASTRUCTURE BLOCKED`; real execution with incomplete output produces `CHANGES REQUESTED`; complete real dry-run execution may produce `PASS WITH NOTES`.
 
 ## 6. No Repo Modification
 
-- Description: The dry-run does not modify application files or repository workflow files.
+- Description: The dry-run does not modify application files, repository workflow files, package files, or merge scripts.
 - Why it matters: Orchestration evaluation must be safe and reversible.
 - How to verify: Run `git status --short` before and after the dry-run.
-- Passing condition: The dry-run only creates report output under `.agent/reports/<timestamp>/`.
+- Passing condition: The dry-run only creates report output under `.agent/reports/<timestamp>/`, and stable adapter changes stay under `.agent/orchestrators/crewai/`.
 
 ## 7. No Merge Gate Integration
 
 - Description: CrewAI is not wired into merge approval or `scripts/local-review.sh`.
 - Why it matters: The current real review workflow must remain stable until a reviewed decision changes it.
 - How to verify: Confirm no changes to merge scripts, package files, or CI gate files.
-- Passing condition: CrewAI remains a standalone adapter candidate.
+- Passing condition: CrewAI remains a standalone adapter candidate and no auto-merge behavior is introduced.
 
 ## 8. Pluggability
 
