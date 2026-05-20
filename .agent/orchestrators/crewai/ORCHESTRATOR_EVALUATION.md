@@ -1,6 +1,6 @@
 # CrewAI Orchestrator Evaluation Matrix
 
-This matrix defines how SITE LOVE evaluates CrewAI as a pluggable orchestrator candidate. Fase 5c evaluates real CrewAI dry-run execution while keeping Codex as the operational executor. Fase 5d adds the executor boundary documented in `.agent/contracts/crewai-codex-executor-contract.md`. Fase 5e tests a real CrewAI Executor Request dry-run without executing Codex. Fase 5f tests a real no-write handshake where CrewAI generates the request and a local Codex no-write adapter reads it and produces a response. The evaluation is limited to orchestration behavior, request/response contracts, and report quality. It does not change the merge gate.
+This matrix defines how SITE LOVE evaluates CrewAI as a pluggable orchestrator candidate. Fase 5c evaluates real CrewAI dry-run execution while keeping Codex as the operational executor. Fase 5d adds the executor boundary documented in `.agent/contracts/crewai-codex-executor-contract.md`. Fase 5e tests a real CrewAI Executor Request dry-run without executing Codex. Fase 5f tests a real no-write handshake where CrewAI generates the request and a local Codex no-write adapter reads it and produces a response. Fase 5g tests a no-write scoped patch plan where the adapter produces a plan and reviewer evaluation without a real code diff. The evaluation is limited to orchestration behavior, request/response contracts, planning artifacts, and report quality. It does not change the merge gate.
 
 ## 1. Role Separation
 
@@ -93,3 +93,11 @@ This matrix defines how SITE LOVE evaluates CrewAI as a pluggable orchestrator c
 - How to verify: Run `.agent/orchestrators/crewai/run_codex_no_write_handshake.py` from the CrewAI venv and inspect `.agent/reports/<timestamp>/crewai-codex-no-write-handshake.md`, `executor-request.md`, and `executor-response.md`.
 - Passing condition: `Real CrewAI execution: yes`, `Executor Request valid: yes`, `Real Codex execution: yes`, `Codex execution mode: read-only/no-write`, `Executor Response valid: yes`, `Repo modification: no`, `Git operations: no`, and the final verdict is `PASS WITH NOTES`.
 - Non-goals: no repository patch, no real code review on a diff, no CrewAI repository write permission, no commit/push/merge by CrewAI or the adapter, and no merge-gate connection.
+
+## 14. Scoped Patch Plan
+
+- Description: CrewAI generates a structured Executor Request, the Codex no-write adapter reads it, and the adapter produces a scoped patch plan, reviewer evaluation, Executor Response, and canonical report.
+- Why it matters: The project can test planning and review-shape handoff before permitting any write-capable Codex implementation.
+- How to verify: Run `.agent/orchestrators/crewai/run_scoped_patch_plan.py` from the CrewAI venv and inspect `.agent/reports/<timestamp>/crewai-scoped-patch-plan.md`, `executor-request.md`, `scoped-patch-plan.md`, `reviewer-evaluation.md`, and `executor-response.md`.
+- Passing condition: `Real CrewAI execution: yes`, `Executor Request valid: yes`, `Real Codex execution: yes`, `Codex execution mode: read-only/no-write`, `Scoped Patch Plan valid: yes`, `Reviewer evaluation generated: yes`, `Aggregator verdict generated: yes`, `Repo modification: no`, `Git operations: no`, and the final verdict is `PASS WITH NOTES`.
+- Non-goals: no application file modification, no applied patch, no real review on a code diff, no CrewAI repository write permission, no Git operation by CrewAI or the adapter, and no merge-gate connection.

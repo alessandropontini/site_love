@@ -134,3 +134,44 @@ Fase 5f adds a CrewAI-to-Codex no-write handshake report shape:
 The Fase 5f Executor Response is real only in the limited sense that the Codex no-write adapter reads the generated `executor-request.md`, validates it, and writes `executor-response.md`. It must declare `Execution mode: read-only/no-write`, `Files changed: none`, `Commands run: none`, and `Diff summary: none`.
 
 Fase 5f must not claim a real code review, a repository patch, merge approval, or merge-gate integration. The maximum expected verdict is `PASS WITH NOTES`.
+
+Fase 5g adds a CrewAI-to-Codex scoped patch plan report shape:
+
+```markdown
+# CrewAI to Codex Scoped Patch Plan Report
+
+- Phase: Fase 5g — CrewAI to Codex Scoped Patch Plan
+- Orchestrator: CrewAI
+- Executor: Codex no-write adapter
+- Real CrewAI execution: yes/no
+- CrewAI importable: yes/no
+- CrewAI version:
+- Executor Request generated: yes/no
+- Executor Request valid: yes/no
+- Real Codex execution: yes/no
+- Codex execution mode: read-only/no-write
+- Scoped Patch Plan generated: yes/no
+- Scoped Patch Plan valid: yes/no
+- Reviewer evaluation generated: yes/no
+- Aggregator verdict generated: yes/no
+- Repo modification: no
+- Git operations: no
+- Agent separation: yes/no
+- Final verdict: PASS | PASS WITH NOTES | CHANGES REQUESTED | BLOCKED | INFRASTRUCTURE BLOCKED
+
+## Scenario
+## CrewAI agent outputs
+## Executor Request validation
+## Codex no-write patch planning
+## Scoped Patch Plan validation
+## Reviewer evaluation summary
+## Safety checks
+## Evidence
+## Limitations
+## Final decision
+## Next step
+```
+
+The Fase 5g Scoped Patch Plan is a planning artifact only. It may name future candidate application files to inspect or edit in a separate approved write phase, but it must not contain an applicable diff, apply a patch, modify repository files, perform Git operations, or claim real review on a code diff.
+
+The reviewer evaluation must include the disclaimer `No real code diff was reviewed in this phase.` The maximum expected verdict is `PASS WITH NOTES`.

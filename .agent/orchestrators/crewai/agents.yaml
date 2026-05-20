@@ -62,3 +62,8 @@ handshake_aggregator:
   role: Handshake Aggregator
   goal: Aggregate CrewAI-to-Codex no-write handshake evidence into a canonical verdict
   phase_5f_execution: real_crewai_codex_no_write_handshake
+
+plan_aggregator:
+  role: Scoped Patch Plan Aggregator
+  goal: Aggregate CrewAI-to-Codex scoped patch plan evidence into a canonical verdict
+  phase_5g_execution: real_crewai_scoped_patch_plan

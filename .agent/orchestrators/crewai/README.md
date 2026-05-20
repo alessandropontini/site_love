@@ -8,6 +8,8 @@ Fase 5e tests a real CrewAI Executor Request dry-run. CrewAI generates a structu
 
 Fase 5f tests the first CrewAI-to-Codex no-write handshake. CrewAI generates a structured Executor Request, then the local Codex no-write adapter reads that actual request and produces a real Executor Response in `read-only/no-write` mode. The adapter does not modify repository files, run Git operations, execute patches, perform real code review, or connect CrewAI to the merge gate.
 
+Fase 5g tests a no-write scoped patch plan flow. CrewAI generates a structured Executor Request, the local Codex no-write adapter reads it, and the adapter produces a real `scoped-patch-plan.md`, reviewer evaluation, Executor Response, and report. The plan may name future candidate application files, but it does not inspect or modify application files, apply a patch, perform a real review on a code diff, run Git operations, or connect CrewAI to the merge gate.
+
 CrewAI is only an orchestrator candidate. Codex remains the operational executor for repository work: reading and editing files, running commands, preparing patches, executing validation, handling Git operations, and summarizing results.
 
 ## Layer Boundaries
@@ -40,6 +42,7 @@ See also:
 - Authorize CrewAI to modify code directly.
 - Execute real Codex patches from CrewAI.
 - Execute write-capable Codex patches through the Fase 5f no-write adapter.
+- Treat the Fase 5g scoped patch plan as an implemented patch or real review on a diff.
 - Declare dry-run output as real code review.
 - Auto-merge, push, commit, or delete branches.
 
@@ -66,6 +69,13 @@ source .venv-crewai/bin/activate
 python .agent/orchestrators/crewai/run_codex_no_write_handshake.py
 ```
 
+Run the scoped patch plan dry-run:
+
+```bash
+source .venv-crewai/bin/activate
+python .agent/orchestrators/crewai/run_scoped_patch_plan.py
+```
+
 The script writes a report to:
 
 ```text
@@ -88,6 +98,16 @@ The Codex no-write handshake writes:
 .agent/reports/<timestamp>/executor-response.md
 ```
 
+The scoped patch plan dry-run writes:
+
+```text
+.agent/reports/<timestamp>/crewai-scoped-patch-plan.md
+.agent/reports/<timestamp>/executor-request.md
+.agent/reports/<timestamp>/scoped-patch-plan.md
+.agent/reports/<timestamp>/reviewer-evaluation.md
+.agent/reports/<timestamp>/executor-response.md
+```
+
 ## Expected Result
 
 The dry-run should produce an auditable markdown report that states whether CrewAI was importable and whether real CrewAI agent execution happened.
@@ -100,6 +120,8 @@ The Fase 5c script uses a deterministic local LLM adapter to avoid external prov
 An honest `INFRASTRUCTURE BLOCKED` is required when CrewAI cannot be imported or cannot run. `PASS WITH NOTES` is acceptable when CrewAI executes distinct agents and tasks, produces separate outputs, avoids repository writes, and keeps CrewAI outside the merge gate.
 
 For Fase 5f, `PASS WITH NOTES` is the maximum expected verdict. It means CrewAI executed, the Executor Request was valid, the Codex no-write adapter really processed the request, and the Executor Response was valid. It still does not mean a patch was executed, a real review happened, or merge approval exists.
+
+For Fase 5g, `PASS WITH NOTES` is also the maximum expected verdict. It means CrewAI executed, the Executor Request was valid, the Codex no-write adapter produced a valid scoped patch plan, reviewer evaluation and aggregator verdict were generated, and the repository stayed unchanged. It still does not mean implementation happened or a real code diff was reviewed.
 
 ## Verdict Meanings
 
