@@ -33,6 +33,10 @@ Additional fields are allowed when they improve traceability, such as:
 
 The report must not claim real review or real CrewAI execution unless the run actually used CrewAI agents and captured separate outputs by agent.
 
+`Real CrewAI execution: no` means CrewAI was not importable, could not complete `Crew.kickoff()`, or only validated the local report contract.
+
+`Real CrewAI execution: yes` means CrewAI executed a dry-run with distinct `Agent`, `Task`, and `Crew` objects and captured separate outputs for each required agent.
+
 If CrewAI is not importable, or if the run only validates the local report contract, the report must use:
 
 ```markdown
@@ -41,3 +45,19 @@ If CrewAI is not importable, or if the run only validates the local report contr
 ```
 
 An honest blocked verdict is required whenever evidence is incomplete.
+
+If CrewAI executes but required agent outputs are missing or unstructured, the report must use:
+
+```markdown
+- Real CrewAI execution: yes
+- Final verdict: CHANGES REQUESTED
+```
+
+If CrewAI executes, required agent outputs are present, repository writes remain disabled, and the merge gate is unchanged, the expected Fase 5c verdict is:
+
+```markdown
+- Real CrewAI execution: yes
+- Final verdict: PASS WITH NOTES
+```
+
+`PASS WITH NOTES` reflects that CrewAI remains a candidate orchestrator and is not integrated with Codex executor, `scripts/local-review.sh`, or merge governance.

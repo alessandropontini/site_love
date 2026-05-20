@@ -1,27 +1,34 @@
 planner:
   role: Orchestration Planner
   goal: Define task sequence without modifying repo
+  phase_5c_execution: real_crewai_dry_run
 
 implementer_simulator:
   role: Implementer Simulator
   goal: Produce an implementation plan but do not edit files
+  phase_5c_execution: real_crewai_dry_run
 
 frontend_architect_reviewer:
   role: Frontend Architect Reviewer
   goal: Review architectural impact independently
+  phase_5c_execution: real_crewai_dry_run
 
 ux_a11y_reviewer:
   role: UX Accessibility Reviewer
   goal: Review accessibility and user experience independently
+  phase_5c_execution: real_crewai_dry_run
 
 qa_regression_reviewer:
   role: QA Regression Reviewer
   goal: Review test and regression risk independently
+  phase_5c_execution: real_crewai_dry_run
 
 git_workflow_reviewer:
   role: Git Workflow Reviewer
   goal: Review branch, merge and approval policy independently
+  phase_5c_execution: real_crewai_dry_run
 
 aggregator:
   role: Review Aggregator
   goal: Aggregate outputs and produce canonical final verdict
+  phase_5c_execution: real_crewai_dry_run
