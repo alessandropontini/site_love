@@ -49,22 +49,22 @@ export const gameLabels: Record<GameId, string> = {
 export const storyChapters: StoryChapter[] = [
   {
     id: "intro",
-    eyebrow: "Prologue",
-    title: "A city opens like a quiet game cartridge",
+    eyebrow: "Prologo",
+    title: "La citta si apre come una soglia luminosa",
     body:
-      "Begin with one small decision: follow the route. The story moves through places, clues, and tiny tests that unlock the next chapter.",
+      "Tutto comincia da una scelta piccola: seguire la strada. Ogni tappa custodisce un indizio, una prova leggera e un ricordo che apre il capitolo successivo.",
     place: "Milano",
     year: "Start",
     tone: "sky"
   },
   {
     id: "timeline",
-    eyebrow: "Chapter 01",
-    title: "The timeline starts moving",
+    eyebrow: "Capitolo 01",
+    title: "Il primo passo",
     body:
-      "Each stop keeps a memory, but nothing is handed over at once. Read the scene, play the moment, and let the next section come into view.",
-    place: "First route",
-    year: "Then",
+      "La strada non rivela tutto insieme. Leggi la scena, attraversa il momento e lascia che il prossimo frammento arrivi con calma.",
+    place: "Prima rotta",
+    year: "Inizio",
     tone: "olive"
   },
   {
@@ -80,12 +80,12 @@ export const storyChapters: StoryChapter[] = [
   },
   {
     id: "map",
-    eyebrow: "Chapter 02",
-    title: "A map of places that kept showing up",
+    eyebrow: "Capitolo 02",
+    title: "I ricordi",
     body:
-      "Some cities are not just backgrounds. They become coordinates: a sign, a facade, a path home, a place you can recognize before anyone names it.",
-    place: "Milano route",
-    year: "After",
+      "Alcuni luoghi non restano sfondo. Diventano coordinate: un cartello, una facciata, una strada che sa gia dove riportarti.",
+    place: "Rotta Milano",
+    year: "Dopo",
     tone: "sky"
   },
   {
@@ -101,12 +101,12 @@ export const storyChapters: StoryChapter[] = [
   },
   {
     id: "emotion",
-    eyebrow: "Chapter 03",
-    title: "The quiet sentence in the middle",
+    eyebrow: "Capitolo 03",
+    title: "La promessa",
     body:
-      "Between the games there is a pause: a softer frame, a held look, a sentence that does not need decoration to matter.",
-    place: "Pause",
-    year: "Always",
+      "Tra una prova e l'altra resta una pausa: una cornice piu morbida, uno sguardo tenuto, una frase che non ha bisogno di decorazioni.",
+    place: "Pausa",
+    year: "Sempre",
     tone: "rose"
   },
   {
@@ -133,12 +133,12 @@ export const storyChapters: StoryChapter[] = [
   },
   {
     id: "finale",
-    eyebrow: "Finale",
-    title: "The reveal waits until every chapter is earned",
+    eyebrow: "Capitolo 04",
+    title: "Il finale",
     body:
-      "When every game is complete, the route stops being a map and becomes a promise: keep choosing the next page together.",
-    place: "Unlocked ending",
-    year: "Forever",
+      "Quando ogni gioco e completo, la rotta smette di essere una mappa e diventa una promessa: continuare a scegliere la prossima pagina insieme.",
+    place: "Finale sbloccato",
+    year: "Per sempre",
     tone: "rose"
   }
 ];
