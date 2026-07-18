@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Manrope, Silkscreen } from "next/font/google";
+import { Manrope } from "next/font/google";
 import "./globals.css";
 
 const uiFont = Manrope({
@@ -8,16 +8,10 @@ const uiFont = Manrope({
   variable: "--font-ui"
 });
 
-const titleFont = Silkscreen({
-  weight: ["400", "700"],
-  subsets: ["latin"],
-  variable: "--font-title"
-});
-
 export const metadata: Metadata = {
-  title: "Pixel Quest: Alessandro & Bridget",
+  title: "Alessandro & Bridget — La nostra avventura",
   description:
-    "Play through four retro mini-games and relive the love story of Alessandro and Bridget."
+    "Un teatro di cartone da attraversare insieme: quattro atti, piccoli giochi e un finale da sbloccare."
 };
 
 export default function RootLayout({
@@ -26,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={`${uiFont.variable} ${titleFont.variable}`}>{children}</body>
+    <html lang="it">
+      <body className={uiFont.variable}>{children}</body>
     </html>
   );
 }
