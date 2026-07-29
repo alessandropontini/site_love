@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { useLocale } from "@/components/experience/LocaleProvider";
 import styles from "../ExperienceShell.module.css";
 
 type WindowId = "lamp" | "plant" | "curtain" | "balcony";
@@ -14,12 +15,16 @@ type Phase =
   | "won"
   | "claimed";
 
-const windows = [
-  { id: "lamp", label: "Lampada", position: "in alto a sinistra" },
-  { id: "plant", label: "Pianta", position: "in alto a destra" },
-  { id: "curtain", label: "Tende", position: "in basso a sinistra" },
-  { id: "balcony", label: "Balcone", position: "in basso a destra" }
-] as const;
+type StatusState =
+  | { key: "initial" }
+  | { key: "reduced"; count: number }
+  | { key: "observe" }
+  | { key: "repeat"; count: number }
+  | { key: "retry" }
+  | { key: "correct"; count: number; total: number }
+  | { key: "won" }
+  | { key: "roundComplete"; round: number }
+  | { key: "nextRound"; round: number };
 
 const rounds: readonly (readonly WindowId[])[] = [
   ["lamp", "plant", "curtain"],
@@ -39,13 +44,39 @@ export function WindowsChallenge({
   const [cueIndex, setCueIndex] = useState(-1);
   const [inputIndex, setInputIndex] = useState(0);
   const [guideVisible, setGuideVisible] = useState(false);
-  const [status, setStatus] = useState("Round 1 di 3. Avvia la prima sequenza.");
+  const [statusState, setStatusState] = useState<StatusState>({
+    key: "initial"
+  });
+  const { messages: copy } = useLocale();
+  const windows = copy.windows.items;
   const windowRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const actionRef = useRef<HTMLButtonElement>(null);
   const playbackSessionRef = useRef(0);
   const claimedRef = useRef(false);
   const currentRound = rounds[roundIndex];
   const showGuide = guideVisible || !motionEnabled;
+  const status = (() => {
+    switch (statusState.key) {
+      case "initial":
+        return copy.windows.initial;
+      case "reduced":
+        return copy.windows.reduced(statusState.count);
+      case "observe":
+        return copy.windows.observe;
+      case "repeat":
+        return copy.windows.repeat(statusState.count);
+      case "retry":
+        return copy.windows.retry;
+      case "correct":
+        return copy.windows.correct(statusState.count, statusState.total);
+      case "won":
+        return copy.windows.won;
+      case "roundComplete":
+        return copy.windows.roundComplete(statusState.round);
+      case "nextRound":
+        return copy.windows.nextRound(statusState.round);
+    }
+  })();
 
   useEffect(() => {
     if (phase !== "showing") return;
@@ -55,14 +86,12 @@ export function WindowsChallenge({
 
     if (!motionEnabled) {
       setGuideVisible(true);
-      setStatus(
-        `Movimento ridotto: la sequenza di ${currentRound.length} finestre resta visibile.`
-      );
+      setStatusState({ key: "reduced", count: currentRound.length });
       setPhase("input");
       return;
     }
 
-    setStatus("Osserva la sequenza. Le finestre saranno disponibili tra poco.");
+    setStatusState({ key: "observe" });
     const timers: number[] = [];
     const initialDelay = 350;
     const stepDuration = 900;
@@ -85,9 +114,7 @@ export function WindowsChallenge({
       window.setTimeout(() => {
         if (playbackSessionRef.current !== session) return;
         setCueIndex(-1);
-        setStatus(
-          `Ora ripeti ${currentRound.length} finestre nello stesso ordine. Se ti serve, usa la guida testuale.`
-        );
+        setStatusState({ key: "repeat", count: currentRound.length });
         setPhase("input");
       }, initialDelay + currentRound.length * stepDuration + 350)
     );
@@ -120,7 +147,7 @@ export function WindowsChallenge({
     if (currentRound[inputIndex] !== windowId) {
       setInputIndex(0);
       setGuideVisible(true);
-      setStatus("Ordine diverso. Nessuna penalità: rivedi la sequenza e riprova.");
+      setStatusState({ key: "retry" });
       setPhase("retry");
       return;
     }
@@ -129,19 +156,21 @@ export function WindowsChallenge({
     setInputIndex(nextInputIndex);
 
     if (nextInputIndex < currentRound.length) {
-      setStatus(
-        `Corretto. ${nextInputIndex} ${nextInputIndex === 1 ? "finestra inserita" : "finestre inserite"} su ${currentRound.length}.`
-      );
+      setStatusState({
+        key: "correct",
+        count: nextInputIndex,
+        total: currentRound.length
+      });
       return;
     }
 
     if (roundIndex === rounds.length - 1) {
-      setStatus("Tutte le finestre sono accese. La luce di casa è pronta.");
+      setStatusState({ key: "won" });
       setPhase("won");
       return;
     }
 
-    setStatus(`Round ${roundIndex + 1} completato.`);
+    setStatusState({ key: "roundComplete", round: roundIndex + 1 });
     setPhase("round-cleared");
   };
 
@@ -149,7 +178,7 @@ export function WindowsChallenge({
     const nextRound = roundIndex + 1;
     setRoundIndex(nextRound);
     setInputIndex(0);
-    setStatus(`Round ${nextRound + 1} di 3. Osserva la nuova sequenza.`);
+    setStatusState({ key: "nextRound", round: nextRound + 1 });
     setPhase("showing");
   };
 
@@ -183,12 +212,12 @@ export function WindowsChallenge({
       <div className={styles.challengeHeading}>
         <span className={styles.challengeNumber}>04</span>
         <div>
-          <h2 id="windows-title">Le finestre accese</h2>
-          <p>Osserva il ritmo della città e restituiscile la stessa luce.</p>
+          <h2 id="windows-title">{copy.windows.title}</h2>
+          <p>{copy.windows.intro}</p>
         </div>
       </div>
 
-      <ol className={styles.roundProgress} aria-label="Avanzamento della prova">
+      <ol className={styles.roundProgress} aria-label={copy.windows.progress}>
         {rounds.map((_, index) => {
           const state = index < roundIndex
             ? "completed"
@@ -201,7 +230,12 @@ export function WindowsChallenge({
             <li key={index} data-state={state}>
               <span aria-hidden="true">{state === "completed" ? "✓" : index + 1}</span>
               <span className={styles.srOnly}>
-                Round {index + 1}: {state === "completed" ? "completato" : state === "current" ? "corrente" : "da completare"}
+                Round {index + 1}:{" "}
+                {state === "completed"
+                  ? copy.windows.stateComplete
+                  : state === "current"
+                    ? copy.windows.stateCurrent
+                    : copy.windows.stateUpcoming}
               </span>
             </li>
           );
@@ -213,7 +247,7 @@ export function WindowsChallenge({
         <div
           className={styles.windowFacade}
           role="group"
-          aria-label="Quattro finestre di Milano"
+          aria-label={copy.windows.group}
         >
           {windows.map((item, index) => {
             const litDuringPlayback = cueIndex >= 0 && currentRound[cueIndex] === item.id;
@@ -237,7 +271,7 @@ export function WindowsChallenge({
                 disabled={phase !== "input"}
                 onClick={() => chooseWindow(item.id)}
                 onKeyDown={(event) => handleWindowKeyDown(event, index)}
-                aria-label={`${item.label}, ${item.position}${lit ? ", illuminata" : ""}`}
+                aria-label={`${item.label}, ${item.position}${lit ? `, ${copy.windows.lit}` : ""}`}
               >
                 <span className={styles.windowPane} aria-hidden="true">
                   <span />
@@ -254,7 +288,7 @@ export function WindowsChallenge({
 
       {showGuide && (
         <div className={styles.sequenceGuide}>
-          <strong>Sequenza del round {roundIndex + 1}</strong>
+          <strong>{copy.windows.guide(roundIndex + 1)}</strong>
           <ol>
             {currentRound.map((windowId, index) => (
               <li key={`${windowId}-${index}`}>
@@ -272,10 +306,10 @@ export function WindowsChallenge({
       <div className={styles.sequenceControls}>
         {phase === "ready" && (
           <button type="button" className={styles.primaryButton} onClick={playRound}>
-            Accendi la prima sequenza <span aria-hidden="true">→</span>
+            {copy.windows.start} <span aria-hidden="true">→</span>
           </button>
         )}
-        {phase === "showing" && <span>Guarda le luci del palco…</span>}
+        {phase === "showing" && <span>{copy.windows.watching}</span>}
         {phase === "input" && (
           <>
             <button
@@ -286,24 +320,24 @@ export function WindowsChallenge({
               disabled={!motionEnabled}
             >
               {!motionEnabled
-                ? "Sequenza sempre visibile"
+                ? copy.windows.alwaysVisible
                 : showGuide
-                  ? "Nascondi la sequenza"
-                  : "Mostra la sequenza"}
+                  ? copy.windows.hide
+                  : copy.windows.show}
             </button>
             <button type="button" className={styles.textButton} onClick={playRound}>
-              Rivedi le luci
+              {copy.windows.replayLights}
             </button>
           </>
         )}
         {phase === "retry" && (
           <button ref={actionRef} type="button" className={styles.primaryButton} onClick={playRound}>
-            Rivedi la sequenza <span aria-hidden="true">↻</span>
+            {copy.windows.replay} <span aria-hidden="true">↻</span>
           </button>
         )}
         {phase === "round-cleared" && (
           <button ref={actionRef} type="button" className={styles.primaryButton} onClick={startNextRound}>
-            Accendi il round successivo <span aria-hidden="true">→</span>
+            {copy.windows.continue} <span aria-hidden="true">→</span>
           </button>
         )}
         {(phase === "won" || phase === "claimed") && (
@@ -314,7 +348,7 @@ export function WindowsChallenge({
             onClick={claimReward}
             disabled={phase === "claimed"}
           >
-            Raccogli la luce <span aria-hidden="true">▣</span>
+            {copy.windows.collect} <span aria-hidden="true">▣</span>
           </button>
         )}
       </div>

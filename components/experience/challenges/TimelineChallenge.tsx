@@ -2,27 +2,55 @@
 
 import { useState } from "react";
 
+import { useLocale } from "@/components/experience/LocaleProvider";
 import styles from "../ExperienceShell.module.css";
 
-const correctOrder = ["Incontrarsi", "Riconoscersi", "Scegliersi", "Costruire"];
+const correctOrder = ["meet", "recognise", "choose", "build"] as const;
+type MomentId = (typeof correctOrder)[number];
 const initialOrder = [...correctOrder].reverse();
 
 export function TimelineChallenge({ onComplete }: { onComplete: () => void }) {
-  const [moments, setMoments] = useState(initialOrder);
+  const [moments, setMoments] = useState<MomentId[]>(initialOrder);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const [message, setMessage] = useState("Tocca la prima tessera da spostare.");
+  const [messageState, setMessageState] = useState<
+    "initial" | "cancelled" | "complete" | "swapped" | "selected"
+  >("initial");
+  const [selectedMoment, setSelectedMoment] = useState<MomentId | null>(null);
+  const { messages: copy } = useLocale();
   const solved = moments.every((moment, index) => moment === correctOrder[index]);
+  const momentLabel = (moment: MomentId) =>
+    copy.timeline.moments[correctOrder.indexOf(moment)];
+  const message = (() => {
+    if (messageState === "selected" && selectedMoment) {
+      return copy.timeline.selected(momentLabel(selectedMoment));
+    }
+
+    switch (messageState) {
+      case "initial":
+        return copy.timeline.initial;
+      case "cancelled":
+        return copy.timeline.cancelled;
+      case "complete":
+        return copy.timeline.complete;
+      case "swapped":
+        return copy.timeline.swapped;
+      case "selected":
+        return copy.timeline.initial;
+    }
+  })();
 
   const chooseMoment = (index: number) => {
     if (selectedIndex === null) {
       setSelectedIndex(index);
-      setMessage(`Hai scelto ${moments[index]}. Ora seleziona la tessera da scambiare.`);
+      setSelectedMoment(moments[index]);
+      setMessageState("selected");
       return;
     }
 
     if (selectedIndex === index) {
       setSelectedIndex(null);
-      setMessage("Selezione annullata.");
+      setSelectedMoment(null);
+      setMessageState("cancelled");
       return;
     }
 
@@ -33,10 +61,11 @@ export function TimelineChallenge({ onComplete }: { onComplete: () => void }) {
     ];
     setMoments(nextMoments);
     setSelectedIndex(null);
-    setMessage(
+    setSelectedMoment(null);
+    setMessageState(
       nextMoments.every((moment, momentIndex) => moment === correctOrder[momentIndex])
-        ? "La sequenza è completa. Ogni scelta ha trovato il suo posto."
-        : "Scambio riuscito. Continua a ricomporre la storia."
+        ? "complete"
+        : "swapped"
     );
   };
 
@@ -45,12 +74,15 @@ export function TimelineChallenge({ onComplete }: { onComplete: () => void }) {
       <div className={styles.challengeHeading}>
         <span className={styles.challengeNumber}>03</span>
         <div>
-          <h2 id="timeline-title">Metti in ordine i gesti</h2>
-          <p>Non servono date: bastano quattro verbi.</p>
+          <h2 id="timeline-title">{copy.timeline.title}</h2>
+          <p>{copy.timeline.intro}</p>
         </div>
       </div>
 
-      <ol className={styles.timelineBoard} aria-label="Sequenza dei momenti">
+      <ol
+        className={styles.timelineBoard}
+        aria-label={copy.timeline.boardLabel}
+      >
         {moments.map((moment, index) => (
           <li key={moment}>
             <button
@@ -60,7 +92,7 @@ export function TimelineChallenge({ onComplete }: { onComplete: () => void }) {
               onClick={() => chooseMoment(index)}
             >
               <span>{String(index + 1).padStart(2, "0")}</span>
-              <strong>{moment}</strong>
+              <strong>{momentLabel(moment)}</strong>
               <span aria-hidden="true">↕</span>
             </button>
           </li>
@@ -73,7 +105,7 @@ export function TimelineChallenge({ onComplete }: { onComplete: () => void }) {
 
       {solved && (
         <button type="button" className={styles.primaryButton} onClick={onComplete}>
-          Prendi il frammento
+          {copy.timeline.collect}
           <span aria-hidden="true">♡</span>
         </button>
       )}

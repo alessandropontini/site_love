@@ -33,6 +33,7 @@ CrewAI is being evaluated as a pluggable orchestrator with a documented Codex ex
 - `components/experience/art/` — cardboard stage, landmarks, characters, and reward art.
 - `components/experience/ExperienceShell.module.css` — active visual system and responsive layout.
 - `lib/experienceConfig.ts` — canonical chapter order, copy, instructions, and rewards.
+- `lib/i18n.ts` — Italian/English dictionaries and free client-side locale detection.
 - `lib/useExperienceProgress.ts` — versioned local state, gating, persistence, and reset.
 - `public/scene/paper-theatre/` — active local transparent WebP theatre assets.
 - `components/story/`, `components/games/`, `components/QuestGame.tsx`, `components/quest/`, and `components/pixel/` — unmounted legacy implementations.
@@ -119,6 +120,16 @@ Documentation-only changes describing these files are allowed when they do not m
 - Avoid fixed-width layouts that break on phones.
 - Keep stage animation and timed challenge playback performant; avoid unnecessary React re-renders in animation paths.
 - Preserve Next.js image/font optimizations and do not add heavyweight client libraries for orchestration or styling without approval.
+
+## Localization rules
+
+- The mounted experience supports Italian (`it`) and English (`en`).
+- All visible copy, status messages, accessible names, image alternatives, confirmations, and live-region announcements must come from `lib/i18n.ts` or localized fields in `lib/experienceConfig.ts`.
+- Preserve the detection priority: saved manual choice, Italian geographic time zone, Italian browser language, then English fallback.
+- Keep the visible `IT / EN` selector available on the invitation and journey toolbar.
+- A manual selection must persist locally and update `html lang`, document title, and description.
+- Challenge state must use language-independent IDs so switching language never resets progress or leaves mixed-language status text.
+- Do not add runtime translation APIs or localization dependencies without explicit approval.
 
 ## Paper-theatre progression rules
 

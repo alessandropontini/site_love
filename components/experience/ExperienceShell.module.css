@@ -76,7 +76,7 @@
   z-index: 50;
   display: grid;
   min-height: var(--toolbar-height);
-  grid-template-columns: auto minmax(140px, 320px) auto;
+  grid-template-columns: auto minmax(140px, 320px) auto auto;
   gap: clamp(.75rem, 3vw, 2.5rem);
   align-items: center;
   justify-content: center;
@@ -116,6 +116,36 @@
 
 .iconButton {
   font-size: 1.25rem;
+}
+
+.languageSelector {
+  display: inline-grid;
+  min-height: 42px;
+  grid-auto-flow: column;
+  align-items: stretch;
+  overflow: hidden;
+  border: 1px solid rgba(240,207,131,.72);
+  background: rgba(255,249,238,.06);
+}
+
+.languageSelector button {
+  min-width: 38px;
+  min-height: 42px;
+  padding: .45rem .55rem;
+  border: 0;
+  background: transparent;
+  color: var(--paper-light);
+  font-size: .72rem;
+  font-weight: 850;
+}
+
+.languageSelector button + button {
+  border-left: 1px solid rgba(240,207,131,.42);
+}
+
+.languageSelector button[aria-pressed="true"] {
+  background: var(--gold-light);
+  color: var(--curtain-deep);
 }
 
 .toolbarStatus {
@@ -281,6 +311,14 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: clamp(2rem, 7vh, 4.75rem);
+}
+
+.invitationControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .65rem;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .invitation .kicker {
@@ -522,28 +560,26 @@
   line-height: 1.15;
 }
 
-.mapNode[data-status="locked"] .nodeLabel::after {
+.nodeStatus {
+  display: block;
+  font-size: .72rem;
+  font-weight: 850;
+  letter-spacing: .08em;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.mapNode[data-status="locked"] .nodeStatus {
   color: #71645b;
-  content: "Bloccata";
-  font-size: .72rem;
   letter-spacing: .1em;
-  text-transform: uppercase;
 }
 
-.mapNode[data-status="available"] .nodeLabel::after {
+.mapNode[data-status="available"] .nodeStatus {
   color: #8a5d18;
-  content: "Disponibile";
-  font-size: .72rem;
-  letter-spacing: .08em;
-  text-transform: uppercase;
 }
 
-.mapNode[data-status="complete"] .nodeLabel::after {
+.mapNode[data-status="complete"] .nodeStatus {
   color: var(--success);
-  content: "Completata";
-  font-size: .72rem;
-  letter-spacing: .08em;
-  text-transform: uppercase;
 }
 
 .finaleBeacon {
@@ -1880,7 +1916,7 @@
   .experience { --toolbar-height: 66px; }
 
   .toolbar {
-    grid-template-columns: auto minmax(110px, 1fr) auto;
+    grid-template-columns: auto minmax(90px, 1fr) auto auto;
     justify-content: stretch;
     padding-inline: .75rem;
   }
@@ -2041,7 +2077,8 @@
 
 @media (max-width: 620px) {
   .toolbar {
-    gap: .55rem;
+    gap: .35rem;
+    padding-inline: .5rem;
   }
 
   .brandButton {
@@ -2050,7 +2087,17 @@
   }
 
   .toolbarStatus {
-    font-size: .72rem;
+    font-size: .65rem;
+  }
+
+  .toolbar .languageSelector {
+    min-height: 40px;
+  }
+
+  .toolbar .languageSelector button {
+    min-width: 31px;
+    min-height: 40px;
+    padding-inline: .35rem;
   }
 
   .invitationCopy {

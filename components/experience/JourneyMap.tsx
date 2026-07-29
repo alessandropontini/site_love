@@ -2,9 +2,10 @@ import type { CSSProperties, RefObject } from "react";
 
 import { PaperStage } from "@/components/experience/art/PaperArt";
 import {
-  experienceChapters,
+  type ExperienceChapter,
   type ChapterId
 } from "@/lib/experienceConfig";
+import { useLocale } from "@/components/experience/LocaleProvider";
 
 import styles from "./ExperienceShell.module.css";
 
@@ -16,6 +17,7 @@ const nodePositions: Record<ChapterId, { x: string; y: string }> = {
 };
 
 export function JourneyMap({
+  chapters,
   completedCount,
   finaleUnlocked,
   isChapterComplete,
@@ -25,6 +27,7 @@ export function JourneyMap({
   onOpenInventory,
   inventoryTriggerRef
 }: {
+  chapters: ExperienceChapter[];
   completedCount: number;
   finaleUnlocked: boolean;
   isChapterComplete: (chapterId: ChapterId) => boolean;
@@ -34,18 +37,16 @@ export function JourneyMap({
   onOpenInventory: () => void;
   inventoryTriggerRef: RefObject<HTMLButtonElement>;
 }) {
+  const { messages: copy } = useLocale();
+
   return (
     <section className={styles.mapScreen} aria-labelledby="map-title">
       <div className={styles.mapHeading}>
         <div>
-          <span className={styles.kicker}>La città si ricorda</span>
-          <h1 id="map-title">Mappa dei ricordi</h1>
+          <span className={styles.kicker}>{copy.map.kicker}</span>
+          <h1 id="map-title">{copy.map.title}</h1>
         </div>
-        <p>
-          Segui la strada illuminata. Ogni fermata cambia il mondo e lascia un
-          oggetto nello zaino. Completa la tappa disponibile per accendere la
-          successiva.
-        </p>
+        <p>{copy.map.description}</p>
       </div>
 
       <div className={styles.mapWorld}>
@@ -62,13 +63,13 @@ export function JourneyMap({
             d="M80 450 C170 390 220 400 280 330 S390 210 485 290 S650 450 720 320 S810 145 930 160"
             pathLength="100"
             style={{
-              strokeDasharray: `${(completedCount / experienceChapters.length) * 100} 100`
+              strokeDasharray: `${(completedCount / chapters.length) * 100} 100`
             }}
           />
         </svg>
 
         <ol className={styles.mapNodes}>
-          {experienceChapters.map((chapter) => {
+          {chapters.map((chapter) => {
             const complete = isChapterComplete(chapter.id);
             const unlocked = isChapterUnlocked(chapter.id);
             const position = nodePositions[chapter.id];
@@ -91,16 +92,25 @@ export function JourneyMap({
                   aria-current={!complete && unlocked ? "step" : undefined}
                   aria-label={`${chapter.number}. ${chapter.mapLabel}. ${
                     complete
-                      ? "Completata"
+                      ? copy.map.complete
                       : unlocked
-                        ? "Disponibile"
-                        : "Bloccata. Completa prima la tappa precedente"
+                        ? copy.map.available
+                        : `${copy.map.locked}. ${copy.map.lockedDetail}`
                   }`}
                 >
                   <span className={styles.nodeNumber}>
                     {complete ? "✓" : chapter.number}
                   </span>
-                  <span className={styles.nodeLabel}>{chapter.mapLabel}</span>
+                  <span className={styles.nodeLabel}>
+                    <span>{chapter.mapLabel}</span>
+                    <span className={styles.nodeStatus}>
+                      {complete
+                        ? copy.map.complete
+                        : unlocked
+                          ? copy.map.available
+                          : copy.map.locked}
+                    </span>
+                  </span>
                 </button>
               </li>
             );
@@ -110,21 +120,21 @@ export function JourneyMap({
         {finaleUnlocked && (
           <button type="button" className={styles.finaleBeacon} onClick={onOpenFinale}>
             <span aria-hidden="true">♥</span>
-            Apri il finale
+            {copy.map.openFinale}
           </button>
         )}
       </div>
 
-      <nav className={styles.mapDock} aria-label="Azioni della mappa">
+      <nav className={styles.mapDock} aria-label={copy.map.actions}>
         <span className={styles.currentLocation}>
           <span aria-hidden="true">⌖</span>
-          Milano, Italia
+          {copy.map.location}
         </span>
         <button type="button" onClick={onOpenInventory} ref={inventoryTriggerRef}>
           <span aria-hidden="true">▣</span>
-          Zaino
+          {copy.map.inventory}
           <strong>
-            {completedCount}/{experienceChapters.length}
+            {completedCount}/{chapters.length}
           </strong>
         </button>
       </nav>

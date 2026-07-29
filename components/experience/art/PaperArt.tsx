@@ -38,7 +38,8 @@ export function PaperStage({
   priority = false,
   chapterId,
   chapterNumber,
-  location
+  location,
+  actLabel = "ATTO"
 }: {
   variant: PaperStageVariant;
   tone?: ChapterTone;
@@ -46,6 +47,7 @@ export function PaperStage({
   chapterId?: ChapterId;
   chapterNumber?: string;
   location?: string;
+  actLabel?: string;
 }) {
   return (
     <div
@@ -93,7 +95,7 @@ export function PaperStage({
 
       {chapterNumber && (
         <span className={styles.actBadge}>
-          <small>ATTO</small>
+          <small>{actLabel}</small>
           {chapterNumber}
         </span>
       )}

@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 
 import { PaperStage, PaperSymbol } from "@/components/experience/art/PaperArt";
-import { experienceChapters } from "@/lib/experienceConfig";
+import { useLocale } from "@/components/experience/LocaleProvider";
+import { getExperienceChapters } from "@/lib/experienceConfig";
 
 import styles from "./ExperienceShell.module.css";
 
@@ -16,6 +17,8 @@ export function FinaleExperience({
 }) {
   const [letterOpen, setLetterOpen] = useState(false);
   const [confirmReplay, setConfirmReplay] = useState(false);
+  const { locale, messages: copy } = useLocale();
+  const experienceChapters = getExperienceChapters(locale);
   const letterTitleRef = useRef<HTMLHeadingElement>(null);
   const replayTriggerRef = useRef<HTMLButtonElement>(null);
 
@@ -33,7 +36,7 @@ export function FinaleExperience({
     <section className={styles.finaleScreen} aria-labelledby="finale-title">
       <button type="button" className={styles.backButton} onClick={onBack}>
         <span aria-hidden="true">←</span>
-        Mappa
+        {copy.common.map}
       </button>
 
       {!letterOpen ? (
@@ -41,13 +44,14 @@ export function FinaleExperience({
           <div className={styles.finalSky} aria-hidden="true">
             <PaperStage variant="finale" tone="night" />
           </div>
-          <span className={styles.kicker}>I quattro ricordi sono qui</span>
-          <h1 id="finale-title">L&apos;ultima pagina non era una fine</h1>
-          <p>
-            Ogni oggetto ha portato una parola. Adesso possono finalmente stare
-            nella stessa lettera.
-          </p>
-          <div className={styles.assemblyObjects} role="list" aria-label="Ricordi raccolti">
+          <span className={styles.kicker}>{copy.finale.kicker}</span>
+          <h1 id="finale-title">{copy.finale.title}</h1>
+          <p>{copy.finale.description}</p>
+          <div
+            className={styles.assemblyObjects}
+            role="list"
+            aria-label={copy.finale.collected}
+          >
             {experienceChapters.map((chapter) => (
               <span
                 key={chapter.id}
@@ -64,7 +68,7 @@ export function FinaleExperience({
             onClick={() => setLetterOpen(true)}
           >
             <span aria-hidden="true">✉</span>
-            Apri la lettera
+            {copy.finale.openLetter}
           </button>
         </div>
       ) : (
@@ -74,20 +78,16 @@ export function FinaleExperience({
           </div>
           <span className={styles.kicker}>Alessandro &amp; Bridget</span>
           <h1 id="finale-title" ref={letterTitleRef} tabIndex={-1}>
-            La prossima fermata è nostra
+            {copy.finale.letterTitle}
           </h1>
           <div className={styles.letterBody}>
-            <p>Ci sono storie che cercano un finale perfetto.</p>
-            <p>
-              Questa preferisce continuare: nelle strade ancora da attraversare,
-              nelle cose piccole da ricordare e in tutte le volte in cui sceglieremo
-              di tornare dalla stessa parte.
-            </p>
-            <strong>Continuiamo?</strong>
+            <p>{copy.finale.letterParagraphOne}</p>
+            <p>{copy.finale.letterParagraphTwo}</p>
+            <strong>{copy.finale.question}</strong>
           </div>
           <div className={styles.finaleActions}>
             <button type="button" className={styles.secondaryButton} onClick={onBack}>
-              Rivedi la mappa
+              {copy.finale.reviewMap}
             </button>
             {!confirmReplay ? (
               <button
@@ -96,16 +96,20 @@ export function FinaleExperience({
                 ref={replayTriggerRef}
                 onClick={() => setConfirmReplay(true)}
               >
-                Ricomincia la storia
+                {copy.finale.restart}
               </button>
             ) : (
-              <div className={styles.replayConfirm} role="group" aria-label="Conferma nuovo inizio">
-                <span>Il progresso verrà cancellato.</span>
+              <div
+                className={styles.replayConfirm}
+                role="group"
+                aria-label={copy.finale.confirmGroup}
+              >
+                <span>{copy.finale.confirm}</span>
                 <button type="button" className={styles.textButton} onClick={cancelReplay} autoFocus>
-                  Annulla
+                  {copy.common.cancel}
                 </button>
                 <button type="button" className={styles.primaryButton} onClick={onReplay}>
-                  Sì, ricomincia
+                  {copy.finale.confirmAction}
                 </button>
               </div>
             )}

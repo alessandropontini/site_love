@@ -1,32 +1,36 @@
 'use client';
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import { useLocale } from "@/components/experience/LocaleProvider";
 import styles from "../ExperienceShell.module.css";
-
-const coordinatePairs = [
-  { id: "duomo", left: "Duomo", right: "Milano", symbol: "⌂" },
-  { id: "tram", left: "Tram", right: "Viaggio", symbol: "▰" },
-  { id: "letter", left: "Lettera", right: "Promessa", symbol: "✉" }
-] as const;
-
-const rightOrder = [coordinatePairs[1], coordinatePairs[2], coordinatePairs[0]];
 
 export function CoordinatesChallenge({ onComplete }: { onComplete: () => void }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [matchedIds, setMatchedIds] = useState<string[]>([]);
-  const [message, setMessage] = useState("Scegli il primo elemento di una coppia.");
+  const { messages: copy } = useLocale();
+  const coordinatePairs = copy.coordinates.pairs;
+  const rightOrder = [
+    coordinatePairs[1],
+    coordinatePairs[2],
+    coordinatePairs[0]
+  ];
+  const [message, setMessage] = useState<string>(copy.coordinates.initial);
   const complete = matchedIds.length === coordinatePairs.length;
+
+  useEffect(() => {
+    setMessage(copy.coordinates.initial);
+  }, [copy]);
 
   const chooseRight = (pairId: string) => {
     if (!selectedId) {
-      setMessage("Prima scegli un elemento nella colonna di sinistra.");
+      setMessage(copy.coordinates.chooseLeft);
       return;
     }
 
     if (selectedId !== pairId) {
       setSelectedId(null);
-      setMessage("Queste coordinate non coincidono ancora. Prova un altro abbinamento.");
+      setMessage(copy.coordinates.mismatch);
       return;
     }
 
@@ -35,8 +39,8 @@ export function CoordinatesChallenge({ onComplete }: { onComplete: () => void })
     setSelectedId(null);
     setMessage(
       nextMatched.length === coordinatePairs.length
-        ? "Tutte le coordinate portano nella stessa direzione."
-        : "Coordinate trovate. Continua con la coppia successiva."
+        ? copy.coordinates.complete
+        : copy.coordinates.matched
     );
   };
 
@@ -45,13 +49,16 @@ export function CoordinatesChallenge({ onComplete }: { onComplete: () => void })
       <div className={styles.challengeHeading}>
         <span className={styles.challengeNumber}>02</span>
         <div>
-          <h2 id="coordinates-title">Collega i segni</h2>
-          <p>Tre coppie, una sola strada.</p>
+          <h2 id="coordinates-title">{copy.coordinates.title}</h2>
+          <p>{copy.coordinates.intro}</p>
         </div>
       </div>
 
       <div className={styles.pairBoard}>
-        <div className={styles.pairColumn} aria-label="Elementi da abbinare">
+        <div
+          className={styles.pairColumn}
+          aria-label={copy.coordinates.leftLabel}
+        >
           {coordinatePairs.map((pair) => {
             const matched = matchedIds.includes(pair.id);
             return (
@@ -64,7 +71,7 @@ export function CoordinatesChallenge({ onComplete }: { onComplete: () => void })
                 aria-pressed={selectedId === pair.id}
                 onClick={() => {
                   setSelectedId(pair.id);
-                  setMessage(`Ora trova la parola collegata a ${pair.left}.`);
+                  setMessage(copy.coordinates.selected(pair.left));
                 }}
               >
                 <span aria-hidden="true">{pair.symbol}</span>
@@ -74,7 +81,10 @@ export function CoordinatesChallenge({ onComplete }: { onComplete: () => void })
           })}
         </div>
         <span className={styles.pairLine} aria-hidden="true">↔</span>
-        <div className={styles.pairColumn} aria-label="Parole corrispondenti">
+        <div
+          className={styles.pairColumn}
+          aria-label={copy.coordinates.rightLabel}
+        >
           {rightOrder.map((pair) => {
             const matched = matchedIds.includes(pair.id);
             return (
@@ -99,7 +109,7 @@ export function CoordinatesChallenge({ onComplete }: { onComplete: () => void })
 
       {complete && (
         <button type="button" className={styles.primaryButton} onClick={onComplete}>
-          Conserva il biglietto
+          {copy.coordinates.collect}
           <span aria-hidden="true">⌖</span>
         </button>
       )}

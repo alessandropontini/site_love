@@ -16,12 +16,23 @@ The earlier files under `components/story/`, `components/games/`, `components/qu
 ## Configuration and state
 
 - `lib/experienceConfig.ts` defines `chapterOrder`, chapter copy, locations, instructions, visual variants, and rewards.
+- `lib/i18n.ts` defines Italian/English interface copy and locale detection.
+- `components/experience/LocaleProvider.tsx` exposes the locale and language selector.
 - `lib/useExperienceProgress.ts` owns versioned state, `localStorage` persistence, migration, unlock checks, rewards, motion preferences, and reset.
 - `components/experience/ExperienceShell.tsx` coordinates invitation, map, active chapter, reward, inventory, and finale views.
 - `components/experience/JourneyMap.tsx` presents complete, available, and locked chapter states.
 - `components/experience/InventoryPanel.tsx` presents collected rewards and the confirmed reset action.
 
 Keep chapter order in configuration. Do not duplicate it in UI code. When adding or removing an act, update the chapter union, configuration, challenge routing, persistence version/migration, map presentation, and finale requirements together.
+
+## Localization
+
+- Add every new visible string and accessible name to both dictionaries.
+- Keep structural game values as stable IDs; never store translated labels as progression state.
+- Add chapter copy to both localized fields in `lib/experienceConfig.ts`.
+- Check language switching on the invitation, map, every challenge state, inventory, reward, and finale.
+- Confirm `html lang`, title, description, and the saved manual preference update.
+- Do not call an external translation service at runtime.
 
 ## Active challenges
 

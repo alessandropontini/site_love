@@ -4,10 +4,13 @@ import Image from "next/image";
 import type { CSSProperties } from "react";
 import { useState } from "react";
 
+import { useLocale } from "@/components/experience/LocaleProvider";
+
 import styles from "../ExperienceShell.module.css";
 
 export function FrequencyChallenge({ onComplete }: { onComplete: () => void }) {
   const [frequency, setFrequency] = useState(18);
+  const { messages: copy } = useLocale();
   const ready = frequency >= 88;
   const visualStyle = {
     "--clarity": frequency / 100,
@@ -20,15 +23,15 @@ export function FrequencyChallenge({ onComplete }: { onComplete: () => void }) {
       <div className={styles.challengeHeading}>
         <span className={styles.challengeNumber}>01</span>
         <div>
-          <h2 id="frequency-title">Sintonizza il segnale</h2>
-          <p>Porta l&apos;indicatore nella zona luminosa.</p>
+          <h2 id="frequency-title">{copy.frequency.title}</h2>
+          <p>{copy.frequency.intro}</p>
         </div>
       </div>
 
       <div className={styles.frequencyMemory} style={visualStyle}>
         <Image
           src="/scene/paper-theatre/duomo-cardboard.webp"
-          alt="Modello di cartone del Duomo di Milano che emerge dal segnale"
+          alt={copy.frequency.imageAlt}
           width={1050}
           height={700}
           sizes="(max-width: 899px) 84vw, 42vw"
@@ -42,8 +45,8 @@ export function FrequencyChallenge({ onComplete }: { onComplete: () => void }) {
 
       <label className={styles.rangeControl}>
         <span>
-          Frequenza del ricordo
-          <strong>{ready ? "Segnale trovato" : `${frequency}%`}</strong>
+          {copy.frequency.label}
+          <strong>{ready ? copy.frequency.found : `${frequency}%`}</strong>
         </span>
         <input
           type="range"
@@ -58,8 +61,8 @@ export function FrequencyChallenge({ onComplete }: { onComplete: () => void }) {
 
       <p className={styles.challengeStatus} id="frequency-status" aria-live="polite">
         {ready
-          ? "Il segnale è nitido. Puoi raccogliere il primo ricordo."
-          : "Continua a regolare: la zona giusta è vicina al massimo."}
+          ? copy.frequency.ready
+          : copy.frequency.searching}
       </p>
 
       <button
@@ -68,7 +71,7 @@ export function FrequencyChallenge({ onComplete }: { onComplete: () => void }) {
         onClick={ready ? onComplete : () => setFrequency(92)}
         aria-controls="frequency-status"
       >
-        {ready ? "Raccogli la scintilla" : "Aggancia il segnale"}
+        {ready ? copy.frequency.collect : copy.frequency.assist}
         <span aria-hidden="true">{ready ? "✦" : "⌁"}</span>
       </button>
     </article>

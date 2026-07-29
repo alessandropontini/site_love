@@ -4,6 +4,12 @@ Un microsito Next.js mobile-first costruito come una piccola storia interattiva.
 
 Il teatro di cartone montato da `app/page.tsx` è la linea narrativa principale e l'esperienza destinata alla produzione. Le implementazioni precedenti restano nel repository soltanto come riferimenti non montati.
 
+## Lingue
+
+L'esperienza è disponibile integralmente in italiano e inglese, compresi giochi, messaggi di stato, controlli accessibili e metadata aggiornati nel browser. Alla prima visita il sito usa gratuitamente il fuso geografico e la lingua del dispositivo: i fusi italiani aprono in italiano, la lingua browser italiana è il secondo segnale e tutti gli altri casi usano l'inglese.
+
+Il selettore visibile **IT / EN** permette sempre di cambiare lingua. La scelta viene salvata soltanto nel browser e ha priorità sui rilevamenti successivi; non vengono usati servizi IP, cookie di profilazione o API di traduzione.
+
 ## Getting Started
 
 1. Install dependencies
@@ -36,6 +42,8 @@ Le vecchie implementazioni scrollytelling e arcade restano nel repository come r
 ## Where To Customize
 
 - `lib/experienceConfig.ts` – titoli, luoghi, istruzioni e ricompense delle quattro fermate.
+- `lib/i18n.ts` – dizionari IT/EN, metadata e rilevamento iniziale della lingua.
+- `components/experience/LocaleProvider.tsx` – stato locale, persistenza e selettore lingua.
 - `lib/useExperienceProgress.ts` – stato versionato, gating, migrazione e persistenza locale.
 - `components/experience/ExperienceShell.tsx` – regia di invito, mappa, capitoli, ricompense e finale.
 - `components/experience/JourneyMap.tsx` – hub visuale e stati `completata`, `disponibile`, `bloccata`.

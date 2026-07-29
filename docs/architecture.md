@@ -32,6 +32,8 @@ npm run lint
 - `components/experience/FinaleExperience.tsx` assembles the four objects and reveals the final letter.
 - `components/experience/ExperienceShell.module.css` contains the isolated design system, responsive layout, scene art, and reduced-motion behavior.
 - `lib/experienceConfig.ts` is the serializable source of truth for chapter order, copy, tones, instructions, and rewards.
+- `lib/i18n.ts` contains the Italian/English interface dictionaries and the provider-independent locale detection rules.
+- `components/experience/LocaleProvider.tsx` owns the active locale, manual selector, local persistence, `html lang`, and client-side metadata updates.
 - `lib/useExperienceProgress.ts` provides versioned local persistence, sequential gating, legacy migration, reset, and finale guards.
 
 The inventory is derived from completed chapter IDs and is never persisted separately. Stored progress is normalized to a closed prefix of configured chapters, so malformed or out-of-order data cannot skip the journey. The finale uses `every()` across configured IDs rather than trusting a numeric count.
@@ -43,6 +45,19 @@ invitation → map → chapter → reward → map → … → finale
 ```
 
 There is no automatic start, timer-authoritative progression, external API, account, database, analytics service, or paid runtime dependency.
+
+## Localization
+
+The active route is bilingual without a runtime translation service or localization dependency. Chapter structure remains language-independent: `chapterOrder` contains stable IDs, while `getExperienceChapters(locale)` resolves localized copy. Challenge state also stores IDs and phase values rather than translated labels, so a language switch does not reset progress or leave stale messages.
+
+Initial locale priority is:
+
+1. A previous manual choice saved under `site-love-locale-v1`.
+2. An Italian geographic time zone (`Europe/Rome`, `Europe/San_Marino`, or `Europe/Vatican`).
+3. An Italian browser language.
+4. English fallback.
+
+The visible `IT / EN` control is available before and after entering the journey. Switching locale updates the mounted copy, accessible names, live messages, `html lang`, document title, and description. Detection is client-side and privacy-preserving; exact IP-country detection can be added later at the hosting edge without changing chapter or challenge state.
 
 ## Legacy implementations
 

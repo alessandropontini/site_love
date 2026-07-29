@@ -6,10 +6,15 @@ import { ChapterExperience } from "@/components/experience/ChapterExperience";
 import { FinaleExperience } from "@/components/experience/FinaleExperience";
 import { InventoryPanel } from "@/components/experience/InventoryPanel";
 import { JourneyMap } from "@/components/experience/JourneyMap";
+import {
+  LanguageSelector,
+  LocaleProvider,
+  useLocale
+} from "@/components/experience/LocaleProvider";
 import { RewardScene } from "@/components/experience/RewardScene";
 import { PaperStage } from "@/components/experience/art/PaperArt";
 import {
-  experienceChapters,
+  getExperienceChapters,
   getExperienceChapter
 } from "@/lib/experienceConfig";
 import { useExperienceProgress } from "@/lib/useExperienceProgress";
@@ -17,10 +22,23 @@ import { useExperienceProgress } from "@/lib/useExperienceProgress";
 import styles from "./ExperienceShell.module.css";
 
 export function ExperienceShell() {
+  return (
+    <LocaleProvider>
+      <ExperienceShellContent />
+    </LocaleProvider>
+  );
+}
+
+function ExperienceShellContent() {
   const [inventoryOpen, setInventoryOpen] = useState(false);
   const backgroundRef = useRef<HTMLDivElement>(null);
   const screenRef = useRef<HTMLElement>(null);
   const inventoryTriggerRef = useRef<HTMLButtonElement>(null);
+  const { locale, messages: copy } = useLocale();
+  const experienceChapters = useMemo(
+    () => getExperienceChapters(locale),
+    [locale]
+  );
   const {
     activeChapter,
     completedCount,
@@ -41,8 +59,11 @@ export function ExperienceShell() {
   } = useExperienceProgress();
 
   const activeChapterConfig = useMemo(
-    () => (activeChapter ? getExperienceChapter(activeChapter) : undefined),
-    [activeChapter]
+    () =>
+      activeChapter
+        ? getExperienceChapter(activeChapter, locale)
+        : undefined,
+    [activeChapter, locale]
   );
   const screenTitleId = {
     invitation: "invitation-title",
@@ -52,8 +73,8 @@ export function ExperienceShell() {
     finale: "finale-title"
   }[experience.view];
   const motionControlLabel = motionLockedBySystem
-    ? "Movimento ridotto attivo nelle impostazioni del dispositivo"
-    : "Movimento ridotto";
+    ? copy.shell.reducedMotionSystem
+    : copy.shell.reducedMotion;
 
   useEffect(() => {
     setInventoryOpen(false);
@@ -88,12 +109,13 @@ export function ExperienceShell() {
       className={styles.experience}
       data-motion={experience.motionEnabled ? "on" : "off"}
       data-view={experience.view}
+      data-locale={locale}
       data-hydrated={hydrated}
       aria-busy={!hydrated}
     >
       <div ref={backgroundRef}>
         <a className={styles.skipLink} href="#experience-screen">
-          Vai all&apos;esperienza
+          {copy.shell.skip}
         </a>
 
         {experience.view !== "invitation" && (
@@ -102,7 +124,7 @@ export function ExperienceShell() {
               type="button"
               className={styles.brandButton}
               onClick={showInvitation}
-              aria-label="Torna all'invito iniziale"
+              aria-label={copy.shell.backToInvitation}
             >
               <span>A</span>
               <span aria-hidden="true">♥</span>
@@ -110,10 +132,11 @@ export function ExperienceShell() {
             </button>
             <div
               className={styles.toolbarStatus}
-              aria-label="Progresso del viaggio"
+              aria-label={copy.shell.journeyProgress}
             >
               <span>
-                {completedCount}/{experienceChapters.length} ricordi
+                {completedCount}/{experienceChapters.length}{" "}
+                {copy.shell.memories}
               </span>
               <span className={styles.toolbarTrack} aria-hidden="true">
                 <span
@@ -123,6 +146,7 @@ export function ExperienceShell() {
                 />
               </span>
             </div>
+            <LanguageSelector className={styles.languageSelector} />
             <button
               type="button"
               className={styles.iconButton}
@@ -152,27 +176,29 @@ export function ExperienceShell() {
             >
               <div className={styles.invitationCopy}>
                 <div className={styles.invitationTopline}>
-                  <span className={styles.kicker}>Una storia da attraversare</span>
-                  <button
-                    type="button"
-                    className={styles.motionButton}
-                    onClick={toggleMotion}
-                    aria-label={motionControlLabel}
-                    aria-pressed={!experience.motionEnabled}
-                    title={motionControlLabel}
-                    disabled={motionLockedBySystem}
-                  >
-                    Movimento ridotto
-                  </button>
+                  <span className={styles.kicker}>
+                    {copy.shell.invitationKicker}
+                  </span>
+                  <div className={styles.invitationControls}>
+                    <LanguageSelector className={styles.languageSelector} />
+                    <button
+                      type="button"
+                      className={styles.motionButton}
+                      onClick={toggleMotion}
+                      aria-label={motionControlLabel}
+                      aria-pressed={!experience.motionEnabled}
+                      title={motionControlLabel}
+                      disabled={motionLockedBySystem}
+                    >
+                      {copy.shell.reducedMotion}
+                    </button>
+                  </div>
                 </div>
                 <p className={styles.chapterMarker}>
-                  Milano · Quattro fermate
+                  {copy.shell.invitationMarker}
                 </p>
                 <h1 id="invitation-title">Alessandro &amp; Bridget</h1>
-                <p className={styles.lede}>
-                  Non è una pagina da leggere. È una città da accendere, un
-                  ricordo alla volta.
-                </p>
+                <p className={styles.lede}>{copy.shell.invitationLede}</p>
                 <div className={styles.invitationActions}>
                   <button
                     type="button"
@@ -181,14 +207,14 @@ export function ExperienceShell() {
                     disabled={!hydrated}
                   >
                     {!hydrated
-                      ? "Caricamento del viaggio…"
+                      ? copy.shell.loading
                       : experience.started
-                        ? "Continua il viaggio"
-                        : "Entra nella storia"}
+                        ? copy.shell.continueJourney
+                        : copy.shell.enterStory}
                     <span aria-hidden="true">→</span>
                   </button>
                   <span className={styles.duration}>
-                    {experienceChapters.length} tappe · circa 6 minuti
+                    {experienceChapters.length} {copy.shell.duration}
                   </span>
                 </div>
               </div>
@@ -201,6 +227,7 @@ export function ExperienceShell() {
 
           {experience.view === "map" && (
             <JourneyMap
+              chapters={experienceChapters}
               completedCount={completedCount}
               finaleUnlocked={finaleUnlocked}
               isChapterComplete={isChapterComplete}
@@ -240,14 +267,18 @@ export function ExperienceShell() {
 
         <p className={styles.srOnly} aria-live="polite">
           {experience.view === "map" &&
-            `Mappa aperta. ${completedCount} ${completedCount === 1 ? "ricordo raccolto" : "ricordi raccolti"} su ${experienceChapters.length}.`}
-          {experience.view === "reward" && "Nuovo ricordo raccolto."}
-          {experience.view === "finale" && "Finale sbloccato."}
+            copy.shell.mapAnnouncement(
+              completedCount,
+              experienceChapters.length
+            )}
+          {experience.view === "reward" && copy.shell.rewardAnnouncement}
+          {experience.view === "finale" && copy.shell.finaleAnnouncement}
         </p>
       </div>
 
       {inventoryOpen && (
         <InventoryPanel
+          chapters={experienceChapters}
           inventory={experience.completedChapters}
           onClose={closeInventory}
           onReset={resetExperience}

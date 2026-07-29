@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 
 import {
-  experienceChapters,
-  type ChapterId
+  type ChapterId,
+  type ExperienceChapter
 } from "@/lib/experienceConfig";
 import { PaperSymbol } from "@/components/experience/art/PaperArt";
+import { useLocale } from "@/components/experience/LocaleProvider";
 
 import styles from "./ExperienceShell.module.css";
 
@@ -18,15 +19,18 @@ const focusableSelector = [
 ].join(", ");
 
 export function InventoryPanel({
+  chapters,
   inventory,
   onClose,
   onReset
 }: {
+  chapters: ExperienceChapter[];
   inventory: ChapterId[];
   onClose: () => void;
   onReset: () => void;
 }) {
   const [confirmReset, setConfirmReset] = useState(false);
+  const { messages: copy } = useLocale();
   const panelRef = useRef<HTMLDivElement>(null);
   const resetTriggerRef = useRef<HTMLButtonElement>(null);
 
@@ -83,15 +87,20 @@ export function InventoryPanel({
       <aside className={styles.inventoryPanel}>
         <div className={styles.inventoryHeader}>
           <div>
-            <span className={styles.kicker}>Oggetti del viaggio</span>
-            <h2 id="inventory-title">Lo zaino dei ricordi</h2>
+            <span className={styles.kicker}>{copy.inventory.kicker}</span>
+            <h2 id="inventory-title">{copy.inventory.title}</h2>
           </div>
-          <button type="button" onClick={onClose} autoFocus aria-label="Chiudi lo zaino">
+          <button
+            type="button"
+            onClick={onClose}
+            autoFocus
+            aria-label={copy.inventory.close}
+          >
             ×
           </button>
         </div>
         <ul className={styles.inventoryGrid}>
-          {experienceChapters.map((chapter) => {
+          {chapters.map((chapter) => {
             const collected = inventory.includes(chapter.id);
             return (
               <li key={chapter.id} data-collected={collected}>
@@ -99,11 +108,13 @@ export function InventoryPanel({
                   {collected ? <PaperSymbol chapterId={chapter.id} /> : "?"}
                 </span>
                 <div>
-                  <strong>{collected ? chapter.reward.title : "Ricordo nascosto"}</strong>
+                  <strong>
+                    {collected ? chapter.reward.title : copy.inventory.hidden}
+                  </strong>
                   <p>
                     {collected
                       ? chapter.reward.description
-                      : `Completa la fermata ${chapter.number} per scoprirlo.`}
+                      : copy.inventory.unlock(chapter.number)}
                   </p>
                 </div>
               </li>
@@ -111,15 +122,19 @@ export function InventoryPanel({
           })}
         </ul>
         <div className={styles.inventoryFooter}>
-          <p>I progressi restano salvati su questo dispositivo.</p>
+          <p>{copy.inventory.saved}</p>
           {confirmReset ? (
-            <div className={styles.resetConfirm} role="group" aria-label="Conferma reset">
-              <span>Vuoi cancellare tutti i ricordi raccolti?</span>
+            <div
+              className={styles.resetConfirm}
+              role="group"
+              aria-label={copy.inventory.confirmGroup}
+            >
+              <span>{copy.inventory.confirm}</span>
               <button type="button" className={styles.textButton} onClick={cancelReset} autoFocus>
-                Annulla
+                {copy.common.cancel}
               </button>
               <button type="button" className={styles.dangerButton} onClick={onReset}>
-                Sì, ricomincia
+                {copy.inventory.confirmAction}
               </button>
             </div>
           ) : (
@@ -129,7 +144,7 @@ export function InventoryPanel({
               ref={resetTriggerRef}
               onClick={() => setConfirmReset(true)}
             >
-              Ricomincia dall&apos;inizio
+              {copy.inventory.reset}
             </button>
           )}
         </div>

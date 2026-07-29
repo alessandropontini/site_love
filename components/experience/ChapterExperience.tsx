@@ -7,6 +7,7 @@ import { CoordinatesChallenge } from "@/components/experience/challenges/Coordin
 import { FrequencyChallenge } from "@/components/experience/challenges/FrequencyChallenge";
 import { TimelineChallenge } from "@/components/experience/challenges/TimelineChallenge";
 import { WindowsChallenge } from "@/components/experience/challenges/WindowsChallenge";
+import { useLocale } from "@/components/experience/LocaleProvider";
 import type { ExperienceChapter } from "@/lib/experienceConfig";
 
 import styles from "./ExperienceShell.module.css";
@@ -25,6 +26,7 @@ export function ChapterExperience({
   onComplete: () => void;
 }) {
   const [replaying, setReplaying] = useState(false);
+  const { messages: copy } = useLocale();
   const showChallenge = !completed || replaying;
 
   const challenge = (() => {
@@ -49,7 +51,7 @@ export function ChapterExperience({
     >
       <button type="button" className={styles.backButton} onClick={onBack}>
         <span aria-hidden="true">←</span>
-        Mappa
+        {copy.common.map}
       </button>
 
       <div className={styles.chapterVisual} aria-hidden="true">
@@ -59,6 +61,7 @@ export function ChapterExperience({
           chapterId={chapter.id}
           chapterNumber={chapter.number}
           location={chapter.location}
+          actLabel={copy.common.act}
         />
       </div>
 
@@ -81,14 +84,14 @@ export function ChapterExperience({
               <PaperSymbol chapterId={chapter.id} />
             </span>
             <div>
-              <h2>Ricordo già raccolto</h2>
-              <p>{chapter.reward.title} è al sicuro nello zaino.</p>
+              <h2>{copy.chapter.collectedTitle}</h2>
+              <p>{copy.chapter.collectedBody(chapter.reward.title)}</p>
             </div>
             <button type="button" className={styles.secondaryButton} onClick={() => setReplaying(true)}>
-              Rivedi la prova
+              {copy.chapter.replay}
             </button>
             <button type="button" className={styles.primaryButton} onClick={onBack}>
-              Torna alla mappa
+              {copy.chapter.backToMap}
             </button>
           </div>
         )}
