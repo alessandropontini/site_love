@@ -63,7 +63,7 @@ export function useStoryProgress() {
 
   const isGameUnlocked = (gameId: GameId) => {
     const index = gameOrder.indexOf(gameId);
-    if (index <= 0) return progress.started;
+    if (index <= 0) return true;
     return gameOrder.slice(0, index).every((id) => completedSet.has(id));
   };
 

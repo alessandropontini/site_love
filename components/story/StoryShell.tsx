@@ -15,6 +15,13 @@ import { useStoryProgress } from "@/lib/useStoryProgress";
 
 import styles from "./StoryShell.module.css";
 
+const portalChapters = [
+  { id: "timeline", number: "01", label: "Il primo passo" },
+  { id: "map", number: "02", label: "I ricordi" },
+  { id: "emotion", number: "03", label: "La promessa" },
+  { id: "finale", number: "04", label: "Il finale" }
+];
+
 function getGameLabel(gameId: GameId) {
   return gameLabels[gameId].toLowerCase();
 }
@@ -54,7 +61,7 @@ export function StoryShell() {
     if (gameId === firstGameId && !progress.started) {
       return (
         <div className={styles.localStart} role="status">
-          <p>The first mini-game is ready when you are.</p>
+          <p>La prima prova è pronta. Da qui puoi iniziare anche senza tornare in cima.</p>
           <button type="button" className={styles.secondaryButton} onClick={startStory}>
             Inizia il capitolo
           </button>
@@ -65,7 +72,7 @@ export function StoryShell() {
     if (!unlocked) {
       return (
         <div className={styles.lockedNote} role="status">
-          Finish the previous chapter to unlock the {getGameLabel(gameId)} game.
+          Completa il capitolo precedente per sbloccare {getGameLabel(gameId)}.
         </div>
       );
     }
@@ -86,6 +93,10 @@ export function StoryShell() {
 
   return (
     <div className={styles.storyShell}>
+      <a className={styles.skipLink} href="#story-content">
+        Vai alla storia
+      </a>
+
       <ProgressIndicator
         completedCount={completedCount}
         totalGames={totalGames}
@@ -95,25 +106,44 @@ export function StoryShell() {
 
       <header className={styles.intro}>
         <div className={styles.introCopy}>
-          <span className={styles.eyebrow}>Playable scrollytelling</span>
-          <h1>Alessandro & Bridget, chapter by chapter</h1>
+          <div className={styles.portalTopline}>
+            <span className={styles.eyebrow}>Una storia da giocare</span>
+            <span className={styles.portalBadge}>Milano · Capitolo 01</span>
+          </div>
+          <h1>Alessandro & Bridget</h1>
           <p>
-            A romantic route told through scroll, places, small interactions, and
-            four different mini-games. Complete every chapter to unlock the final
-            reveal.
+            Quattro tappe, piccoli giochi e una strada da percorrere insieme.
+            Ogni prova apre un nuovo pezzo della storia, fino all&apos;ultima promessa.
           </p>
+
+          <nav className={styles.chapterNav} aria-label="Chapter navigation">
+            {portalChapters.map((chapter) => (
+              <a key={chapter.id} href={`#${chapter.id}`}>
+                <span>{chapter.number}</span>
+                <strong>{chapter.label}</strong>
+              </a>
+            ))}
+          </nav>
+
           <div className={styles.introActions}>
             <a
               className={styles.primaryButton}
               href="#timeline"
               onClick={() => startStory()}
             >
-              Inizia
+              Inizia il viaggio
             </a>
-            <button type="button" className={styles.secondaryButton} onClick={resetStory}>
-              Reset progress
-            </button>
+            {(progress.started || completedCount > 0) && (
+              <button type="button" className={styles.secondaryButton} onClick={resetStory}>
+                Ricomincia
+              </button>
+            )}
           </div>
+
+          <a className={styles.scrollCue} href="#timeline" aria-label="Scorri per continuare">
+            <span aria-hidden="true" />
+            Scorri per continuare
+          </a>
         </div>
 
         <div className={styles.introArt} aria-hidden="true">
@@ -134,7 +164,7 @@ export function StoryShell() {
         </div>
       </header>
 
-      <div className={styles.storyTrack}>
+      <div className={styles.storyTrack} id="story-content">
         {storyChapters.map((chapter, chapterIndex) => {
           const gameId = chapter.gameId;
           const requiredPreviousGame = chapterRequirements[chapter.id] ?? null;
@@ -152,7 +182,7 @@ export function StoryShell() {
                 locked={!finaleUnlocked}
                 complete={finaleUnlocked}
               >
-                <FinalReveal unlocked={finaleUnlocked} onReset={resetStory} />
+                {finaleUnlocked && <FinalReveal unlocked onReset={resetStory} />}
               </ScrollScene>
             );
           }

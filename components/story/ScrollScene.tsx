@@ -28,6 +28,8 @@ export function ScrollScene({
       aria-describedby={locked ? `${chapter.id}-locked-note` : undefined}
     >
       <div className={styles.sceneVisual} aria-hidden="true">
+        <span className={styles.sceneGlyph}>{chapter.glyph}</span>
+        <span className={styles.sceneIndex}>{chapter.index}</span>
         <div className={styles.orbit}>
           <span />
           <span />
@@ -42,17 +44,14 @@ export function ScrollScene({
       <div className={styles.sceneCopy}>
         <span className={styles.eyebrow}>{chapter.eyebrow}</span>
         <h2 id={`${chapter.id}-title`}>{chapter.title}</h2>
-        <p>
-          {locked
-            ? "This chapter is still locked. Complete the required mini-game to continue the route."
-            : chapter.body}
-        </p>
-        {locked && (
+        {!locked && <p>{chapter.body}</p>}
+        {locked ? (
           <p className={styles.lockedNote} id={`${chapter.id}-locked-note`}>
-            Complete the previous mini-game to unlock this chapter.
+            Completa la tappa precedente per aprire questo capitolo.
           </p>
+        ) : (
+          children
         )}
-        {children}
       </div>
     </section>
   );
