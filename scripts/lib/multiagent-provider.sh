@@ -3,7 +3,7 @@ set -euo pipefail
 
 ALLOWED_VERDICTS_REGEX='^(PASS|PASS WITH NOTES|CHANGES REQUESTED|BLOCKED|INFRASTRUCTURE BLOCKED)$'
 DEFAULT_MAX_DIFF_CHARS=60000
-DEFAULT_AGENT_TIMEOUT_SECONDS=180
+DEFAULT_AGENT_TIMEOUT_SECONDS=300
 
 status_without_generated_reports() {
   git status --short --untracked-files=all | grep -v '^?? \.agent/reports/' || true
@@ -325,6 +325,29 @@ provider_model() {
   esac
 }
 
+resolve_codex_bin() {
+  local configured="${MULTIAGENT_CODEX_BIN:-}"
+  local app_bundle="/Applications/Codex.app/Contents/Resources/codex"
+
+  if [[ -n "$configured" ]]; then
+    if [[ "$configured" == */* ]]; then
+      [[ -x "$configured" ]] && printf '%s\n' "$configured"
+    else
+      command -v "$configured" 2>/dev/null || true
+    fi
+    return 0
+  fi
+
+  # The macOS app bundle is updated with the active Codex app and can be more
+  # reliable than an older globally installed npm wrapper.
+  if [[ "$(uname -s)" == "Darwin" && -x "$app_bundle" ]]; then
+    printf '%s\n' "$app_bundle"
+    return 0
+  fi
+
+  command -v codex 2>/dev/null || true
+}
+
 write_infrastructure_blocked_report() {
   local output_file="$1"
   local agent="$2"
@@ -527,49 +550,55 @@ run_command_with_timeout() {
   local diag_file="$4"
   local stdin_file="$5"
   shift 5
-  local timeout_bin=""
-  local command_pid exit_code elapsed
-
-  if command -v timeout >/dev/null 2>&1; then
-    timeout_bin="timeout"
-  elif command -v gtimeout >/dev/null 2>&1; then
-    timeout_bin="gtimeout"
-  fi
-
-  if [[ -n "$timeout_bin" ]]; then
-    if "$timeout_bin" "$timeout_seconds" "$@" < "$stdin_file" > "$stdout_file" 2> "$stderr_file"; then
-      return 0
-    fi
-    return $?
-  fi
+  local command_pid command_pgid shell_pgid exit_code elapsed
+  local restore_monitor_mode="no"
 
   {
     echo
-    echo "External timeout command not available; using portable bash timeout."
+    echo "Using process-group timeout supervision."
   } >> "$diag_file"
 
+  if [[ "$-" != *m* ]]; then
+    set -m
+    restore_monitor_mode="yes"
+  fi
   "$@" < "$stdin_file" > "$stdout_file" 2> "$stderr_file" &
   command_pid=$!
+  command_pgid="$(ps -o pgid= -p "$command_pid" 2>/dev/null | tr -d ' ' || true)"
+  shell_pgid="$(ps -o pgid= -p "$$" 2>/dev/null | tr -d ' ' || true)"
+  if [[ "$restore_monitor_mode" == "yes" ]]; then
+    set +m
+  fi
+
+  if [[ -z "$command_pgid" || "$command_pgid" == "$shell_pgid" ]]; then
+    echo "Could not isolate command process group; refusing unsafe timeout supervision." >> "$diag_file"
+    kill "$command_pid" 2>/dev/null || true
+    wait "$command_pid" 2>/dev/null || true
+    return 125
+  fi
+
+  echo "Command PID: $command_pid" >> "$diag_file"
+  echo "Command process group: $command_pgid" >> "$diag_file"
   elapsed=0
 
   while kill -0 "$command_pid" 2>/dev/null; do
     if [[ "$elapsed" -ge "$timeout_seconds" ]]; then
-      echo "Command timed out after ${timeout_seconds}s; terminating process ${command_pid}." >> "$diag_file"
-      kill "$command_pid" 2>/dev/null || true
+      echo "Command timed out after ${timeout_seconds}s; terminating process group ${command_pgid}." >> "$diag_file"
+      kill -TERM -- "-$command_pgid" 2>/dev/null || true
 
       local grace_elapsed=0
-      while kill -0 "$command_pid" 2>/dev/null && [[ "$grace_elapsed" -lt 2 ]]; do
+      while kill -0 -- "-$command_pgid" 2>/dev/null && [[ "$grace_elapsed" -lt 5 ]]; do
         sleep 1
         grace_elapsed=$((grace_elapsed + 1))
       done
 
-      if kill -0 "$command_pid" 2>/dev/null; then
-        kill -9 "$command_pid" 2>/dev/null || true
+      if kill -0 -- "-$command_pgid" 2>/dev/null; then
+        kill -KILL -- "-$command_pgid" 2>/dev/null || true
         sleep 1
       fi
 
-      if kill -0 "$command_pid" 2>/dev/null; then
-        echo "Process ${command_pid} did not exit after SIGKILL; returning timeout without blocking." >> "$diag_file"
+      if kill -0 -- "-$command_pgid" 2>/dev/null; then
+        echo "Process group ${command_pgid} did not exit after SIGKILL; manual host cleanup may be required." >> "$diag_file"
       else
         set +e
         wait "$command_pid" 2>/dev/null
@@ -606,12 +635,14 @@ run_codex_agent() {
   local output_file="$4"
   local model
   local prompt_tmp raw_tmp transcript_tmp stderr_tmp diag_tmp exit_tmp validation_reason
+  local codex_bin
   local timeout_seconds="${MULTIAGENT_AGENT_TIMEOUT_SECONDS:-$DEFAULT_AGENT_TIMEOUT_SECONDS}"
   local exit_code=0
   local -a codex_cmd
 
-  if ! command -v codex >/dev/null 2>&1; then
-    write_infrastructure_blocked_report "$output_file" "$agent" "codex" "n/a" "codex CLI not found" "no"
+  codex_bin="$(resolve_codex_bin)"
+  if [[ -z "$codex_bin" ]]; then
+    write_infrastructure_blocked_report "$output_file" "$agent" "codex" "n/a" "Codex CLI not found; set MULTIAGENT_CODEX_BIN to an executable CLI path" "no"
     return 0
   fi
 
@@ -626,7 +657,7 @@ run_codex_agent() {
   build_agent_prompt "$run_dir" "$agent" "$prompt_file" "codex" "$model" > "$prompt_tmp"
   : > "$raw_tmp"
 
-  codex_cmd=(codex exec --color never --sandbox read-only --output-last-message "$raw_tmp")
+  codex_cmd=("$codex_bin" exec --color never --sandbox read-only --output-last-message "$raw_tmp")
   if [[ -n "${MULTIAGENT_CODEX_ARGS:-}" ]]; then
     # shellcheck disable=SC2206
     codex_cmd+=(${MULTIAGENT_CODEX_ARGS})
@@ -639,6 +670,7 @@ run_codex_agent() {
     echo "- Agent: $agent"
     echo "- Provider: codex"
     echo "- Model: $model"
+    echo "- Codex binary: $codex_bin"
     echo "- Timeout seconds: $timeout_seconds"
     echo "- Prompt file: $(basename "$prompt_tmp")"
     echo "- Output last message file: $(basename "$raw_tmp")"

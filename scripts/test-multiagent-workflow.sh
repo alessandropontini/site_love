@@ -9,6 +9,7 @@ WORKTREE=""
 PASS_EXPLICIT="PENDING"
 PASS_COMMITTED="PENDING"
 PASS_WORKING_TREE="PENDING"
+PASS_TIMEOUT_CLEANUP="PENDING"
 
 log() {
   printf '%s\n' "$*" >&2
@@ -52,6 +53,43 @@ create_clean_worktree() {
   TMP_PARENT="$(mktemp -d "${TMPDIR:-/tmp}/site-love-multiagent-smoke.XXXXXX")"
   WORKTREE="$TMP_PARENT/worktree"
   git -C "$REPO_ROOT" worktree add --detach "$WORKTREE" HEAD >/dev/null
+}
+
+smoke_timeout_cleanup() {
+  local fixture_dir child_pid exit_code child_alive
+
+  log "==> timeout process-group cleanup smoke"
+  fixture_dir="$TMP_PARENT/timeout-cleanup"
+  mkdir -p "$fixture_dir"
+  : > "$fixture_dir/stdin"
+  : > "$fixture_dir/diagnostics"
+
+  # shellcheck source=scripts/lib/multiagent-provider.sh
+  source "$REPO_ROOT/scripts/lib/multiagent-provider.sh"
+  if run_command_with_timeout \
+    1 \
+    "$fixture_dir/stdout" \
+    "$fixture_dir/stderr" \
+    "$fixture_dir/diagnostics" \
+    "$fixture_dir/stdin" \
+    bash -c 'sleep 30 & echo $! > "$1/child.pid"; wait' _ "$fixture_dir"; then
+    exit_code=0
+  else
+    exit_code=$?
+  fi
+
+  [[ "$exit_code" -eq 124 ]] || fail "Expected timeout exit code 124, got $exit_code."
+  [[ -s "$fixture_dir/child.pid" ]] || fail "Timeout fixture did not record its child PID."
+  child_pid="$(cat "$fixture_dir/child.pid")"
+  sleep 1
+  if kill -0 "$child_pid" 2>/dev/null; then
+    child_alive="yes"
+  else
+    child_alive="no"
+  fi
+  [[ "$child_alive" == "no" ]] || fail "Timed-out child process $child_pid survived cleanup."
+  assert_contains "$fixture_dir" "diagnostics" "terminating process group"
+  PASS_TIMEOUT_CLEANUP="PASS"
 }
 
 latest_report_dir() {
@@ -178,6 +216,7 @@ main() {
   create_clean_worktree
 
   log "Using temporary worktree: $WORKTREE"
+  smoke_timeout_cleanup
   smoke_explicit_range
   smoke_committed_range
   smoke_working_tree
@@ -187,6 +226,7 @@ main() {
   log "- explicit-range: $PASS_EXPLICIT"
   log "- committed-range: $PASS_COMMITTED"
   log "- working-tree: $PASS_WORKING_TREE"
+  log "- timeout cleanup: $PASS_TIMEOUT_CLEANUP"
   log "- final status: PASS"
 }
 

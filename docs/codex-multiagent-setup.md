@@ -114,17 +114,27 @@ When the smoke script is present and executable, `local-review` also records its
 
 - `MULTIAGENT_PROVIDER=codex`
 - `REVIEW_BASE` and `REVIEW_HEAD` for explicit Git range review.
-- `MULTIAGENT_AGENT_TIMEOUT_SECONDS=180`
+- `MULTIAGENT_AGENT_TIMEOUT_SECONDS=300`
 - `MULTIAGENT_MAX_DIFF_CHARS=60000`
+- `MULTIAGENT_CODEX_BIN` to select an explicit Codex CLI executable.
 - `MULTIAGENT_CODEX_ARGS` for explicit extra `codex exec` arguments when the local CLI supports them.
 - `MULTIAGENT_CODEX_MODEL` is recorded as intent only unless the user also passes a supported model flag through `MULTIAGENT_CODEX_ARGS`.
 
-If `timeout` or `gtimeout` is available, the script uses it. Otherwise it uses a portable bash timeout fallback that starts `codex exec` in the background, monitors it, terminates it after `MULTIAGENT_AGENT_TIMEOUT_SECONDS`, and returns exit code `124` on timeout.
+On macOS the workflow prefers the CLI bundled with `Codex.app` over a potentially stale global npm wrapper. Other systems resolve `codex` from `PATH`. Set `MULTIAGENT_CODEX_BIN` when a different authenticated installation is required:
+
+```bash
+MULTIAGENT_CODEX_BIN=/absolute/path/to/codex \
+MULTIAGENT_PROVIDER=codex \
+./scripts/local-review.sh
+```
+
+The timeout supervisor starts every reviewer in an isolated process group. At `MULTIAGENT_AGENT_TIMEOUT_SECONDS` it terminates the complete group, including Node wrappers and native Codex child processes, and returns exit code `124`. This prevents timed-out reviewers from surviving as orphan processes and blocking later runs.
 
 Before running the full workflow, a quick CLI sanity check is:
 
 ```bash
-printf "Rispondi solo con OK. Non modificare file.\n" | codex exec -
+CODEX_BIN="${MULTIAGENT_CODEX_BIN:-/Applications/Codex.app/Contents/Resources/codex}"
+printf "Rispondi solo con OK. Non modificare file.\n" | "$CODEX_BIN" exec -
 ```
 
 ## Optional OpenClaw Spike
