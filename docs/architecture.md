@@ -2,6 +2,8 @@
 
 Alessandro & Bridget is a single-page Next.js 14 App Router experience. The public route is a state-driven journey with an invitation, a Milan map, four lightweight challenges, four rewards, a persistent inventory, and a gated finale.
 
+This paper-theatre route is the canonical product architecture and the main narrative line for production. Legacy trees remain in the repository for reference, but changes to them do not change the shipped home unless `app/page.tsx` is deliberately remounted.
+
 ## Next.js app structure
 
 - `app/layout.tsx` defines app metadata, loads the Manrope UI font, and imports `app/globals.css`. Editorial headings use a local system serif stack, so the public route has no decorative font download.
@@ -151,7 +153,7 @@ Do not modify visual assets in `public/` without explicit approval.
 ## Design documentation references
 
 - `README.md` gives the high-level project overview, local commands, gameplay sequence, customization paths, and production-build notes.
-- `docs/quest-guide.md` documents quest metadata, mini-game files, pixel art customization, difficulty tuning, and styling entry points.
+- `docs/quest-guide.md` documents the active chapter configuration, challenge files, progress invariants, paper art, and regression checks.
 - `docs/visual-direction.md` records the current paper-theatre direction, Milan/Duomo composition guidance, typography, materials, motion, and responsive rules.
 - `docs/ai-workflow.md` documents Codex usage, validation commands, and the manual review process for this repository.
 - `docs/multiagent-workflow.md` documents the Phase 1 local multi-agent patch policy, report structure, verdicts, and future provider integration path.

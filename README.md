@@ -2,6 +2,8 @@
 
 Un microsito Next.js mobile-first costruito come una piccola storia interattiva. Non è una landing page né un lungo scorrimento: il visitatore entra in una mappa illustrata di Milano, completa quattro fermate, raccoglie ricordi e apre una lettera finale.
 
+Il teatro di cartone montato da `app/page.tsx` è la linea narrativa principale e l'esperienza destinata alla produzione. Le implementazioni precedenti restano nel repository soltanto come riferimenti non montati.
+
 ## Getting Started
 
 1. Install dependencies
@@ -47,10 +49,11 @@ Le vecchie implementazioni scrollytelling e arcade restano nel repository come r
 - `public/scene/paper-theatre/` – Duomo, tram e coppia di cartone locali; nessuna immagine remota è necessaria.
 - `data/` – still ignored; stash heavyweight concept art or exports here if needed.
 
-👉 For deeper breakdowns, peek at `docs/quest-guide.md`.
-👉 For the current visual direction and character references, use `docs/visual-direction.md`.
-👉 For local AI patch workflow rules, use `docs/ai-workflow.md` and `docs/multiagent-workflow.md`.
-👉 For future CrewAI orchestration infrastructure, use `docs/crewai-orchestration.md`.
+- Per struttura, stato e confini legacy: `docs/architecture.md`.
+- Per personalizzare capitoli, prove e ricompense: `docs/quest-guide.md`.
+- Per la direzione visiva corrente: `docs/visual-direction.md`.
+- Per il workflow AI e le review: `docs/ai-workflow.md` e `docs/multiagent-workflow.md`.
+- Per l'infrastruttura CrewAI candidata: `docs/crewai-orchestration.md`.
 
 ## Local Review Workflow
 
