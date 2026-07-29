@@ -26,7 +26,7 @@ npm run lint
 - `components/experience/JourneyMap.tsx` renders the visual map and its semantic ordered list of chapter nodes.
 - `components/experience/ChapterExperience.tsx` provides a shared narrative frame and selects the configured challenge.
 - `components/experience/challenges/` contains the frequency, pairing, ordering, and window-sequence interactions.
-- `components/experience/art/` contains the shared paper-stage composition and accessible-independent reward iconography.
+- `components/experience/art/` contains the shared paper-stage composition, per-chapter Milan landmark selection, and accessible-independent reward iconography.
 - `components/experience/RewardScene.tsx` presents the newly collected object.
 - `components/experience/InventoryPanel.tsx` is the persistent, dismissible memory drawer with a confirmed reset action.
 - `components/experience/FinaleExperience.tsx` assembles the four objects and reveals the final letter.
@@ -160,7 +160,7 @@ The current experience layout and controls are isolated in `components/experienc
 - `lib/profile.ts` contains title-screen profile and intro copy.
 - `lib/photos.ts` contains photo metadata.
 - `public/photos/` contains photo documentation/placeholders.
-- `public/scene/paper-theatre/` contains the active transparent WebP cutouts for the Duomo, tram, and couple. Older pixel assets remain only for unmounted legacy implementations.
+- `public/scene/paper-theatre/` contains the active transparent WebP cutouts for the Duomo, tram, couple, Galleria-inspired portal, Navigli, Arco della Pace-inspired arch, and Milanese window facade. Older pixel assets remain only for unmounted legacy implementations.
 - `data/` is ignored except for `.gitkeep` and can hold heavyweight local concept art or exports.
 
 Do not modify visual assets in `public/` without explicit approval.

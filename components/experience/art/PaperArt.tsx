@@ -8,28 +8,39 @@ type PaperStageVariant = "invitation" | "map" | "chapter" | "finale";
 
 const imageSizes: Record<
   PaperStageVariant,
-  { duomo: string; tram: string; couple: string }
+  { duomo: string; landmark: string; tram: string; couple: string }
 > = {
   invitation: {
     duomo: "(max-width: 899px) 79vw, 34vw",
+    landmark: "0px",
     tram: "(max-width: 899px) 39vw, 17vw",
     couple: "(max-width: 899px) 25vw, 11vw"
   },
   map: {
     duomo: "(max-width: 899px) 65vw, 36vw",
+    landmark: "0px",
     tram: "(max-width: 899px) 31vw, 19vw",
     couple: "(max-width: 899px) 18vw, 11vw"
   },
   chapter: {
-    duomo: "(max-width: 899px) 84vw, 32vw",
+    duomo: "0px",
+    landmark: "(max-width: 899px) 92vw, 43vw",
     tram: "(max-width: 899px) 38vw, 15vw",
     couple: "(max-width: 899px) 24vw, 10vw"
   },
   finale: {
     duomo: "(max-width: 899px) 70vw, 35vw",
+    landmark: "0px",
     tram: "0px",
     couple: "(max-width: 899px) 32vw, 15vw"
   }
+};
+
+const chapterLandmarks: Record<ChapterId, string> = {
+  spark: "/scene/paper-theatre/galleria-cardboard.webp",
+  coordinates: "/scene/paper-theatre/navigli-cardboard.webp",
+  promise: "/scene/paper-theatre/arco-pace-cardboard.webp",
+  future: "/scene/paper-theatre/milan-windows-cardboard.webp"
 };
 
 export function PaperStage({
@@ -49,6 +60,12 @@ export function PaperStage({
   location?: string;
   actLabel?: string;
 }) {
+  const landmark = chapterId ? chapterLandmarks[chapterId] : null;
+  const showTram =
+    variant === "invitation" ||
+    variant === "map" ||
+    (variant === "chapter" && chapterId === "spark");
+
   return (
     <div
       className={`${styles.stage} ${styles[variant]}`}
@@ -63,17 +80,28 @@ export function PaperStage({
       <span className={styles.frontSkyline} />
       <span className={styles.stageRoad} />
 
-      <div className={styles.duomoLayer}>
-        <Image
-          src="/scene/paper-theatre/duomo-cardboard.webp"
-          alt=""
-          fill
-          priority={priority}
-          sizes={imageSizes[variant].duomo}
-        />
-      </div>
+      {landmark ? (
+        <div className={styles.landmarkLayer}>
+          <Image
+            src={landmark}
+            alt=""
+            fill
+            sizes={imageSizes[variant].landmark}
+          />
+        </div>
+      ) : (
+        <div className={styles.duomoLayer}>
+          <Image
+            src="/scene/paper-theatre/duomo-cardboard.webp"
+            alt=""
+            fill
+            priority={priority}
+            sizes={imageSizes[variant].duomo}
+          />
+        </div>
+      )}
 
-      {variant !== "finale" && (
+      {showTram && (
         <div className={styles.tramLayer}>
           <Image
             src="/scene/paper-theatre/tram-cardboard.webp"
