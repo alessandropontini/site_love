@@ -6,13 +6,46 @@
     linear-gradient(180deg, #dcebf2 0%, #f5f1df 48%, #dfe9cf 100%);
 }
 
+.skipLink {
+  position: fixed;
+  left: 16px;
+  top: 16px;
+  z-index: 40;
+  border: 2px solid #24351f;
+  background: #fffdf3;
+  color: #24351f;
+  padding: 10px 12px;
+  font-weight: 900;
+  text-decoration: none;
+  transform: translateY(-140%);
+  transition: transform 160ms ease;
+}
+
+.skipLink:focus-visible {
+  outline: 3px solid rgba(111, 144, 198, 0.72);
+  outline-offset: 3px;
+  transform: translateY(0);
+}
+
 .intro {
   min-height: 100vh;
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 0.95fr) minmax(320px, 1.05fr);
   align-items: center;
   gap: clamp(28px, 6vw, 72px);
   padding: clamp(28px, 6vw, 72px);
+}
+
+.intro::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(36, 53, 31, 0.08) 1px, transparent 1px) 0 0 / 56px 56px,
+    linear-gradient(180deg, rgba(36, 53, 31, 0.05) 1px, transparent 1px) 0 0 / 56px 56px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.54), transparent 68%);
 }
 
 .introArt {
@@ -108,6 +141,23 @@
   max-width: 680px;
   display: grid;
   gap: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.portalTopline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.portalBadge {
+  border-left: 1px solid rgba(45, 67, 44, 0.28);
+  color: rgba(36, 53, 31, 0.64);
+  padding-left: 12px;
+  font-size: 0.75rem;
+  font-weight: 800;
 }
 
 .eyebrow,
@@ -121,7 +171,7 @@
 
 .introCopy h1,
 .sceneCopy h2,
-.finalReveal h2 {
+.finalReveal h3 {
   margin: 0;
   font-size: clamp(2.5rem, 8vw, 6rem);
   line-height: 0.94;
@@ -136,6 +186,52 @@
   color: rgba(36, 53, 31, 0.76);
   font-size: clamp(1rem, 2vw, 1.18rem);
   line-height: 1.7;
+}
+
+.chapterNav {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  max-width: 560px;
+}
+
+.chapterNav a {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  border: 1px solid rgba(45, 67, 44, 0.22);
+  background: rgba(255, 253, 243, 0.66);
+  color: #24351f;
+  padding: 10px 12px;
+  text-decoration: none;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+.chapterNav a:hover {
+  border-color: rgba(186, 121, 105, 0.62);
+  background: rgba(255, 253, 243, 0.92);
+  transform: translateY(-1px);
+}
+
+.chapterNav span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  background: #24351f;
+  color: #fffdf3;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.chapterNav strong {
+  min-width: 0;
+  font-size: 0.95rem;
 }
 
 .introActions {
@@ -155,6 +251,7 @@
   padding: 12px 18px;
   font-weight: 900;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .secondaryButton {
@@ -170,9 +267,43 @@
 
 .primaryButton:focus-visible,
 .secondaryButton:focus-visible,
+.chapterNav a:focus-visible,
+.scrollCue:focus-visible,
 .promiseBox button:focus-visible {
   outline: 3px solid rgba(111, 144, 198, 0.58);
   outline-offset: 3px;
+}
+
+.scrollCue {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  color: rgba(36, 53, 31, 0.72);
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.scrollCue span {
+  width: 16px;
+  height: 26px;
+  border: 2px solid rgba(36, 53, 31, 0.44);
+  position: relative;
+}
+
+.scrollCue span::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 6px;
+  width: 4px;
+  height: 4px;
+  background: #ba7969;
+  transform: translateX(-50%);
+  animation: scrollPulse 1400ms ease-in-out infinite;
 }
 
 .progress {
@@ -201,6 +332,19 @@
   padding: 0;
   margin: 0;
   list-style: none;
+}
+
+@keyframes scrollPulse {
+  0%,
+  100% {
+    transform: translate(-50%, 0);
+    opacity: 0.45;
+  }
+
+  50% {
+    transform: translate(-50%, 8px);
+    opacity: 1;
+  }
 }
 
 .progressDot {
@@ -267,6 +411,29 @@
     linear-gradient(180deg, rgba(255, 253, 243, 0.84), rgba(255, 253, 243, 0.36)),
     var(--scene-bg, #dcebf2);
   box-shadow: 0 24px 70px rgba(31, 49, 32, 0.14);
+}
+
+.sceneGlyph {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  z-index: 1;
+  color: rgba(36, 53, 31, 0.72);
+  font-family: var(--font-title), monospace;
+  font-size: clamp(4rem, 12vw, 8.5rem);
+  line-height: 1;
+  text-shadow: 8px 8px 0 rgba(255, 253, 243, 0.54);
+  transform: translate(-50%, -50%);
+}
+
+.sceneIndex {
+  position: absolute;
+  right: 24px;
+  top: 18px;
+  color: rgba(36, 53, 31, 0.18);
+  font-family: var(--font-title), monospace;
+  font-size: clamp(2.4rem, 7vw, 5rem);
+  font-weight: 700;
 }
 
 .scene[data-tone="sky"] {
@@ -340,7 +507,7 @@
 }
 
 .sceneCopy h2,
-.finalReveal h2 {
+.finalReveal h3 {
   font-size: clamp(2rem, 5vw, 4.2rem);
 }
 
@@ -377,6 +544,11 @@
   box-shadow: 0 24px 70px rgba(31, 49, 32, 0.14);
 }
 
+.finalReveal h3 {
+  margin: 0;
+  line-height: 1;
+}
+
 .finalReveal[data-unlocked="false"] {
   filter: grayscale(0.2);
 }
@@ -407,7 +579,11 @@
   }
 
   .intro {
-    padding: 24px 18px 64px;
+    padding: 24px 18px 48px;
+  }
+
+  .chapterNav {
+    grid-template-columns: 1fr;
   }
 
   .introArt {
@@ -419,7 +595,7 @@
     left: 12px;
     right: 12px;
     top: auto;
-    bottom: 12px;
+    bottom: max(10px, env(safe-area-inset-bottom));
     justify-content: space-between;
   }
 
@@ -435,5 +611,135 @@
     position: relative;
     top: auto;
     min-height: 260px;
+  }
+}
+
+@media (max-width: 520px) {
+  .introCopy {
+    gap: 18px;
+  }
+
+  .introCopy h1 {
+    font-size: clamp(2.7rem, 13vw, 3.65rem);
+    line-height: 0.92;
+  }
+
+  .introCopy p {
+    font-size: 0.98rem;
+    line-height: 1.55;
+  }
+
+  .chapterNav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .chapterNav a {
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: 8px;
+    min-height: 48px;
+    padding: 7px 8px;
+  }
+
+  .chapterNav span {
+    width: 28px;
+    height: 28px;
+    font-size: 0.68rem;
+  }
+
+  .chapterNav strong {
+    font-size: 0.76rem;
+    line-height: 1.12;
+  }
+
+  .introActions {
+    align-items: stretch;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    min-height: 48px;
+    display: grid;
+    place-items: center;
+    flex: 1 1 140px;
+    text-align: center;
+  }
+
+  .scrollCue {
+    font-size: 0.72rem;
+  }
+
+  .introArt {
+    min-height: 270px;
+  }
+
+  .citySign {
+    left: 7%;
+    top: 13%;
+  }
+
+  .duomoFrame {
+    right: 6%;
+    bottom: 25%;
+    width: min(54%, 220px);
+  }
+
+  .progress {
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .progressLabel {
+    display: none;
+  }
+
+  .progressDot {
+    width: 26px;
+    height: 26px;
+  }
+
+  .storyTrack {
+    gap: 64px;
+  }
+
+  .scene {
+    min-height: auto;
+  }
+
+  .sceneCopy {
+    gap: 14px;
+  }
+
+  .sceneCopy h2,
+  .finalReveal h3 {
+    font-size: clamp(2rem, 11vw, 3rem);
+  }
+
+  .sceneVisual {
+    min-height: 220px;
+  }
+
+  .placeCard {
+    left: 14px;
+    bottom: 14px;
+    padding: 10px 12px;
+  }
+
+  .finalReveal {
+    padding: 22px 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skipLink,
+  .chapterNav a,
+  .primaryButton,
+  .secondaryButton,
+  .promiseBox button {
+    transition: none;
+  }
+
+  .scrollCue span::after {
+    animation: none;
   }
 }

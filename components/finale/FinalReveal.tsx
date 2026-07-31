@@ -8,19 +8,19 @@ type FinalRevealProps = {
 export function FinalReveal({ unlocked, onReset }: FinalRevealProps) {
   return (
     <div className={styles.finalReveal} data-unlocked={unlocked}>
-      <span className={styles.eyebrow}>{unlocked ? "Unlocked" : "Locked"}</span>
-      <h2>{unlocked ? "The next chapter is ours" : "The finale is still sealed"}</h2>
+      <span className={styles.eyebrow}>{unlocked ? "Sbloccato" : "Bloccato"}</span>
+      <h3>{unlocked ? "La prossima avventura è nostra" : "Il finale è ancora chiuso"}</h3>
       <p>
         {unlocked
-          ? "Every clue, choice, and small challenge points to the same reveal: the story keeps going because you keep choosing it together."
-          : "Complete all four mini-games to open the final reveal. The ending should feel earned, not skipped."}
+          ? "Ogni indizio e ogni scelta portano qui: questa storia continua perché, un passo alla volta, continuate a scegliervi."
+          : "Completa i quattro mini-game per aprire il finale."}
       </p>
       {unlocked && (
         <div className={styles.promiseBox}>
           <strong>Alessandro & Bridget</strong>
-          <span>Continue?</span>
-          <button type="button" onClick={onReset} aria-label="Replay the full story journey">
-            Replay the journey
+          <span>Continuare?</span>
+          <button type="button" onClick={onReset} aria-label="Rigioca tutta la storia">
+            Rigioca la storia
           </button>
         </div>
       )}

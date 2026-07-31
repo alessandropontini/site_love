@@ -19,7 +19,7 @@ export function MemoryGame({ completed, onComplete }: MemoryGameProps) {
   const deck = useMemo(makeDeck, []);
   const [selected, setSelected] = useState<string[]>([]);
   const [matched, setMatched] = useState<string[]>([]);
-  const [message, setMessage] = useState("Pair each fragment with its matching memory.");
+  const [message, setMessage] = useState("Abbina ogni frammento al suo ricordo.");
 
   const chooseCard = (id: string) => {
     if (completed || matched.includes(id) || selected.includes(id)) return;
@@ -38,23 +38,23 @@ export function MemoryGame({ completed, onComplete }: MemoryGameProps) {
       const nextMatched = [...matched, firstId, secondId];
       setMatched(nextMatched);
       setSelected([]);
-      setMessage("Matched. The archive is getting clearer.");
+      setMessage("Coppia trovata. L'album diventa più nitido.");
       if (nextMatched.length === deck.length) {
-        setMessage("Every memory is paired. The route continues.");
+        setMessage("Ogni ricordo ha ritrovato il suo posto. La strada continua.");
         onComplete();
       }
       return;
     }
 
-    setMessage("Those two do not belong together yet.");
+    setMessage("Questi due frammenti non appartengono ancora alla stessa pagina.");
     window.setTimeout(() => setSelected([]), 650);
   };
 
   return (
     <article className={`${styles.gameCard} ${completed ? styles.success : ""}`}>
       <header>
-        <h3>Memory pairs</h3>
-        <p>Match the places and feelings that belong together.</p>
+        <h3>Memory dei ricordi</h3>
+        <p>Abbina i luoghi e le emozioni che appartengono alla stessa pagina.</p>
       </header>
       <div className={styles.memoryGrid} role="list" aria-label="Memory cards">
         {deck.map((card) => {
@@ -68,13 +68,13 @@ export function MemoryGame({ completed, onComplete }: MemoryGameProps) {
               disabled={completed || matched.includes(card.id)}
               onClick={() => chooseCard(card.id)}
             >
-              {active ? card.label : "Memory"}
+              {active ? card.label : "Ricordo"}
             </button>
           );
         })}
       </div>
       <p className={styles.status} aria-live="polite">
-        {completed ? "Complete. Every pair is saved." : message}
+        {completed ? "Completato. Ogni coppia è al sicuro." : message}
       </p>
     </article>
   );

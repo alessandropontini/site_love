@@ -95,15 +95,15 @@ sed -n '1,260p' docs/visual-direction.md
 
 For feature work, also inspect the relevant component, schema, or CSS file.
 
-For scrollytelling work, inspect at minimum:
+For work on the mounted paper-theatre experience, inspect at minimum:
 
 ```bash
 sed -n '1,220p' AGENTS.md
 sed -n '1,220p' docs/architecture.md
-sed -n '1,220p' components/story/StoryShell.tsx
-sed -n '1,180p' components/story/ProgressIndicator.tsx
-sed -n '1,180p' lib/useStoryProgress.ts
-sed -n '1,220p' lib/storyConfig.ts
+sed -n '1,260p' docs/visual-direction.md
+sed -n '1,280p' components/experience/ExperienceShell.tsx
+sed -n '1,220p' lib/experienceConfig.ts
+sed -n '1,360p' lib/useExperienceProgress.ts
 ```
 
 ### 2. Plan
@@ -114,7 +114,7 @@ Write a short implementation plan before changing files. Call out:
 - Files intentionally avoided
 - Validation commands to run
 - Any risky areas, especially mini-games, visual assets, dependencies, or deployment configuration
-- For scrollytelling changes: how chapter gating, local start CTA, and progress states remain intact
+- For paper-theatre changes: how chapter gating, idempotent rewards, persistence, reduced motion, and finale guards remain intact
 
 ### 3. Implement
 
@@ -162,15 +162,17 @@ Automatic approval is prohibited. `PASS` and `PASS WITH NOTES` still require fin
 
 When separate reviewer reports are missing, simulated, incomplete, invalid, or marked `Real execution: no`, the correct verdict is `INFRASTRUCTURE BLOCKED`.
 
-For scrollytelling changes, also verify:
+For paper-theatre changes, also verify:
 
-- The first intro chapter remains readable.
-- Later narrative chapters are gated behind the previous required mini-game or story block.
-- The first game is derived from story config such as `gameOrder`, not hardcoded in UI code.
-- The first game has a local CTA if `started=false` and the user scrolls past the intro.
-- Locked chapters show one clear locked explanation without duplicate nested locked copy.
-- The progress indicator distinguishes `complete`, `available/current`, and `locked`.
-- Available but incomplete games are not announced as locked.
+- The invitation remains readable and does not auto-start.
+- Chapter order and finale requirements derive from `experienceConfig`.
+- Only the first incomplete chapter is available; later chapters remain locked.
+- Replaying or restoring state cannot duplicate rewards or bypass progression.
+- Inventory and finale derive from completed chapter IDs.
+- All challenges remain completable with keyboard/touch controls and without drag-only input.
+- Focus moves to the new view, returns after the inventory closes, and visible focus is preserved.
+- `prefers-reduced-motion` overrides the in-app motion setting and timed visual sequences retain a readable fallback.
+- The active route still mounts `ExperienceShell`; legacy story and arcade trees remain unmounted.
 
 ## Safe first prompts
 
@@ -208,4 +210,4 @@ Do not add `@openai/codex` to this project's `dependencies` or `devDependencies`
 
 ### `npm run build` fails on Google Fonts or `next/font`
 
-This project uses Next font integration in `app/layout.tsx`. In restricted environments, `next build` may fail when it cannot fetch Google Fonts such as Manrope or Silkscreen. Treat that as an environment/network limitation unless the task explicitly asks to change font loading. Do not make invasive production-code changes only to bypass a local network restriction.
+This project uses Next font integration in `app/layout.tsx`. In restricted environments, `next build` may fail when it cannot fetch Manrope from Google Fonts. Treat that as an environment/network limitation unless the task explicitly asks to change font loading. Do not make invasive production-code changes only to bypass a local network restriction.

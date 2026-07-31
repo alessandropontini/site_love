@@ -1,8 +1,10 @@
-# AGENTS.md — Pixel Quest: Alessandro & Bridget
+# AGENTS.md — Alessandro & Bridget: Teatro di cartone
 
 ## Project summary
 
-This repository is `alessandropontini/site_love`, a private Next.js microsite named `dreamy-couple-gallery`. The shipped experience is **Pixel Quest: Alessandro & Bridget**: a retro/pixel-style love-story quest with a title screen, map progression, four mini-games, shared heart collection, and an epilogue.
+This repository is `alessandropontini/site_love`, a private Next.js microsite named `dreamy-couple-gallery`. The shipped experience is **Alessandro & Bridget — La nostra avventura**: a mobile-first cardboard-theatre journey through an invitation, a Milan map, four accessible narrative challenges, collected keepsakes, and a gated final letter.
+
+The paper-theatre experience mounted by `app/page.tsx` is the canonical product and the main narrative line. The earlier scrollytelling and pixel arcade implementations remain unmounted legacy references and must not be treated as the current home experience.
 
 Ruflo has been removed from the SITE LOVE workflow. Reviews do not use Ruflo, Claude Flow, MCP, WASM agents, or unvalidated automatic multi-agent orchestration. The local Ruflo/WASM runtime was retired because it did not produce autonomous review output without an external model provider/API key. Codex remains the active real executor/provider for implementation support, file inspection, lint/build execution, and independent reviewer reports.
 
@@ -15,23 +17,26 @@ CrewAI is being evaluated as a pluggable orchestrator with a documented Codex ex
 - Next.js 14 App Router
 - React 18
 - TypeScript with strict compiler settings
-- CSS-driven retro/pixel styling in `app/globals.css`
-- Next font integration for Manrope UI text and Silkscreen title accents
-- Custom CSS/pixel-art components and static scene assets
+- CSS Modules for the active experience, with shared base styling in `app/globals.css`
+- Next font integration for Manrope UI text and a local system serif stack for editorial titles
+- Custom CSS/SVG paper-stage compositions and optimized local WebP scene assets
 
 ## Key files and directories
 
 - `package.json` — project name, scripts, and runtime/development dependencies.
 - `app/layout.tsx` — metadata, font setup, and global stylesheet import.
-- `app/page.tsx` — single-page entry point that renders the quest shell.
-- `app/globals.css` — global theme tokens, responsive layout rules, CRT/pixel styling, and game panel styling.
-- `components/QuestGame.tsx` — top-level quest state, intro/map/game/ending flow, heart totals, character selection, and dev skip handling.
-- `components/quest/questSchema.tsx` — chapter metadata and game component registration.
-- `components/quest/games/` — mini-game implementations.
-- `components/pixel/` — custom pixel characters and landmarks.
-- `public/scene/` and `public/photos/` — static visual assets.
-- `lib/profile.ts` and `lib/photos.ts` — site content/profile and photo metadata.
-- `docs/quest-guide.md` — gameplay customization guide.
+- `app/page.tsx` — single-page entry point that renders `ExperienceShell`.
+- `app/globals.css` — shared reset, base typography, and legacy styling.
+- `components/experience/ExperienceShell.tsx` — canonical invitation/map/chapter/reward/finale controller.
+- `components/experience/JourneyMap.tsx` — narrative map and chapter availability states.
+- `components/experience/challenges/` — four active accessible narrative challenges.
+- `components/experience/art/` — cardboard stage, landmarks, characters, and reward art.
+- `components/experience/ExperienceShell.module.css` — active visual system and responsive layout.
+- `lib/experienceConfig.ts` — canonical chapter order, copy, instructions, and rewards.
+- `lib/useExperienceProgress.ts` — versioned local state, gating, persistence, and reset.
+- `public/scene/paper-theatre/` — active local transparent WebP theatre assets.
+- `components/story/`, `components/games/`, `components/QuestGame.tsx`, `components/quest/`, and `components/pixel/` — unmounted legacy implementations.
+- `docs/quest-guide.md` — active experience customization and regression guide.
 - `docs/visual-direction.md` — approved visual/design direction.
 - `docs/architecture.md` — architecture overview for maintainers and agents.
 - `docs/ai-workflow.md` — Codex usage and manual review workflow guidance.
@@ -45,9 +50,6 @@ CrewAI is being evaluated as a pluggable orchestrator with a documented Codex ex
 - `scripts/local-multiagent.sh`, `scripts/local-patch.sh`, `scripts/local-review.sh` — safe local workflow entrypoints.
 - `scripts/openclaw-orchestrate.sh` — experimental safe OpenClaw wrapper and Codex fallback helper.
 - `scripts/lib/multiagent-provider.sh` — provider abstraction and deterministic report aggregation.
-- `components/story/` — scrollytelling shell, scroll scenes, and progress indicator.
-- `components/games/` — lightweight scrollytelling mini-games.
-- `lib/storyConfig.ts` and `lib/useStoryProgress.ts` — scrollytelling content/config and progress state.
 
 ## Safe tasks for Codex
 
@@ -60,16 +62,16 @@ Codex is appropriate for low-risk maintenance such as:
 - Copy updates in metadata/content files when explicitly requested.
 - Test, lint, and build troubleshooting that does not change deployment configuration.
 
-Before changing the scrollytelling feature, agents must read this `AGENTS.md`, `docs/architecture.md`, and the relevant story files. If AI-assisted implementation or validation is part of the work, also read `docs/ai-workflow.md`.
+Before changing the active paper-theatre experience, agents must read this `AGENTS.md`, `docs/architecture.md`, `docs/visual-direction.md`, and the relevant files under `components/experience/` and `lib/experienceConfig.ts`. If AI-assisted implementation or validation is part of the work, also read `docs/ai-workflow.md`.
 
 ## Risky tasks
 
 Treat the following as risky and plan carefully before editing:
 
-- Mini-game physics, timers, scoring, collision, unlock, and win-condition logic.
-- Quest progression and reward-heart accounting.
-- Major CSS rewrites affecting intro, map, or game-panel layout.
-- Pixel art, landmarks, sprites, and visual-asset pipeline changes.
+- Challenge sequencing, timers, completion rules, unlocks, and win-condition logic.
+- Experience progression, persistence migrations, inventory, and finale gating.
+- Major CSS rewrites affecting invitation, map, chapter, reward, inventory, or finale layout.
+- Paper art, landmarks, characters, and visual-asset pipeline changes.
 - Dependency upgrades, framework upgrades, or TypeScript config changes.
 - Any change that could affect production deployment, environment variables, secrets, or hosting behavior.
 
@@ -77,6 +79,9 @@ Treat the following as risky and plan carefully before editing:
 
 Ask for explicit user approval before editing any of these paths:
 
+- `components/experience/challenges/`
+- `lib/useExperienceProgress.ts`
+- `lib/experienceConfig.ts` chapter order or completion requirements
 - `components/quest/games/`
 - `components/quest/questSchema.tsx`
 - `components/QuestGame.tsx`
@@ -90,20 +95,21 @@ Ask for explicit user approval before editing any of these paths:
 
 Documentation-only changes describing these files are allowed when they do not modify the files themselves.
 
-## Mini-game logic rules
+## Challenge logic rules
 
-- Do not modify mini-game logic unless the user explicitly asks for that specific game behavior.
-- Preserve current win conditions, score/reward flow, collision detection, movement physics, timers, keyboard/touch controls, and dev skip behavior.
-- When game changes are requested, inspect the relevant file first, write a plan, and keep changes minimal and isolated.
-- Validate game-related changes with `npm run lint` and `npm run build`; manually test the affected game in the browser when possible.
+- Do not modify active challenge logic unless the user explicitly asks for that behavior.
+- Preserve sequential chapter gating, idempotent rewards, finale requirements, keyboard/touch controls, and reduced-motion fallbacks.
+- When challenge changes are requested, inspect the relevant file under `components/experience/challenges/` first, write a plan, and keep changes minimal and isolated.
+- Validate challenge changes with `npm run lint` and `npm run build`; manually test the affected chapter in the browser when possible.
+- Legacy arcade and scrollytelling mechanics are not part of the public route and should not be changed as a side effect of active experience work.
 
 ## Visual direction rules
 
 - Follow `docs/visual-direction.md` as the source of truth for style decisions.
-- Preserve the retro, warm, pixel-art love-story tone.
+- Preserve the warm, tactile, cinematic cardboard-theatre love-story tone.
 - Do not modify visual assets in `public/` without explicit approval.
-- Keep Silkscreen for short title/accent moments and prefer clean readable UI text elsewhere.
-- Maintain the approved Milan/Italian city-entry sign/Duomo direction unless the user asks to revise it.
+- Keep Manrope for functional UI and the documented system serif stack for editorial titles.
+- Maintain the approved Milan/Duomo, proscenium, tram, and layered paper-stage direction unless the user asks to revise it.
 
 ## Accessibility, mobile layout, and performance rules
 
@@ -111,20 +117,21 @@ Documentation-only changes describing these files are allowed when they do not m
 - Maintain color contrast for text, controls, progress states, and game HUD elements.
 - Respect mobile-first readability: actions and information should come before decorative scenery on small screens.
 - Avoid fixed-width layouts that break on phones.
-- Keep animation and real-time game loops performant; avoid unnecessary React re-renders in animation paths.
+- Keep stage animation and timed challenge playback performant; avoid unnecessary React re-renders in animation paths.
 - Preserve Next.js image/font optimizations and do not add heavyweight client libraries for orchestration or styling without approval.
 
-## Scrollytelling progression rules
+## Paper-theatre progression rules
 
-- The first intro chapter must always be readable.
-- Story gating applies to both mini-games and later narrative chapters.
-- Future narrative chapters must depend on completion of the previous required mini-game or story block.
-- The first game must be derived from story configuration such as `gameOrder`, not hardcoded in UI code.
-- If `started=false` and the user reaches the first game without using the intro CTA, show a local CTA such as `Inizia il capitolo`; do not rely only on the intro CTA.
-- Do not auto-start the story unless that behavior is explicitly requested.
-- Locked chapters should present one clear locked explanation; avoid duplicate locked copy from nested game slots.
-- The progress indicator must distinguish `complete`, `available/current`, and `locked`; never label an available but incomplete game as locked.
-- Anti-regression checklist for story changes: first chapter readable, future chapters gated, first game config-driven and locally startable, no duplicate locked copy, progress states correct, docs updated with the code.
+- The invitation must remain readable and the experience must not auto-start.
+- Chapter order must come from `chapterOrder`/`experienceChapters`, not duplicated hardcoded arrays.
+- Exactly the first incomplete chapter is available; later chapters remain locked until every previous chapter is complete.
+- Completion and rewards must be idempotent, and inventory contents must derive from completed chapter IDs.
+- The finale must require every configured chapter ID, not only a matching count.
+- Persisted state must be sanitized and migrated without allowing locked chapters or the finale to open.
+- Available, complete, and locked states must differ by text and semantics, not color alone.
+- Reduced-motion system preference must override the saved in-app motion setting.
+- Reset must require confirmation in the inventory flow and remove only SITE LOVE progress keys.
+- Anti-regression checklist: invitation readable, map gating correct, rewards unique, finale fully gated, keyboard/touch completion available, focus restored after overlays, reduced motion respected, docs updated with code.
 
 ## AI assistance and review rules
 
@@ -146,7 +153,7 @@ Documentation-only changes describing these files are allowed when they do not m
 - Every patch requires independent review before merge.
 - The minimum required independent reviewers are Code Review and QA / Regression.
 - Add specialized reviewers when relevant:
-  - Frontend Architect for React, Next.js routing, state, components, scrollytelling, or architecture.
+  - Frontend Architect for React, Next.js routing, state, components, the paper-theatre experience, or architecture.
   - UX / Accessibility for UI, copy, interactions, mobile, focus, keyboard, semantics, or ARIA.
   - Performance for rendering, animation, scroll, bundle, images, or performance-sensitive paths.
   - Git / Workflow Reviewer for scripts, CI, operational docs, package files, AI workflow, or this `AGENTS.md`.
