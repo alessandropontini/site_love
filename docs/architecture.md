@@ -160,7 +160,7 @@ The current experience layout and controls are isolated in `components/experienc
 - `lib/profile.ts` contains title-screen profile and intro copy.
 - `lib/photos.ts` contains photo metadata.
 - `public/photos/` contains photo documentation/placeholders.
-- `public/scene/paper-theatre/` contains the active transparent WebP cutouts for the Duomo, tram, couple, Galleria-inspired portal, Navigli, Arco della Pace-inspired arch, and Milanese window facade. Older pixel assets remain only for unmounted legacy implementations.
+- `public/scene/paper-theatre/` contains the active transparent WebP cutouts for the Duomo, tram, couple, Galleria-inspired portal, spring Navigli scene with jasmine, Arco della Pace-inspired arch, and Milanese window facade. Older pixel assets remain only for unmounted legacy implementations.
 - `data/` is ignored except for `.gitkeep` and can hold heavyweight local concept art or exports.
 
 Do not modify visual assets in `public/` without explicit approval.
