@@ -1,91 +1,122 @@
-# Codex Multi-Agent Setup
+# Codex Review Setup
 
 ## Prerequisites
 
-- Codex CLI installed on the developer machine.
-- Codex CLI authenticated and configured by the user.
-- SITE LOVE repository opened from the git root.
+- Run commands from the repository root.
+- Use a `feature/*` branch for patch work.
+- Install and authenticate Codex CLI outside this project.
+- Do not add Codex or orchestration tools to `package.json`.
 
-Do not add Codex CLI to this project's `dependencies` or `devDependencies`.
+The workflow searches for Codex in this order:
 
-## Local Review
+1. `MULTIAGENT_CODEX_BIN`
+2. `/Applications/Codex.app/Contents/Resources/codex`
+3. `~/.codex/plugins/.plugin-appserver/codex`
+4. `codex` on `PATH`
 
-```bash
-MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh
-```
+## One-Reviewer Command
 
-Review scope selection is automatic:
-
-- If both `REVIEW_BASE` and `REVIEW_HEAD` are set, the script reviews that explicit Git range.
-- If no explicit range is set and the working tree has staged or unstaged changes, the script reviews the working tree.
-- If no explicit range is set and the working tree is clean, the script reviews the last committed patch with `HEAD~1..HEAD`.
-
-Use explicit range review when the patch has already been committed or spans multiple commits:
+Create a request file outside the repository so reports receive the real goal and acceptance criteria:
 
 ```bash
-REVIEW_BASE=HEAD~2 REVIEW_HEAD=HEAD MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh
+cat > /tmp/site-love-review-request.md <<'EOF'
+# Request
+
+Describe the patch.
+
+## Acceptance
+
+- State the required behavior.
+- State prohibited changes.
+- Require lint and build.
+EOF
 ```
 
-If the range is invalid or the selected diff is empty, the workflow deterministically returns `INFRASTRUCTURE BLOCKED`.
-
-The script runs the minimum independent reviewers through `codex exec`:
-
-- `review-code`
-- `review-qa-regression`
-
-Each reviewer runs in read-only sandbox mode and must write a separate final report with `Real execution: yes` and a valid `Verdict:`.
-
-Accepted verdicts are:
-
-- `PASS`
-- `PASS WITH NOTES`
-- `CHANGES REQUESTED`
-- `BLOCKED`
-- `INFRASTRUCTURE BLOCKED`
-
-## Noop Safe Test
+Run:
 
 ```bash
-MULTIAGENT_PROVIDER=noop ./scripts/local-review.sh
+MULTIAGENT_PROVIDER=codex \
+  ./scripts/local-review.sh --request-file /tmp/site-love-review-request.md
 ```
 
-`noop` never approves. It is useful for checking report generation and deterministic aggregation.
+The command performs validation once and launches one fresh read-only Codex process named `review-code-qa`. It does not commit, merge, push, or edit application files.
 
-The expected final verdict for `noop` is `INFRASTRUCTURE BLOCKED` because every generated reviewer report has `Real execution: no`.
+For a binary or environment-sensitive patch, create a supplemental evidence file before passing it:
 
-For repeatable local smoke coverage of all review modes, run:
+```bash
+printf '%s\n' \
+  '# Supplemental evidence' \
+  '- Record binary inspection, endpoint checks, or screenshot paths here.' \
+  > /tmp/site-love-review-evidence.md
+
+MULTIAGENT_PROVIDER=codex \
+  ./scripts/local-review.sh \
+  --request-file /tmp/site-love-review-request.md \
+  --evidence-file /tmp/site-love-review-evidence.md
+```
+
+Omit `--evidence-file` when no supplemental evidence is needed.
+
+Inspect the result:
+
+```bash
+RUN_DIR="$(ls -td .agent/reports/* | head -1)"
+cat "$RUN_DIR/10_review-code-qa.md"
+cat "$RUN_DIR/99_final-verdict.md"
+```
+
+## Explicit Commit Range
+
+Use a range when the patch is already committed or spans several commits:
+
+```bash
+REVIEW_BASE=system \
+REVIEW_HEAD=HEAD \
+MULTIAGENT_PROVIDER=codex \
+  ./scripts/local-review.sh --request-file /tmp/site-love-review-request.md
+```
+
+Both range variables are required. Invalid or empty ranges return `INFRASTRUCTURE BLOCKED`.
+
+## Optional Variables
+
+- `REVIEW_REQUEST_FILE`: request path alternative to `--request-file`.
+- `REVIEW_EVIDENCE_FILE`: supplemental evidence path alternative to `--evidence-file`.
+- `REVIEW_BASE`, `REVIEW_HEAD`: explicit committed range.
+- `MULTIAGENT_CODEX_BIN`: explicit Codex executable.
+- `MULTIAGENT_AGENT_TIMEOUT_SECONDS`: reviewer timeout, default `300`.
+- `MULTIAGENT_MAX_DIFF_CHARS`: prompt diff limit, default `60000`.
+- `MULTIAGENT_CODEX_ARGS`: additional supported `codex exec` arguments.
+- `MULTIAGENT_CODEX_MODEL`: model label recorded in the report.
+
+## Smoke Test
 
 ```bash
 ./scripts/test-multiagent-workflow.sh
 ```
 
-The smoke script uses a temporary detached Git worktree and runs `local-review` with `MULTIAGENT_PROVIDER=noop` for `explicit-range`, `committed-range`, and `working-tree` scenarios. Its expected verdicts are `INFRASTRUCTURE BLOCKED`, because `noop` is intentionally non-real. This checks workflow context, non-empty diffs, scope metadata, and aggregator blocking behavior; it does not replace a real Codex review.
+The smoke suite uses `noop`, creates temporary worktrees, and must end in `PASS` for the suite while each nested review remains `INFRASTRUCTURE BLOCKED`. No model call is made.
 
-## Optional Variables
+## Validity Rules
 
-- `MULTIAGENT_PROVIDER=codex`
-- `REVIEW_BASE` and `REVIEW_HEAD` for explicit Git range review.
-- `MULTIAGENT_AGENT_TIMEOUT_SECONDS=180`
-- `MULTIAGENT_MAX_DIFF_CHARS=60000`
-- `MULTIAGENT_CODEX_ARGS` for explicit extra `codex exec` arguments when the local CLI supports them.
-- `MULTIAGENT_CODEX_MODEL` is recorded as intent only unless the user also passes a supported model flag through `MULTIAGENT_CODEX_ARGS`.
+A release review is valid only when the combined report contains:
 
-If `timeout` or `gtimeout` is available, the script uses it. Otherwise it uses a portable bash timeout fallback that starts `codex exec` in the background, monitors it, terminates it after `MULTIAGENT_AGENT_TIMEOUT_SECONDS`, and returns exit code `124` on timeout.
+- `Provider: codex`
+- `Real execution: yes`
+- A valid structured verdict
 
-Before running the full workflow, a quick CLI sanity check is:
+Reports from any provider other than `codex` fail the real-provider gate even if they claim `Real execution: yes` or spoof `Provider: codex`; aggregation checks the configured runner as well as report metadata.
+
+The deterministic aggregator blocks invalid output instead of repairing or upgrading it. Raw Codex stdout, stderr, transcript, diagnostics, and exit code remain in the run directory for troubleshooting.
+
+## Troubleshooting
+
+Use an explicit binary when the global wrapper is stale or unresponsive:
 
 ```bash
-printf "Rispondi solo con OK. Non modificare file.\n" | codex exec -
+MULTIAGENT_CODEX_BIN="$HOME/.codex/plugins/.plugin-appserver/codex" \
+MULTIAGENT_PROVIDER=codex \
+  ./scripts/local-review.sh --request-file /tmp/site-love-review-request.md
 ```
 
-## Notes
-
-- Invalid, empty, missing, or non-real reports produce `INFRASTRUCTURE BLOCKED`.
-- Reports without `Real execution: yes` produce `INFRASTRUCTURE BLOCKED`.
-- Missing context files, invalid review scope, or empty diffs produce `INFRASTRUCTURE BLOCKED`.
-- Invalid Codex output is not repaired. The wrapper writes a deterministic fallback report and keeps raw diagnostics in `.agent/reports/<run-id>/`.
-- Codex raw files are named `<agent>-codex-stdout.md`, `<agent>-codex-stderr.md`, `<agent>-codex-transcript.txt`, `<agent>-codex-diagnostics.md`, and `<agent>-codex-exit-code.txt`.
-- The aggregator remains deterministic shell logic, not an LLM.
-- Final human approval is still required before merge.
-- Patch implementation automation is not enabled in Phase 2B.
-- OpenClaw is not active in this phase.
+If authentication, quota, timeout, context, diff, lint, or build evidence is unavailable, keep the resulting `INFRASTRUCTURE BLOCKED` verdict. Never replace it manually with `PASS`.

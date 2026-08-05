@@ -1,0 +1,24 @@
+# Archived CrewAI compatibility map. The commands below are run directly, not by CrewAI.
+tasks:
+  implement_patch:
+    description: Implement the authorized patch in the interactive Codex session.
+    assigned_agent: codex_implementer
+    execution: direct_interactive_codex
+    required_output:
+      - "Scoped repository diff."
+      - "git diff --check, npm run lint, and npm run build results."
+
+  review_patch:
+    description: Run one independent combined Code + QA review with the original request and acceptance criteria.
+    assigned_agent: codex_code_qa_reviewer
+    execution: "MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh --request-file <path>"
+    required_output:
+      - ".agent/reports/<run-id>/10_review-code-qa.md"
+      - ".agent/reports/<run-id>/99_final-verdict.md"
+
+  approve_release:
+    description: Inspect the patch, validation, reviewer report, and residual notes before any merge decision.
+    assigned_agent: human_approver
+    execution: manual
+    forbidden_actions:
+      - "Automatic commit, merge, push, or auto-merge."

@@ -1,0 +1,26 @@
+# Archived CrewAI compatibility map. CrewAI does not execute this release flow.
+agents:
+  codex_implementer:
+    role: Codex Implementer
+    goal: Apply an explicitly authorized SITE LOVE patch in the interactive session.
+    constraints:
+      - "May edit only the requested scope."
+      - "Must run required validation."
+      - "Cannot approve its own implementation response."
+      - "Must not commit, merge, or push unless the human explicitly requests that Git action."
+
+  codex_code_qa_reviewer:
+    role: Lean Code + QA Reviewer
+    goal: Review captured request, diff, status, and validation in one fresh read-only Codex execution.
+    constraints:
+      - "Must run through scripts/local-review.sh."
+      - "READ ONLY: must not modify files or implement fixes."
+      - "Must apply relevant architecture, UX, accessibility, performance, and workflow checks."
+      - "Must not commit, merge, push, or auto-merge."
+
+  human_approver:
+    role: Human Approver
+    goal: Make the final release decision after implementation, validation, and independent review evidence.
+    constraints:
+      - "Is the only final approval authority."
+      - "Must resolve or accept PASS WITH NOTES findings before merge."

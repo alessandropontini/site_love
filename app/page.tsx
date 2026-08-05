@@ -1,9 +1,5 @@
-import { StoryShell } from "@/components/story/StoryShell";
+import { ExperienceShell } from "@/components/experience/ExperienceShell";
 
 export default function Home() {
-  return (
-    <main>
-      <StoryShell />
-    </main>
-  );
+  return <ExperienceShell />;
 }

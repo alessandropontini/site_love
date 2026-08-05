@@ -1,6 +1,14 @@
-# Pixel Quest: Alessandro & Bridget
+# Alessandro & Bridget — La nostra avventura
 
-A retro-styled Next.js microsite evolving into a playable scrollytelling love story. The current home experience moves through narrative chapters, lightweight interactions, and progressively unlocked mini-games before the final reveal.
+Un microsito Next.js mobile-first costruito come una piccola storia interattiva. Non è una landing page né un lungo scorrimento: il visitatore entra in una mappa illustrata di Milano, completa quattro fermate, raccoglie ricordi e apre una lettera finale.
+
+Il teatro di cartone montato da `app/page.tsx` è la linea narrativa principale e l'esperienza destinata alla produzione. Le implementazioni precedenti restano nel repository soltanto come riferimenti non montati.
+
+## Lingue
+
+L'esperienza è disponibile integralmente in italiano e inglese, compresi giochi, messaggi di stato, controlli accessibili e metadata aggiornati nel browser. Alla prima visita il sito usa gratuitamente il fuso geografico e la lingua del dispositivo: i fusi italiani aprono in italiano, la lingua browser italiana è il secondo segnale e tutti gli altri casi usano l'inglese.
+
+Il selettore visibile **IT / EN** permette sempre di cambiare lingua. La scelta viene salvata soltanto nel browser e ha priorità sui rilevamenti successivi; non vengono usati servizi IP, cookie di profilazione o API di traduzione.
 
 ## Getting Started
 
@@ -12,58 +20,73 @@ A retro-styled Next.js microsite evolving into a playable scrollytelling love st
    ```bash
    npm run dev
    ```
-3. Open http://localhost:3000 and press **Inizia**.
+3. Apri http://localhost:3000 e premi **Entra nella storia**.
 
-## Playing The Timeline
+## Customer journey
 
-The site launches with a cinematic intro and a scroll-driven route. Complete each interactive chapter in order to unlock the next narrative section and finale:
+Il percorso pubblico montato da `app/page.tsx` è:
 
-1. **Signal quiz** – answer personal route-setting questions.
-2. **Memory pairs** – match places and feelings from the shared archive.
-3. **Picture sequence** – reorder the story beats.
-4. **Hidden clues** – find the objects that unlock the final reveal.
+1. **Invito** — promessa, durata e ingresso esplicito.
+2. **Mappa viva** — una sola fermata disponibile alla volta.
+3. **La scintilla** — sintonizzazione di un segnale.
+4. **Le coordinate** — tre abbinamenti accessibili tramite tap.
+5. **Le scelte** — quattro gesti da ricomporre.
+6. **Le finestre accese** — tre sequenze luminose da osservare e ripetere.
+7. **Ricompense** — un oggetto entra nello zaino dopo ogni prova.
+8. **Finale** — i quattro oggetti aprono una lettera HTML.
 
-Story gating applies to both mini-games and later narrative chapters. The first intro chapter is always readable; future chapters depend on the previous required mini-game. If someone scrolls directly to the first game without pressing **Inizia**, a local **Inizia il capitolo** CTA starts the path without forcing auto-start.
+Il progresso è sequenziale, idempotente e salvato soltanto nel browser tramite `localStorage`. Inventario e finale sono derivati dai capitoli completati; non servono account, database, API o servizi a pagamento. Il comando per ridurre il movimento è visibile e viene ricordato sul dispositivo, mentre la preferenza di sistema ha sempre la precedenza.
 
-The legacy arcade quest remains in `components/QuestGame.tsx` and `components/quest/` for reuse or reference, but `app/page.tsx` currently mounts the scrollytelling shell.
+Le vecchie implementazioni scrollytelling e arcade restano nel repository come riferimento, ma non sono montate nel percorso pubblico.
 
 ## Where To Customize
 
-- `lib/storyConfig.ts` – edit scrollytelling chapters, game order, labels, questions, memory pairs, puzzle tiles, and hidden objects.
-- `lib/useStoryProgress.ts` – progress state, `localStorage`, game unlocks, and finale unlock logic.
-- `components/story/StoryShell.tsx` – scrollytelling assembly, chapter gating, and local start CTA.
-- `components/story/ProgressIndicator.tsx` – compact progress states: complete, available/current, and locked.
-- `components/games/*` – lightweight scrollytelling mini-games.
+- `lib/experienceConfig.ts` – titoli, luoghi, istruzioni e ricompense delle quattro fermate.
+- `lib/i18n.ts` – dizionari IT/EN, metadata e rilevamento iniziale della lingua.
+- `components/experience/LocaleProvider.tsx` – stato locale, persistenza e selettore lingua.
+- `lib/useExperienceProgress.ts` – stato versionato, gating, migrazione e persistenza locale.
+- `components/experience/ExperienceShell.tsx` – regia di invito, mappa, capitoli, ricompense e finale.
+- `components/experience/JourneyMap.tsx` – hub visuale e stati `completata`, `disponibile`, `bloccata`.
+- `components/experience/challenges/*` – le quattro interazioni leggere.
+- `components/experience/art/*` – quinte, landmark e marionette del teatro di cartone.
+- `components/experience/ExperienceShell.module.css` – design system, scene e layout responsive.
 - `components/QuestGame.tsx` – legacy arcade quest shell kept intact.
-- `components/quest/questSchema.ts` – legacy arcade chapter metadata.
+- `components/quest/questSchema.tsx` – legacy arcade chapter metadata.
 - `components/quest/games/*` – legacy arcade mini-game mechanics.
-- `components/pixel/PixelCharacter.tsx` – update pixel palettes or redraw the avatars.
-- `app/globals.css` – global palette, CRT overlays, and responsive layout tokens.
+- `components/pixel/` – componenti legacy, non montati dalla route pubblica.
+- `public/scene/paper-theatre/` – Duomo, tram, coppia e landmark milanesi locali, incluso il Naviglio Grande primaverile; nessuna immagine remota è necessaria a runtime.
 - `data/` – still ignored; stash heavyweight concept art or exports here if needed.
 
-👉 For deeper breakdowns, peek at `docs/quest-guide.md`.
-👉 For the current visual direction and character references, use `docs/visual-direction.md`.
-👉 For local AI patch workflow rules, use `docs/ai-workflow.md` and `docs/multiagent-workflow.md`.
+- Per struttura, stato e confini legacy: `docs/architecture.md`.
+- Per personalizzare capitoli, prove e ricompense: `docs/quest-guide.md`.
+- Per la direzione visiva corrente: `docs/visual-direction.md`.
+- Per il workflow AI e le review: `docs/ai-workflow.md` e `docs/multiagent-workflow.md`.
+- Per lo stato degli esperimenti CrewAI e OpenClaw: `docs/crewai-orchestration.md` e `docs/openclaw-orchestration.md`.
 
-## Story Gating Checklist
+## Lean Codex Review
 
-- The first intro chapter must stay readable.
-- Future narrative chapters must stay gated behind the previous required mini-game.
-- The first game must be derived from `gameOrder`, not hardcoded in UI code.
-- The first mini-game must be startable locally if the user scrolls past the intro before pressing **Inizia**.
-- Locked chapters should expose one clear locked message, not duplicate locked copy in nested game slots.
-- The progress indicator must not label an available but incomplete game as locked.
-- Documentation should be updated with behavior changes to `StoryShell`, `ProgressIndicator`, or `useStoryProgress`.
-
-## Dev Skip Button
-
-During development a **Skip (DEV)** button appears in every mini-game panel so you can jump past a stage while testing. It is shown automatically when `NODE_ENV !== "production"` or when you set:
+Codex è l'unico strumento AI operativo. La sessione interattiva sviluppa; una nuova esecuzione Codex in sola lettura svolge una sola review combinata Code + QA. Inserisci obiettivo e criteri di accettazione in un file locale, poi esegui:
 
 ```bash
-NEXT_PUBLIC_DEV_SKIP=true
+git diff --check
+MULTIAGENT_PROVIDER=codex \
+  ./scripts/local-review.sh --request-file /tmp/site-love-review-request.md
+RUN_DIR="$(ls -td .agent/reports/* | head -1)"
+cat "$RUN_DIR/10_review-code-qa.md"
+cat "$RUN_DIR/99_final-verdict.md"
 ```
 
-Be sure to unset the flag (or comment out the button) before launching to production.
+Lo script esegue anche lint, build e smoke workflow, non modifica file applicativi e non fa commit, merge o push. `noop` resta gratuito per testare soltanto l'infrastruttura e deve produrre `INFRASTRUCTURE BLOCKED`. Anche `PASS` richiede approvazione umana finale. CrewAI e OpenClaw sono esperimenti inattivi, non passaggi di rilascio.
+
+## Experience checklist
+
+- L&apos;invito resta sempre leggibile e non parte automaticamente.
+- La mappa mostra una sola tappa disponibile; le successive restano bloccate.
+- Ogni successo assegna la ricompensa una volta sola.
+- Il finale richiede tutti e quattro gli ID configurati, non soltanto un conteggio.
+- Il reset richiede conferma e cancella soltanto i dati locali del sito.
+- Tutte le prove sono completabili con pulsanti o controlli HTML nativi, senza drag obbligatorio.
+- Il layout resta usabile tra 320 e 430 px e rispetta `prefers-reduced-motion`.
 
 ## Production Build
 
@@ -72,14 +95,14 @@ npm run build
 npm start
 ```
 
-Deploy behind a CDN (Vercel works great) to keep input latency low for the mini-games.
+La build è statica sul percorso `/` e può essere pubblicata su un piano gratuito compatibile con Next.js. Per preview temporanee si può usare un tunnel gratuito; l&apos;URL del tunnel cambia quando il processo viene riavviato.
 
 ## Tech Stack Highlights
 
 - **Next.js 14** with the App Router powering the single-page quest.
-- **React hooks** orchestrating real-time state loops for each mini-game.
-- **Custom pixel art** drawn with CSS grids for avatars, tiles, and collectibles.
-- **RequestAnimationFrame loops** for Flappy and Side-Scroller physics.
-- **TypeScript** across all components for safer interaction code.
+- **React hooks** per stato, persistenza e interazioni.
+- **CSS Modules e SVG** per mappa, transizioni e scene senza librerie runtime aggiuntive.
+- **Diorama di carta stratificato** per Duomo, tram e protagonisti.
+- **TypeScript strict** per gating e configurazione dei capitoli.
 
-Have fun remixing the stages—swap in new memories, change the mechanics, or add hidden chapters to keep the love story evolving.
+Le fotografie personali non sono ancora presenti in `public/photos/`. Quando saranno disponibili, devono essere locali, ottimizzate e inserite nei reveal narrativi senza sostituire l’interfaccia HTML accessibile.

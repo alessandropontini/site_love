@@ -3,7 +3,7 @@ set -euo pipefail
 
 ALLOWED_VERDICTS_REGEX='^(PASS|PASS WITH NOTES|CHANGES REQUESTED|BLOCKED|INFRASTRUCTURE BLOCKED)$'
 DEFAULT_MAX_DIFF_CHARS=60000
-DEFAULT_AGENT_TIMEOUT_SECONDS=180
+DEFAULT_AGENT_TIMEOUT_SECONDS=300
 
 status_without_generated_reports() {
   git status --short --untracked-files=all | grep -v '^?? \.agent/reports/' || true
@@ -285,6 +285,22 @@ run_validation_commands() {
       echo "Result: fail"
       status=1
     fi
+    echo
+    echo "## ./scripts/test-multiagent-workflow.sh"
+    if [[ "${MULTIAGENT_SKIP_WORKFLOW_SMOKE:-}" == "1" ]]; then
+      echo "Result: skipped"
+      echo "Reason: MULTIAGENT_SKIP_WORKFLOW_SMOKE=1 prevents recursive smoke validation."
+    elif [[ -x "./scripts/test-multiagent-workflow.sh" ]]; then
+      if ./scripts/test-multiagent-workflow.sh; then
+        echo "Result: pass"
+      else
+        echo "Result: fail"
+        status=1
+      fi
+    else
+      echo "Result: skipped"
+      echo "Reason: scripts/test-multiagent-workflow.sh is not present or not executable."
+    fi
   } > "$run_dir/04_validation.md" 2>&1
 
   return "$status"
@@ -297,16 +313,42 @@ provider_model() {
     codex)
       printf '%s\n' "${MULTIAGENT_CODEX_MODEL:-codex-config-default}"
       ;;
-    ollama)
-      printf '%s\n' "${MULTIAGENT_OLLAMA_MODEL:-qwen2.5-coder:7b}"
-      ;;
-    gemini | noop)
+    noop)
       printf '%s\n' "n/a"
       ;;
     *)
       printf '%s\n' "unknown"
       ;;
   esac
+}
+
+resolve_codex_bin() {
+  local configured="${MULTIAGENT_CODEX_BIN:-}"
+  local app_bundle="/Applications/Codex.app/Contents/Resources/codex"
+  local plugin_appserver="${HOME:-}/.codex/plugins/.plugin-appserver/codex"
+
+  if [[ -n "$configured" ]]; then
+    if [[ "$configured" == */* ]]; then
+      [[ -x "$configured" ]] && printf '%s\n' "$configured"
+    else
+      command -v "$configured" 2>/dev/null || true
+    fi
+    return 0
+  fi
+
+  # The macOS app bundle is updated with the active Codex app and can be more
+  # reliable than an older globally installed npm wrapper.
+  if [[ "$(uname -s)" == "Darwin" && -x "$app_bundle" ]]; then
+    printf '%s\n' "$app_bundle"
+    return 0
+  fi
+
+  if [[ -x "$plugin_appserver" ]]; then
+    printf '%s\n' "$plugin_appserver"
+    return 0
+  fi
+
+  command -v codex 2>/dev/null || true
 }
 
 write_infrastructure_blocked_report() {
@@ -324,7 +366,7 @@ write_infrastructure_blocked_report() {
 - Provider: $provider
 - Model: $model
 - Real execution: $real_execution
-- Input files: 00_context.md, 01_git_status.txt, 02_git_diff.patch, 03_git_diff_stat.txt, 04_validation.md, 06_review_scope.md, 07_touched_files.txt, 05_untracked_files.md if present
+- Input files: 00_context.md, 01_git_status.txt, 02_git_diff.patch, 03_git_diff_stat.txt, 04_validation.md, 06_review_scope.md, 07_touched_files.txt, 05_untracked_files.md and 08_review_evidence.md if present
 - Verdict: INFRASTRUCTURE BLOCKED
 
 ## Summary
@@ -403,6 +445,11 @@ build_agent_prompt() {
       echo "## Untracked Files Context"
       cat "$run_dir/05_untracked_files.md"
     fi
+    if [[ -f "$run_dir/08_review_evidence.md" ]]; then
+      echo
+      echo "## Additional Review Evidence"
+      cat "$run_dir/08_review_evidence.md"
+    fi
     echo
     echo "## Required Report Format"
     echo
@@ -414,7 +461,7 @@ build_agent_prompt() {
 - Provider: $provider
 - Model: $model
 - Real execution: yes
-- Input files: 00_context.md, 01_git_status.txt, 02_git_diff.patch, 03_git_diff_stat.txt, 04_validation.md, 06_review_scope.md, 07_touched_files.txt, 05_untracked_files.md if present
+- Input files: 00_context.md, 01_git_status.txt, 02_git_diff.patch, 03_git_diff_stat.txt, 04_validation.md, 06_review_scope.md, 07_touched_files.txt, 05_untracked_files.md and 08_review_evidence.md if present
 - Verdict: PASS | PASS WITH NOTES | CHANGES REQUESTED | BLOCKED | INFRASTRUCTURE BLOCKED
 
 ## Summary
@@ -436,6 +483,11 @@ extract_verdict() {
 is_real_execution() {
   local report_file="$1"
   grep -Eq '^- Real execution:[[:space:]]*yes[[:space:]]*$' "$report_file"
+}
+
+is_codex_provider() {
+  local report_file="$1"
+  grep -Eq '^- Provider:[[:space:]]*codex[[:space:]]*$' "$report_file"
 }
 
 validate_agent_report() {
@@ -499,9 +551,12 @@ agent_report_validation_errors() {
 
 validate_real_agent_report() {
   local report_file="$1"
+  local execution_provider="$2"
 
+  [[ "$execution_provider" == "codex" ]] || return 1
   validate_agent_report "$report_file" || return 1
   is_real_execution "$report_file" || return 1
+  is_codex_provider "$report_file" || return 1
 }
 
 run_command_with_timeout() {
@@ -511,49 +566,55 @@ run_command_with_timeout() {
   local diag_file="$4"
   local stdin_file="$5"
   shift 5
-  local timeout_bin=""
-  local command_pid exit_code elapsed
-
-  if command -v timeout >/dev/null 2>&1; then
-    timeout_bin="timeout"
-  elif command -v gtimeout >/dev/null 2>&1; then
-    timeout_bin="gtimeout"
-  fi
-
-  if [[ -n "$timeout_bin" ]]; then
-    if "$timeout_bin" "$timeout_seconds" "$@" < "$stdin_file" > "$stdout_file" 2> "$stderr_file"; then
-      return 0
-    fi
-    return $?
-  fi
+  local command_pid command_pgid shell_pgid exit_code elapsed
+  local restore_monitor_mode="no"
 
   {
     echo
-    echo "External timeout command not available; using portable bash timeout."
+    echo "Using process-group timeout supervision."
   } >> "$diag_file"
 
+  if [[ "$-" != *m* ]]; then
+    set -m
+    restore_monitor_mode="yes"
+  fi
   "$@" < "$stdin_file" > "$stdout_file" 2> "$stderr_file" &
   command_pid=$!
+  command_pgid="$(ps -o pgid= -p "$command_pid" 2>/dev/null | tr -d ' ' || true)"
+  shell_pgid="$(ps -o pgid= -p "$$" 2>/dev/null | tr -d ' ' || true)"
+  if [[ "$restore_monitor_mode" == "yes" ]]; then
+    set +m
+  fi
+
+  if [[ -z "$command_pgid" || "$command_pgid" == "$shell_pgid" ]]; then
+    echo "Could not isolate command process group; refusing unsafe timeout supervision." >> "$diag_file"
+    kill "$command_pid" 2>/dev/null || true
+    wait "$command_pid" 2>/dev/null || true
+    return 125
+  fi
+
+  echo "Command PID: $command_pid" >> "$diag_file"
+  echo "Command process group: $command_pgid" >> "$diag_file"
   elapsed=0
 
   while kill -0 "$command_pid" 2>/dev/null; do
     if [[ "$elapsed" -ge "$timeout_seconds" ]]; then
-      echo "Command timed out after ${timeout_seconds}s; terminating process ${command_pid}." >> "$diag_file"
-      kill "$command_pid" 2>/dev/null || true
+      echo "Command timed out after ${timeout_seconds}s; terminating process group ${command_pgid}." >> "$diag_file"
+      kill -TERM -- "-$command_pgid" 2>/dev/null || true
 
       local grace_elapsed=0
-      while kill -0 "$command_pid" 2>/dev/null && [[ "$grace_elapsed" -lt 2 ]]; do
+      while kill -0 -- "-$command_pgid" 2>/dev/null && [[ "$grace_elapsed" -lt 5 ]]; do
         sleep 1
         grace_elapsed=$((grace_elapsed + 1))
       done
 
-      if kill -0 "$command_pid" 2>/dev/null; then
-        kill -9 "$command_pid" 2>/dev/null || true
+      if kill -0 -- "-$command_pgid" 2>/dev/null; then
+        kill -KILL -- "-$command_pgid" 2>/dev/null || true
         sleep 1
       fi
 
-      if kill -0 "$command_pid" 2>/dev/null; then
-        echo "Process ${command_pid} did not exit after SIGKILL; returning timeout without blocking." >> "$diag_file"
+      if kill -0 -- "-$command_pgid" 2>/dev/null; then
+        echo "Process group ${command_pgid} did not exit after SIGKILL; manual host cleanup may be required." >> "$diag_file"
       else
         set +e
         wait "$command_pid" 2>/dev/null
@@ -590,12 +651,14 @@ run_codex_agent() {
   local output_file="$4"
   local model
   local prompt_tmp raw_tmp transcript_tmp stderr_tmp diag_tmp exit_tmp validation_reason
+  local codex_bin
   local timeout_seconds="${MULTIAGENT_AGENT_TIMEOUT_SECONDS:-$DEFAULT_AGENT_TIMEOUT_SECONDS}"
   local exit_code=0
   local -a codex_cmd
 
-  if ! command -v codex >/dev/null 2>&1; then
-    write_infrastructure_blocked_report "$output_file" "$agent" "codex" "n/a" "codex CLI not found" "no"
+  codex_bin="$(resolve_codex_bin)"
+  if [[ -z "$codex_bin" ]]; then
+    write_infrastructure_blocked_report "$output_file" "$agent" "codex" "n/a" "Codex CLI not found; set MULTIAGENT_CODEX_BIN to an executable CLI path" "no"
     return 0
   fi
 
@@ -610,7 +673,7 @@ run_codex_agent() {
   build_agent_prompt "$run_dir" "$agent" "$prompt_file" "codex" "$model" > "$prompt_tmp"
   : > "$raw_tmp"
 
-  codex_cmd=(codex exec --color never --sandbox read-only --output-last-message "$raw_tmp")
+  codex_cmd=("$codex_bin" exec --color never --sandbox read-only --output-last-message "$raw_tmp")
   if [[ -n "${MULTIAGENT_CODEX_ARGS:-}" ]]; then
     # shellcheck disable=SC2206
     codex_cmd+=(${MULTIAGENT_CODEX_ARGS})
@@ -623,6 +686,7 @@ run_codex_agent() {
     echo "- Agent: $agent"
     echo "- Provider: codex"
     echo "- Model: $model"
+    echo "- Codex binary: $codex_bin"
     echo "- Timeout seconds: $timeout_seconds"
     echo "- Prompt file: $(basename "$prompt_tmp")"
     echo "- Output last message file: $(basename "$raw_tmp")"
@@ -650,62 +714,12 @@ run_codex_agent() {
 
   cp "$raw_tmp" "$output_file"
 
-  if ! validate_real_agent_report "$output_file"; then
+  if ! validate_real_agent_report "$output_file" "codex"; then
     validation_reason="$(agent_report_validation_errors "$output_file")"
     if validate_agent_report "$output_file" && ! is_real_execution "$output_file"; then
       validation_reason="report did not contain 'Real execution: yes'"
     fi
     write_infrastructure_blocked_report "$output_file" "$agent" "codex" "$model" "codex output was invalid: ${validation_reason}; raw output saved to $(basename "$raw_tmp"); raw stderr saved to $(basename "$stderr_tmp")" "no"
-  fi
-}
-
-run_gemini_agent() {
-  local run_dir="$1"
-  local agent="$2"
-  local _prompt_file="$3"
-  local output_file="$4"
-
-  if ! command -v gemini >/dev/null 2>&1; then
-    write_infrastructure_blocked_report "$output_file" "$agent" "gemini" "n/a" "gemini CLI not found" "no"
-    return 0
-  fi
-
-  write_infrastructure_blocked_report "$output_file" "$agent" "gemini" "n/a" "gemini CLI found, but Phase 2A does not assume a stable non-interactive invocation syntax; TODO: wire an approved gemini command" "no"
-}
-
-run_ollama_agent() {
-  local run_dir="$1"
-  local agent="$2"
-  local prompt_file="$3"
-  local output_file="$4"
-  local model="${MULTIAGENT_OLLAMA_MODEL:-qwen2.5-coder:7b}"
-  local prompt_tmp raw_tmp
-
-  if ! command -v ollama >/dev/null 2>&1; then
-    write_infrastructure_blocked_report "$output_file" "$agent" "ollama" "$model" "ollama CLI not found" "no"
-    return 0
-  fi
-
-  ollama list > "$run_dir/ollama-list.txt" 2>&1 || true
-
-  prompt_tmp="$run_dir/${agent}-prompt.txt"
-  raw_tmp="$run_dir/${agent}-raw-output.md"
-  build_agent_prompt "$run_dir" "$agent" "$prompt_file" > "$prompt_tmp"
-
-  if ! ollama run "$model" < "$prompt_tmp" > "$raw_tmp" 2>&1; then
-    write_infrastructure_blocked_report "$output_file" "$agent" "ollama" "$model" "ollama command failed; see ${agent}-raw-output.md" "no"
-    return 0
-  fi
-
-  if [[ ! -s "$raw_tmp" ]]; then
-    write_infrastructure_blocked_report "$output_file" "$agent" "ollama" "$model" "ollama returned empty output" "no"
-    return 0
-  fi
-
-  cp "$raw_tmp" "$output_file"
-
-  if ! validate_real_agent_report "$output_file"; then
-    write_infrastructure_blocked_report "$output_file" "$agent" "ollama" "$model" "ollama output did not match the required report format or did not mark Real execution: yes; raw output saved to ${agent}-raw-output.md" "no"
   fi
 }
 
@@ -722,12 +736,6 @@ run_agent() {
       ;;
     codex)
       run_codex_agent "$run_dir" "$agent" "$prompt_file" "$output_file"
-      ;;
-    gemini)
-      run_gemini_agent "$run_dir" "$agent" "$prompt_file" "$output_file"
-      ;;
-    ollama)
-      run_ollama_agent "$run_dir" "$agent" "$prompt_file" "$output_file"
       ;;
     *)
       write_infrastructure_blocked_report "$output_file" "$agent" "$provider" "unknown" "unsupported MULTIAGENT_PROVIDER: $provider" "no"
@@ -763,7 +771,7 @@ aggregate_reports_basic() {
     fi
 
     verdict="$(extract_verdict "$report")"
-    if is_real_execution "$report"; then
+    if validate_real_agent_report "$report" "${MULTIAGENT_PROVIDER:-noop}"; then
       real="yes"
     else
       real="no"
@@ -840,7 +848,7 @@ aggregate_reports_basic() {
     echo
     echo "## Blocking Rules"
     echo
-    echo "- Missing required reports, missing diff/status/scope/validation, empty diff, invalid reports, or Real execution: no produce INFRASTRUCTURE BLOCKED."
+    echo "- Missing required reports, missing diff/status/scope/validation, empty diff, invalid reports, Provider other than codex, or Real execution: no produce INFRASTRUCTURE BLOCKED."
     echo "- Any reviewer verdict of CHANGES REQUESTED, BLOCKED, or INFRASTRUCTURE BLOCKED makes the patch non-mergeable."
     echo "- Final human approval is still required before merge."
   } > "$final_file"

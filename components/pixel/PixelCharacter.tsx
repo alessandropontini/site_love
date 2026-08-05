@@ -96,23 +96,65 @@ const SPRITES: Record<PixelCharacterVariant, PixelSprite> = {
   }
 };
 
+function createPixelPaths(sprite: PixelSprite) {
+  return Object.entries(sprite.palette).map(([key, color]) => {
+    let path = "";
+    sprite.rows.forEach((row, rowIndex) => {
+      row.split("").forEach((cell, columnIndex) => {
+        if (cell === key) {
+          path += `M${columnIndex} ${rowIndex}h1v1h-1z`;
+        }
+      });
+    });
+    return { color, key, path };
+  });
+}
+
+const COMPACT_PATHS: Record<PixelCharacterVariant, ReturnType<typeof createPixelPaths>> = {
+  alessandro: createPixelPaths(SPRITES.alessandro),
+  bridget: createPixelPaths(SPRITES.bridget)
+};
+
 export function PixelCharacter({
   variant,
   size = 92,
-  className
+  className,
+  compact = false
 }: {
   variant: PixelCharacterVariant;
   size?: number;
   className?: string;
+  compact?: boolean;
 }) {
   const sprite = SPRITES[variant];
+  const height = (size / sprite.width) * sprite.height;
   const pixels: CSSProperties = {
     display: "grid",
     gridTemplateColumns: `repeat(${sprite.width}, 1fr)`,
     width: size,
-    height: (size / sprite.width) * sprite.height,
+    height,
     imageRendering: "pixelated"
   };
+
+  if (compact) {
+    return (
+      <svg
+        className={["pixel-character", "pixel-character--compact", className]
+          .filter(Boolean)
+          .join(" ")}
+        width={size}
+        height={height}
+        viewBox={`0 0 ${sprite.width} ${sprite.height}`}
+        shapeRendering="crispEdges"
+        aria-hidden="true"
+        focusable="false"
+      >
+        {COMPACT_PATHS[variant].map(({ color, key, path }) => (
+          <path key={key} d={path} fill={color} />
+        ))}
+      </svg>
+    );
+  }
 
   return (
     <div

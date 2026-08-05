@@ -16,9 +16,9 @@ export function ProgressIndicator({
   isGameUnlocked
 }: ProgressIndicatorProps) {
   return (
-    <aside className={styles.progress} aria-label="Story progress">
+    <aside className={styles.progress} aria-label="Progresso della storia">
       <div>
-        <span className={styles.progressLabel}>Progress</span>
+        <span className={styles.progressLabel}>Tappe</span>
         <strong>
           {completedCount}/{totalGames}
         </strong>
@@ -29,10 +29,10 @@ export function ProgressIndicator({
           const status = complete ? "complete" : isGameUnlocked(gameId) ? "available" : "locked";
           const statusLabel =
             status === "complete"
-              ? "complete"
+              ? "completato"
               : status === "available"
-                ? "available/current"
-                : "locked";
+                ? "disponibile, tappa attuale"
+                : "bloccato";
 
           return (
             <li key={gameId}>

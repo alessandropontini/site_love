@@ -1,36 +1,105 @@
-# Local Multi-Agent Patch Workflow
+# Lean Codex Patch Review Workflow
 
-SITE LOVE uses a conservative patch workflow: small scoped changes, objective validation, independent review, and final human approval before merge.
+SITE LOVE uses one operational AI tool: Codex. Codex may implement a scoped patch in the interactive session and then run one combined Code + QA review through a fresh read-only `codex exec` process.
 
-## Goal
+The implementation response is never review evidence. Independence comes from a separate execution with a clean reviewer prompt and captured repository evidence, not from asking one response to imitate multiple agents.
 
-The goal is to prepare a local/freemium multi-agent workflow where implementation and review are traceable. The repository must not rely on simulated review output, and it must not reintroduce Ruflo as a required workflow tool.
+## Release Decision
 
-## Implementer vs Reviewer
+- Codex is the only active developer and review provider.
+- `scripts/local-review.sh` is the canonical review entrypoint.
+- One `review-code-qa` report replaces the former Code Review and QA / Regression calls.
+- The combined reviewer also applies architecture, UX/accessibility, performance, and Git/workflow checks when relevant to touched files.
+- The deterministic shell aggregator validates the report and computes the final verdict.
+- A human still approves every merge.
+- No workflow command commits, merges, or pushes.
+- CrewAI and OpenClaw are inactive experiments, not part of the release path.
 
-The implementer applies the requested patch and writes an implementer report. The implementer cannot approve the patch.
+This reduces reviewer invocations from two to one and avoids repeating the same diff and validation context twice.
 
-Reviewers are independent agents with separate prompts and separate report files. A combined response that pretends to be multiple reviewers is not acceptable.
+## Required Flow
 
-## Minimum Required Reviewers
+1. Work on a `feature/*` branch.
+2. Implement the requested patch in the interactive Codex session.
+3. Run `git diff --check`, `npm run lint`, and `npm run build`.
+4. Put the original request and acceptance criteria in a local Markdown file.
+5. Launch one independent read-only review.
+6. Read the generated report and deterministic verdict.
+7. Require human approval before commit, merge, or push decisions.
 
-Every patch requires at least:
+Example:
 
-- Code Review Agent.
-- QA / Regression Agent.
+```bash
+git diff --check
+npm run lint
+npm run build
+MULTIAGENT_PROVIDER=codex \
+  ./scripts/local-review.sh --request-file /tmp/site-love-review-request.md
+RUN_DIR="$(ls -td .agent/reports/* | head -1)"
+cat "$RUN_DIR/10_review-code-qa.md"
+cat "$RUN_DIR/99_final-verdict.md"
+```
 
-## Additional Required Reviewers
+`MULTIAGENT_PROVIDER` is retained as a compatibility environment variable. `codex` is the only provider accepted as real release evidence. `noop` is only for workflow smoke tests.
 
-Use additional reviewers when the patch touches their area:
+## Request Context
 
-- Frontend Architect Agent for React, Next.js routing, state, components, scrollytelling, or architecture.
-- UX / Accessibility Agent for UI, copy, interactions, mobile, focus, keyboard, semantics, or ARIA.
-- Performance Agent for rendering, animation, scroll, bundle, images, or performance-sensitive paths.
-- Git / Workflow Reviewer for scripts, CI, operational docs, package files, AI workflow, or `AGENTS.md`.
+The request file should contain:
 
-## Allowed Verdicts
+- The requested outcome.
+- Allowed and prohibited scope.
+- Acceptance criteria.
+- Required validation.
+- Explicit Git constraints.
 
-Each reviewer and the aggregator must end with exactly one verdict:
+`local-review.sh` copies this content into `00_context.md`, so the reviewer receives the original intent instead of trying to infer it from the diff. `REVIEW_REQUEST_FILE=/path/to/file.md` is equivalent to `--request-file`.
+
+Use `--evidence-file` only after creating a supplemental Markdown file for binary-asset inspection, local endpoint checks, screenshots, or other evidence that a Git text diff cannot contain:
+
+```bash
+MULTIAGENT_PROVIDER=codex \
+  ./scripts/local-review.sh \
+  --request-file /tmp/site-love-review-request.md \
+  --evidence-file /tmp/site-love-review-evidence.md
+```
+
+The evidence file is copied to `08_review_evidence.md` and included verbatim in the read-only reviewer prompt. `REVIEW_EVIDENCE_FILE` is the environment-variable equivalent. Omit the flag for ordinary text-only patches.
+
+## Review Scope
+
+The script chooses one of three modes:
+
+- `working-tree`: staged, unstaged, and relevant untracked changes when the tree is dirty.
+- `committed-range`: `HEAD~1..HEAD` when the tree is clean.
+- `explicit-range`: the range supplied through both `REVIEW_BASE` and `REVIEW_HEAD`.
+
+For a multi-commit patch:
+
+```bash
+REVIEW_BASE=system \
+REVIEW_HEAD=HEAD \
+MULTIAGENT_PROVIDER=codex \
+  ./scripts/local-review.sh --request-file /tmp/site-love-review-request.md
+```
+
+An invalid range, empty diff, missing request where intent cannot be evaluated, or missing validation must block approval.
+
+## Report Contract
+
+Each run is stored under `.agent/reports/<run-id>/` and includes:
+
+- `00_context.md`
+- `01_git_status.txt`
+- `02_git_diff.patch`
+- `03_git_diff_stat.txt`
+- `04_validation.md`
+- `06_review_scope.md`
+- `07_touched_files.txt`
+- `08_review_evidence.md` when supplied
+- `10_review-code-qa.md`
+- `99_final-verdict.md`
+
+A real reviewer report must contain `Provider: codex`, `Real execution: yes`, and exactly one allowed verdict:
 
 - `PASS`
 - `PASS WITH NOTES`
@@ -38,210 +107,41 @@ Each reviewer and the aggregator must end with exactly one verdict:
 - `BLOCKED`
 - `INFRASTRUCTURE BLOCKED`
 
+Missing, empty, malformed, non-real, or `noop` output deterministically becomes `INFRASTRUCTURE BLOCKED`.
+The aggregator also binds validation to the configured execution runner: a non-Codex run cannot pass by writing `Provider: codex` inside its own report.
+
 ## Merge Conditions
 
-A patch is mergeable only when:
+A patch can proceed to human merge review only when:
 
-- The diff is available.
-- Required validation was run: `git diff --check`, `npm run lint`, and `npm run build`.
-- Required reviewer reports are real, separate, and present.
-- No required reviewer returned `CHANGES REQUESTED`, `BLOCKED`, or `INFRASTRUCTURE BLOCKED`.
-- The implementer did not approve their own patch.
-- Final human review approves the merge.
+- The intended diff is complete and non-empty.
+- Required validations passed.
+- The combined reviewer report is real and valid.
+- The reviewer returned `PASS` or `PASS WITH NOTES`.
+- Every note is resolved or explicitly accepted.
+- Human approval is recorded.
 
-If lint or build cannot run, or if they fail, the result must be documented and the patch cannot receive `PASS`.
+`PASS` never performs or authorizes an automatic merge. `CHANGES REQUESTED`, `BLOCKED`, and `INFRASTRUCTURE BLOCKED` mean no merge.
 
-## Infrastructure Blocked
-
-`INFRASTRUCTURE BLOCKED` means the workflow infrastructure is not capable of producing a real approval. Use it when:
-
-- Real independent agent reports are missing.
-- A placeholder or simulated review is present instead of a real report.
-- The diff is unavailable.
-- Lint/build output is unavailable.
-- Required reviewer coverage is missing.
-- A reviewer report is missing required fields, uses an invalid verdict, or omits `Real execution: yes`.
-
-This verdict is not a code-quality judgment. It means the patch is not mergeable through the multi-agent workflow yet.
-
-## Phase 1: Current State
-
-Phase 1 is infrastructure/documentation only. It adds:
-
-- Separate agent prompt files in `.agent/prompts/`.
-- Report storage under `.agent/reports/`.
-- Safe placeholder scripts in `scripts/`.
-- Policy documentation for independent review and verdict handling.
-
-Phase 1 does not execute real providers, does not configure Ollama, does not implement OpenClaw, and does not approve patches.
-
-## Phase 2A: Provider Execution Hooks
-
-Phase 2A adds a small provider abstraction for real reviewer execution hooks without adding npm or Python dependencies.
-
-Provider selection is controlled by:
-
-```bash
-MULTIAGENT_PROVIDER=noop
-```
-
-If `MULTIAGENT_PROVIDER` is unset, the workflow uses `noop`.
-
-Supported provider names:
-
-- `noop`: default safe provider. It does not call an LLM and always writes `Real execution: no` with `INFRASTRUCTURE BLOCKED`.
-- `codex`: Codex CLI reviewer provider. Phase 2B runs reviewers through `codex exec` when the CLI is installed and configured.
-- `gemini`: nominal hook for future Gemini CLI execution. The script checks for the `gemini` command, but Phase 2A does not assume a stable non-interactive invocation syntax. Until an approved command is wired, it remains `INFRASTRUCTURE BLOCKED`.
-- `ollama`: experimental optional local model hook. It uses `MULTIAGENT_OLLAMA_MODEL` or defaults to `qwen2.5-coder:7b`, checks for the `ollama` command, and sends the agent prompt plus run context through `ollama run`. It is not the recommended primary provider on 8 GB Intel Macs.
-
-Phase 2A keeps `local-review` conservative:
-
-- It writes `00_context.md`, git status, review scope, touched files, full diff, diff stat, and validation output.
-- It runs the minimum required reviewers: Code Review and QA / Regression.
-- It saves separate reports as `10_review-code.md` and `11_review-qa-regression.md`.
-- It writes `99_final-verdict.md` using deterministic shell aggregation.
-- It does not run OpenClaw.
-- It does not install dependencies.
-- It does not expose full environment variables or secrets in reports.
-
-Every agent report must include:
-
-```markdown
-# Agent Report
-
-- Agent:
-- Provider:
-- Model:
-- Real execution: yes/no
-- Input files:
-- Verdict:
-
-## Summary
-
-## Findings
-
-## Required changes
-
-## Evidence
-```
-
-The deterministic aggregator treats a report as real only when it exists, is non-empty, contains a valid `Verdict:`, and says `Real execution: yes`. `Real execution: no` always blocks approval.
-
-Expect `INFRASTRUCTURE BLOCKED` when:
-
-- The provider is `noop`.
-- A provider CLI is missing.
-- A provider hook is not yet wired to a confirmed non-interactive command.
-- A provider command fails or returns empty output.
-- A provider returns output that does not match the report format.
-- Required reports, diff/status files, or validation output are missing.
-- The selected review scope is invalid or produces an empty diff.
-
-## Phase 2B: Codex Real Reviewer Execution
-
-Phase 2B makes Codex the first real reviewer provider:
-
-```bash
-MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh
-```
-
-The script:
-
-- Captures context, git status, review scope, touched files, full diff, diff stat, and validation output.
-- Builds a dedicated prompt for each minimum reviewer.
-- Calls `codex exec` non-interactively in read-only sandbox mode for `review-code` and `review-qa-regression`.
-- Saves separate stdout/stderr diagnostics per reviewer.
-- Uses Codex's final-message output file as the agent report, avoiding CLI transcript noise in report validation.
-- Validates each report before aggregation.
-- Keeps aggregation deterministic in shell.
-
-`local-review` supports three review modes:
-
-- `working-tree`: used when `REVIEW_BASE` and `REVIEW_HEAD` are unset and the working tree has staged or unstaged changes. The context captures `git status --short`, staged and unstaged tracked diffs, relevant untracked text files, diff stat, and touched files.
-- `committed-range`: used when `REVIEW_BASE` and `REVIEW_HEAD` are unset and the working tree is clean. The context falls back to `HEAD~1..HEAD` and captures `git diff --stat HEAD~1 HEAD`, `git diff HEAD~1 HEAD`, and `git diff --name-only HEAD~1 HEAD`.
-- `explicit-range`: used when both `REVIEW_BASE` and `REVIEW_HEAD` are set. The context captures `git diff --stat "$REVIEW_BASE" "$REVIEW_HEAD"`, `git diff "$REVIEW_BASE" "$REVIEW_HEAD"`, and `git diff --name-only "$REVIEW_BASE" "$REVIEW_HEAD"`.
-
-Use explicit ranges when the patch has already been committed and spans more than the last commit:
-
-```bash
-REVIEW_BASE=HEAD~2 REVIEW_HEAD=HEAD MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh
-```
-
-If only one of `REVIEW_BASE` or `REVIEW_HEAD` is set, the range does not resolve, or the selected diff is empty, the workflow records the scope failure and the deterministic final verdict is `INFRASTRUCTURE BLOCKED`.
-
-Supported Phase 2B variables:
-
-- `MULTIAGENT_PROVIDER=codex`
-- `REVIEW_BASE` and `REVIEW_HEAD` for explicit committed-range review.
-- `MULTIAGENT_AGENT_TIMEOUT_SECONDS=180`
-- `MULTIAGENT_MAX_DIFF_CHARS=60000`
-- `MULTIAGENT_CODEX_ARGS` for explicit extra `codex exec` arguments supported by the local CLI.
-- `MULTIAGENT_CODEX_MODEL` for report metadata; pass a model flag via `MULTIAGENT_CODEX_ARGS` only when the local CLI supports it.
-
-The script uses `timeout` or `gtimeout` when available. If neither command is available, it uses a portable bash timeout fallback that starts the provider process in the background, monitors it, terminates it after `MULTIAGENT_AGENT_TIMEOUT_SECONDS`, and returns exit code `124` on timeout.
-
-Codex reports are accepted only when they contain:
-
-- `# Agent Report`
-- `- Agent: <agent-name>`
-- `- Provider: codex`
-- `- Model: <model-or-codex-config-default>`
-- `- Real execution: yes`
-- `- Input files: ...`
-- `- Verdict:` with `PASS`, `PASS WITH NOTES`, `CHANGES REQUESTED`, `BLOCKED`, or `INFRASTRUCTURE BLOCKED`
-- `## Summary`
-- `## Findings`
-- `## Required changes`
-- `## Evidence`
-
-If Codex is missing, not configured, fails, returns empty output, times out, returns `Real execution: no`, or returns an invalid report, that reviewer report is replaced with `INFRASTRUCTURE BLOCKED`. The fallback report must explain the exact validation failure and point to raw files in the same run directory.
-
-For Codex runs, raw diagnostics live under `.agent/reports/<run-id>/`:
-
-- `<agent>-codex-stdout.md`: Codex final-message output used as the raw reviewer report.
-- `<agent>-codex-stderr.md`: raw stderr from `codex exec`.
-- `<agent>-codex-transcript.txt`: CLI stdout transcript.
-- `<agent>-codex-diagnostics.md`: command metadata without secrets.
-- `<agent>-codex-exit-code.txt`: process exit code.
-
-For newly added files in working-tree mode, prefer staging intended additions before review so they appear as normal patch content. Remaining untracked text files are still captured separately in `05_untracked_files.md`, included in touched files, and represented in the generated diff context when safe.
-
-`noop` remains the default safe provider and can never approve. Gemini remains a nominal hook. Ollama remains experimental and optional; it is not the primary provider for this hardware profile.
-
-Patch implementation automation is still disabled in Phase 2B. OpenClaw is excluded from this phase.
-
-## Phase 2C: Local Workflow Smoke Tests
-
-Phase 2C adds a repeatable local smoke/regression check for the shell workflow:
+## Smoke Test
 
 ```bash
 ./scripts/test-multiagent-workflow.sh
 ```
 
-The smoke script creates a temporary detached Git worktree from `HEAD` and runs `local-review` with `MULTIAGENT_PROVIDER=noop`. It does not push, merge, use secrets, delete existing `.agent/reports` directories, or modify application code.
+The smoke suite uses `noop` in a temporary detached worktree. Its nested reviews must return `INFRASTRUCTURE BLOCKED`; this verifies range selection, request/evidence propagation, report generation, timeout cleanup, Codex-only provider enforcement, and deterministic blocking without spending model tokens.
 
-The smoke coverage checks:
+## Compatibility Commands
 
-- `explicit-range` with `REVIEW_BASE=HEAD~1 REVIEW_HEAD=HEAD`.
-- `committed-range` fallback with a clean temporary worktree.
-- `working-tree` detection using a temporary untracked fixture under `.agent/tmp/` inside the temporary worktree.
-- Non-empty diff and diff stat files.
-- Valid review scope metadata.
-- Deterministic `INFRASTRUCTURE BLOCKED` final verdicts for `noop`, because `noop` reports `Real execution: no`.
+`scripts/local-multiagent.sh "patch description"` remains as a compatibility entrypoint. It now performs the same single combined review and does not implement a patch.
 
-`INFRASTRUCTURE BLOCKED` is the expected smoke-test verdict for `noop`; it proves the validator and aggregator still reject non-real reviewer output. These smoke tests do not replace a real Codex review with `MULTIAGENT_PROVIDER=codex`.
-
-## Phase 2D: Additional Provider Integration
-
-A future phase may connect additional providers, specialized reviewer selection, or executor automation. That integration must write separate reports per agent and preserve the same verdict rules.
-
-## Phase 3: Optional OpenClaw Layer
-
-OpenClaw may be evaluated later as an optional orchestration layer. It must not become required unless explicitly approved, and it must not replace real separate reviewer output with simulated aggregation.
+`scripts/crewai-orchestrate.sh review` and the OpenClaw wrapper may still delegate to `local-review.sh`, but neither orchestrator is required or accepted as separate review evidence.
 
 ## Prohibited
 
-- Do not reintroduce Ruflo as a required workflow tool.
-- Do not present simulated multi-agent output as independent review.
-- Do not add orchestration dependencies to `dependencies` or `devDependencies` without explicit approval.
-- Do not require AI tooling for `npm run dev`, `npm run build`, `npm run start`, `npm run lint`, or deployment.
+- Treating the implementation response as its own approval.
+- Simulating several reviewers inside one response.
+- Marking `noop` as real review.
+- Auto-commit, auto-merge, auto-push, or direct feature-to-`prod` release.
+- Adding AI orchestration packages to app dependencies.
+- Requiring AI tools for runtime, lint, build, start, or deployment.

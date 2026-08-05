@@ -19,25 +19,15 @@ printf '%s\n' "$*" > "$REQUEST_FILE"
 write_context_files "$REPORT_DIR" "multiagent" "$REQUEST_FILE"
 run_validation_commands "$REPORT_DIR" || true
 
-write_infrastructure_blocked_report \
-  "$REPORT_DIR/09_implementer.md" \
-  "patch-implementer" \
-  "$PROVIDER" \
-  "$(provider_model "$PROVIDER")" \
-  "automatic patch implementation remains disabled in Phase 2B; this script does not modify application code" \
-  "no"
-
-run_agent "$REPORT_DIR" "review-code" ".agent/prompts/review-code.md" "$REPORT_DIR/10_review-code.md"
-run_agent "$REPORT_DIR" "review-qa-regression" ".agent/prompts/review-qa-regression.md" "$REPORT_DIR/11_review-qa-regression.md"
+run_agent "$REPORT_DIR" "review-code-qa" ".agent/prompts/review-code-qa.md" "$REPORT_DIR/10_review-code-qa.md"
 
 aggregate_reports_basic \
   "$REPORT_DIR" \
   "$REPORT_DIR/99_final-verdict.md" \
-  "$REPORT_DIR/10_review-code.md" \
-  "$REPORT_DIR/11_review-qa-regression.md"
+  "$REPORT_DIR/10_review-code-qa.md"
 
 echo "Provider: $PROVIDER"
 echo "Report directory: $REPORT_DIR"
-echo "Automatic implementation is disabled in Phase 2B."
+echo "Implementation stays in the interactive Codex session; this command performs one separate read-only review."
 echo "Final verdict:"
 sed -n 's/^- Verdict: //p' "$REPORT_DIR/99_final-verdict.md" | tail -n 1

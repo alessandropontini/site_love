@@ -1,41 +1,91 @@
-# Quest Customization Guide
+# Paper-Theatre Experience Guide
 
-This guide highlights where to update copy, art, and game balance for the pixel timeline.
+This guide covers the canonical SITE LOVE narrative mounted by `app/page.tsx`. The public experience is a cardboard-theatre journey through an invitation, a Milan map, four sequential acts, four collected keepsakes, and a gated final letter.
 
-## Core Metadata
+## Canonical flow
 
-- `lib/profile.ts` – Title screen names and intro copy.
-- `components/quest/questSchema.ts` – Chapter metadata (title, subtitle, location, year, reward hearts) and which React component renders the stage.
-- `components/QuestGame.tsx` – Flow between screens (intro → map → game → ending) plus heart counter text.
+1. `ExperienceShell` restores local progress and shows the invitation.
+2. **Entra nella storia** opens `JourneyMap`.
+3. The map exposes exactly the first incomplete act.
+4. Completing an act opens its reward scene and records one keepsake.
+5. Returning to the map exposes the next act.
+6. All four configured chapter IDs unlock `FinaleExperience`.
 
-## Mini-Game Files
+The earlier files under `components/story/`, `components/games/`, `components/quest/`, and `components/pixel/` are not mounted by the public route.
 
-| Chapter key    | File path                                               | Mechanics overview                             |
-|----------------|---------------------------------------------------------|------------------------------------------------|
-| `tetris`       | `components/quest/games/TetrisQuest.tsx`                | Falling block alignment with glowing columns.  |
-| `pacmaze`      | `components/quest/games/PacMazeQuest.tsx`               | Turn-based maze chase with hearts vs ghost.    |
-| `flappy`       | `components/quest/games/FlappyLettersQuest.tsx`         | Rafter-delivered letters weaving through gaps. |
-| `platformer`   | `components/quest/games/PlatformRunQuest.tsx`           | Auto-runner collecting vow coins and jumping.  |
+## Configuration and state
 
-Each file exposes props (`rewardHearts`, `onComplete`) so you can adjust reward values or hook into alternative scoring.
+- `lib/experienceConfig.ts` defines `chapterOrder`, chapter copy, locations, instructions, visual variants, and rewards.
+- `lib/i18n.ts` defines Italian/English interface copy and locale detection.
+- `components/experience/LocaleProvider.tsx` exposes the locale and language selector.
+- `lib/useExperienceProgress.ts` owns versioned state, `localStorage` persistence, migration, unlock checks, rewards, motion preferences, and reset.
+- `components/experience/ExperienceShell.tsx` coordinates invitation, map, active chapter, reward, inventory, and finale views.
+- `components/experience/JourneyMap.tsx` presents complete, available, and locked chapter states.
+- `components/experience/InventoryPanel.tsx` presents collected rewards and the confirmed reset action.
 
-## Pixel Art
+Keep chapter order in configuration. Do not duplicate it in UI code. When adding or removing an act, update the chapter union, configuration, challenge routing, persistence version/migration, map presentation, and finale requirements together.
 
-- `components/pixel/PixelCharacter.tsx` draws avatars by mapping grid cells to color tokens.
-- Edit the `palette` hex values or rewrite the `rows` strings to craft new outfits and hairstyles.
-- Keep the grid dimensions consistent (12×16) for sizing.
+## Localization
 
-## Difficulty Tuning Tips
+- Add every new visible string and accessible name to both dictionaries.
+- Keep structural game values as stable IDs; never store translated labels as progression state.
+- Add chapter copy to both localized fields in `lib/experienceConfig.ts`.
+- Check language switching on the invitation, map, every challenge state, inventory, reward, and finale.
+- Confirm `html lang`, title, description, and the saved manual preference update.
+- Do not call an external translation service at runtime.
 
-- **TetrisQuest:** adjust `TARGET_SEQUENCE`, drop interval, or column count to ramp difficulty.
-- **PacMazeQuest:** modify `GRID_TEMPLATE` walls or heart placement; ghost behaviour lives in `moveGhost`.
-- **FlappyLettersQuest:** tweak `PIPE_GAP`, `HORIZONTAL_SPEED`, or required pipe count.
-- **PlatformRunQuest:** update `OBSTACLES`, `COINS`, or physics constants (`RUN_SPEED`, `JUMP_FORCE`).
+## Active challenges
 
-## Styling
+| Act | File | Interaction | Reward |
+| --- | --- | --- | --- |
+| La scintilla | `components/experience/challenges/FrequencyChallenge.tsx` | Tune a signal into the target range. | La prima scintilla |
+| Le coordinate | `components/experience/challenges/CoordinatesChallenge.tsx` | Match three memory coordinates with large buttons. | Le nostre coordinate |
+| Le scelte | `components/experience/challenges/TimelineChallenge.tsx` | Rebuild four moments in sequence. | Il filo rosso |
+| Le finestre accese | `components/experience/challenges/WindowsChallenge.tsx` | Observe and repeat three deterministic window sequences. | La luce di casa |
 
-- Global pixel aesthetic resides in `app/globals.css`.
-- Add CRT scanline overlays or change accent colors by updating the CSS variables at the top of the file.
-- Additional responsive tweaks live at the bottom media queries.
+Challenge completion must remain keyboard and touch accessible. Avoid drag-only input, tiny targets, hidden time pressure, sound dependencies, and penalties that erase completed progress.
 
-Feel free to branch new chapters: duplicate an event in `questSchema.ts`, create a new mini-game component, and add a corresponding node to the map.
+## Progress invariants
+
+- The invitation never auto-starts the journey.
+- The first chapter is available with zero progress.
+- A later chapter requires every previous chapter ID.
+- Completing a chapter more than once does not duplicate its reward.
+- Stored chapter lists are sanitized in configured order.
+- Restored state cannot open a locked chapter, invalid reward view, or premature finale.
+- The finale requires all configured IDs, not only a matching number.
+- Reset removes only current and legacy SITE LOVE progress keys.
+
+Changing these rules is high risk and requires focused tests plus the independent combined Code + QA review.
+
+## Art and styling
+
+- `components/experience/art/PaperArt.tsx` composes the shared stage and reward symbols.
+- `components/experience/art/PaperArt.module.css` owns paper depth, proscenium, scene layers, and restrained motion.
+- `components/experience/ExperienceShell.module.css` owns the active layout, controls, map, challenges, inventory, rewards, finale, and responsive behavior.
+- `public/scene/paper-theatre/` contains the active local transparent WebP cutouts.
+- `docs/visual-direction.md` is the source of truth for palette, materials, typography, motion, responsive behavior, and asset provenance.
+
+Do not edit `public/` assets without explicit approval. Keep text, instructions, state, and controls in semantic HTML rather than baking them into images.
+
+## Accessibility and motion
+
+- Preserve the skip link and programmatic focus on each view transition.
+- Keep visible `:focus-visible` treatment and accessible names for icon-only controls.
+- Map state must use text and semantics as well as color.
+- Inventory must keep background content inert, close on Escape, trap focus, and return focus to its trigger.
+- The system `prefers-reduced-motion` preference overrides the saved motion toggle.
+- When motion is disabled, timed visual sequences must expose an ordered text guide.
+- Maintain touch targets of at least 44×44 px and test at 320×568 and 390×844.
+
+## Validation checklist
+
+Run:
+
+```bash
+git diff --check
+npm run lint
+npm run build
+```
+
+Then manually verify the invitation, all four acts, reward transitions, inventory, reset confirmation, persisted reload, finale gating, keyboard-only completion, reduced-motion behavior, and mobile layouts. Before merge, run the real independent Codex-backed review required by `docs/multiagent-workflow.md`.

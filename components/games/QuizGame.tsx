@@ -13,7 +13,7 @@ type QuizGameProps = {
 
 export function QuizGame({ completed, onComplete }: QuizGameProps) {
   const [answers, setAnswers] = useState<Record<number, string>>({});
-  const [message, setMessage] = useState("Choose the answers that fit the route.");
+  const [message, setMessage] = useState("Scegli le risposte che indicano la strada.");
 
   const allAnswered = quizQuestions.every((_, index) => answers[index]);
   const allCorrect = quizQuestions.every(
@@ -22,22 +22,22 @@ export function QuizGame({ completed, onComplete }: QuizGameProps) {
 
   const submit = () => {
     if (!allAnswered) {
-      setMessage("Answer every question before checking the signal.");
+      setMessage("Rispondi a tutte le domande prima di controllare il segnale.");
       return;
     }
     if (!allCorrect) {
-      setMessage("Almost. Revisit the details and tune the signal again.");
+      setMessage("Quasi. Rileggi gli indizi e prova a sintonizzarti di nuovo.");
       return;
     }
-    setMessage("Signal locked. The next chapter is open.");
+    setMessage("Segnale trovato. Il prossimo capitolo è aperto.");
     onComplete();
   };
 
   return (
     <article className={`${styles.gameCard} ${completed ? styles.success : ""}`}>
       <header>
-        <h3>Signal quiz</h3>
-        <p>Three small choices set the tone for the journey.</p>
+        <h3>Quiz delle affinità</h3>
+        <p>Tre piccole scelte per trovare la frequenza del viaggio.</p>
       </header>
       {quizQuestions.map((question, questionIndex) => (
         <fieldset key={question.prompt} className={styles.actions}>
@@ -63,10 +63,10 @@ export function QuizGame({ completed, onComplete }: QuizGameProps) {
         </fieldset>
       ))}
       <p className={styles.status} aria-live="polite">
-        {completed ? "Complete. This chapter stays unlocked." : message}
+        {completed ? "Completato. Questo capitolo resta aperto." : message}
       </p>
       <button type="button" className={styles.button} onClick={submit} disabled={completed}>
-        Check answers
+        Controlla le risposte
       </button>
     </article>
   );
