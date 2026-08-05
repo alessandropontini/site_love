@@ -328,6 +328,7 @@ provider_model() {
 resolve_codex_bin() {
   local configured="${MULTIAGENT_CODEX_BIN:-}"
   local app_bundle="/Applications/Codex.app/Contents/Resources/codex"
+  local plugin_appserver="${HOME:-}/.codex/plugins/.plugin-appserver/codex"
 
   if [[ -n "$configured" ]]; then
     if [[ "$configured" == */* ]]; then
@@ -342,6 +343,11 @@ resolve_codex_bin() {
   # reliable than an older globally installed npm wrapper.
   if [[ "$(uname -s)" == "Darwin" && -x "$app_bundle" ]]; then
     printf '%s\n' "$app_bundle"
+    return 0
+  fi
+
+  if [[ -x "$plugin_appserver" ]]; then
+    printf '%s\n' "$plugin_appserver"
     return 0
   fi
 

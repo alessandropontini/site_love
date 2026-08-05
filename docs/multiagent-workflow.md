@@ -178,7 +178,7 @@ Supported Phase 2B variables:
 - `REVIEW_BASE` and `REVIEW_HEAD` for explicit committed-range review.
 - `MULTIAGENT_AGENT_TIMEOUT_SECONDS=300`
 - `MULTIAGENT_MAX_DIFF_CHARS=60000`
-- `MULTIAGENT_CODEX_BIN` for an explicit Codex CLI path. On macOS the workflow prefers the current `Codex.app` bundled CLI before a global npm installation.
+- `MULTIAGENT_CODEX_BIN` for an explicit Codex CLI path. On macOS the workflow prefers the current `Codex.app` bundled CLI, then the local `.codex/plugins/.plugin-appserver/codex`, before a global npm installation.
 - `MULTIAGENT_CODEX_ARGS` for explicit extra `codex exec` arguments supported by the local CLI.
 - `MULTIAGENT_CODEX_MODEL` for report metadata; pass a model flag via `MULTIAGENT_CODEX_ARGS` only when the local CLI supports it.
 

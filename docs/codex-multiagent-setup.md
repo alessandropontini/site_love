@@ -120,7 +120,7 @@ When the smoke script is present and executable, `local-review` also records its
 - `MULTIAGENT_CODEX_ARGS` for explicit extra `codex exec` arguments when the local CLI supports them.
 - `MULTIAGENT_CODEX_MODEL` is recorded as intent only unless the user also passes a supported model flag through `MULTIAGENT_CODEX_ARGS`.
 
-On macOS the workflow prefers the CLI bundled with `Codex.app` over a potentially stale global npm wrapper. Other systems resolve `codex` from `PATH`. Set `MULTIAGENT_CODEX_BIN` when a different authenticated installation is required:
+On macOS the workflow prefers the CLI bundled with `Codex.app`, then the local Codex app-server CLI under `.codex/plugins/.plugin-appserver/`, before falling back to a potentially stale global npm wrapper. Other systems resolve `codex` from `PATH`. Set `MULTIAGENT_CODEX_BIN` when a different authenticated installation is required:
 
 ```bash
 MULTIAGENT_CODEX_BIN=/absolute/path/to/codex \
