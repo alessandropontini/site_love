@@ -11,6 +11,7 @@ PASS_COMMITTED="PENDING"
 PASS_WORKING_TREE="PENDING"
 PASS_TIMEOUT_CLEANUP="PENDING"
 PASS_PROVIDER_GATE="PENDING"
+PASS_METADATA_NORMALIZATION="PENDING"
 
 log() {
   printf '%s\n' "$*" >&2
@@ -162,6 +163,46 @@ smoke_provider_gate() {
   PASS_PROVIDER_GATE="PASS"
 }
 
+smoke_codex_metadata_normalization() {
+  local fixture_dir report_file
+
+  log "==> Codex report metadata normalization smoke"
+  fixture_dir="$TMP_PARENT/metadata-normalization"
+  mkdir -p "$fixture_dir"
+  report_file="$fixture_dir/report.md"
+
+  {
+    echo "# Agent Report"
+    echo
+    echo "- Agent: review-code-qa"
+    echo "- Provider: codex"
+    echo "- Real execution: yes"
+    echo "- Verdict: PASS"
+    echo
+    echo "## Summary"
+    echo
+    echo "Fixture."
+    echo
+    echo "## Findings"
+    echo
+    echo "None."
+    echo
+    echo "## Required changes"
+    echo
+    echo "None."
+    echo
+    echo "## Evidence"
+    echo
+    echo "Fixture."
+  } > "$report_file"
+
+  normalize_codex_report_metadata "$report_file" "codex-config-default"
+  validate_real_agent_report "$report_file" "codex" || fail "Codex metadata normalization did not produce a valid real report."
+  assert_contains "$fixture_dir" "report.md" "- Model: codex-config-default"
+  assert_contains "$fixture_dir" "report.md" "- Input files: 00_context.md"
+  PASS_METADATA_NORMALIZATION="PASS"
+}
+
 latest_report_dir() {
   local run_dir
   run_dir="$(find "$WORKTREE/.agent/reports" -mindepth 1 -maxdepth 1 -type d -print 2>/dev/null | sort -r | head -n 1 || true)"
@@ -294,6 +335,7 @@ main() {
   log "Using temporary worktree: $WORKTREE"
   smoke_timeout_cleanup
   smoke_provider_gate
+  smoke_codex_metadata_normalization
   smoke_explicit_range
   smoke_committed_range
   smoke_working_tree
@@ -305,6 +347,7 @@ main() {
   log "- working-tree: $PASS_WORKING_TREE"
   log "- timeout cleanup: $PASS_TIMEOUT_CLEANUP"
   log "- codex-only provider gate: $PASS_PROVIDER_GATE"
+  log "- Codex metadata normalization: $PASS_METADATA_NORMALIZATION"
   log "- final status: PASS"
 }
 

@@ -291,7 +291,9 @@ run_validation_commands() {
       echo "Result: skipped"
       echo "Reason: MULTIAGENT_SKIP_WORKFLOW_SMOKE=1 prevents recursive smoke validation."
     elif [[ -x "./scripts/test-multiagent-workflow.sh" ]]; then
-      if ./scripts/test-multiagent-workflow.sh; then
+      # A release range must not leak into the smoke fixtures. Those fixtures
+      # deliberately exercise their own explicit, committed, and working-tree modes.
+      if env -u REVIEW_BASE -u REVIEW_HEAD ./scripts/test-multiagent-workflow.sh; then
         echo "Result: pass"
       else
         echo "Result: fail"
@@ -644,6 +646,33 @@ run_noop_agent() {
   write_infrastructure_blocked_report "$output_file" "$agent" "noop" "n/a" "real provider not configured" "no"
 }
 
+normalize_codex_report_metadata() {
+  local report_file="$1"
+  local model="$2"
+  local metadata_file
+
+  # Codex is instructed to emit this template, but the runner owns the known
+  # execution metadata and fills only omitted fields before validating the report.
+  head -n 1 "$report_file" | grep -qx '# Agent Report' || return 0
+
+  metadata_file="${report_file}.metadata.tmp"
+  if ! grep -q '^- Model:[[:space:]]*[^[:space:]]' "$report_file"; then
+    awk -v model="$model" '
+      { print }
+      /^- Provider:/ { print "- Model: " model }
+    ' "$report_file" > "$metadata_file"
+    mv "$metadata_file" "$report_file"
+  fi
+
+  if ! grep -q '^- Input files:[[:space:]]*[^[:space:]]' "$report_file"; then
+    awk '
+      { print }
+      /^- Real execution:/ { print "- Input files: 00_context.md, 01_git_status.txt, 02_git_diff.patch, 03_git_diff_stat.txt, 04_validation.md, 06_review_scope.md, 07_touched_files.txt, 05_untracked_files.md and 08_review_evidence.md if present" }
+    ' "$report_file" > "$metadata_file"
+    mv "$metadata_file" "$report_file"
+  fi
+}
+
 run_codex_agent() {
   local run_dir="$1"
   local agent="$2"
@@ -713,6 +742,7 @@ run_codex_agent() {
   fi
 
   cp "$raw_tmp" "$output_file"
+  normalize_codex_report_metadata "$output_file" "$model"
 
   if ! validate_real_agent_report "$output_file" "codex"; then
     validation_reason="$(agent_report_validation_errors "$output_file")"
