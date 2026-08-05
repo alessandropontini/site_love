@@ -30,10 +30,11 @@ export function FrequencyChallenge({ onComplete }: { onComplete: () => void }) {
 
       <div className={styles.frequencyMemory} style={visualStyle}>
         <Image
-          src="/scene/paper-theatre/duomo-cardboard.webp"
+          src="/scene/paper-theatre/milan-prop-radio.png"
           alt={copy.frequency.imageAlt}
-          width={1050}
-          height={700}
+          width={720}
+          height={720}
+          unoptimized
           sizes="(max-width: 899px) 84vw, 42vw"
         />
         <span className={styles.frequencyNoise} aria-hidden="true" />

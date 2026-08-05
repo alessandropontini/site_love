@@ -33,6 +33,7 @@ function ExperienceShellContent() {
   const [inventoryOpen, setInventoryOpen] = useState(false);
   const backgroundRef = useRef<HTMLDivElement>(null);
   const screenRef = useRef<HTMLElement>(null);
+  const previousScreenKeyRef = useRef<string | null>(null);
   const inventoryTriggerRef = useRef<HTMLButtonElement>(null);
   const { locale, messages: copy } = useLocale();
   const experienceChapters = useMemo(
@@ -75,15 +76,24 @@ function ExperienceShellContent() {
   const motionControlLabel = motionLockedBySystem
     ? copy.shell.reducedMotionSystem
     : copy.shell.reducedMotion;
+  const screenKey = `${experience.view}-${activeChapter ?? "home"}`;
 
   useEffect(() => {
     setInventoryOpen(false);
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+
+    if (previousScreenKeyRef.current === null) {
+      previousScreenKeyRef.current = screenKey;
+      return;
+    }
+    if (previousScreenKeyRef.current === screenKey) return;
+    previousScreenKeyRef.current = screenKey;
+
     window.requestAnimationFrame(() => {
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
       screenRef.current?.focus({ preventScroll: true });
     });
-  }, [experience.view, activeChapter]);
+  }, [screenKey]);
 
   useEffect(() => {
     if (!inventoryOpen) return;
@@ -164,7 +174,7 @@ function ExperienceShellContent() {
         <main
           className={styles.screen}
           id="experience-screen"
-          key={`${experience.view}-${activeChapter ?? "home"}`}
+          key={screenKey}
           ref={screenRef}
           tabIndex={-1}
           aria-labelledby={screenTitleId}

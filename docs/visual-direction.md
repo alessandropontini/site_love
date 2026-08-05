@@ -5,7 +5,7 @@ This document is the source of truth for the mounted public experience.
 ## North Star
 
 - Experience concept: **Milano come un piccolo teatro di cartone da attraversare**.
-- Structure: invitation → living Milan stage → four acts → collected props → final letter.
+- Structure: invitation → theatre index → four illustrated book chapters → collected props → final Duomo letter.
 - Visual principle: every screen is a new arrangement of the same tactile cardboard theatre.
 - Emotional target: adult, intimate, cinematic, and playful without becoming childish or kitsch.
 - Runtime boundary: local CSS, SVG, and optimized images only; no paid API, remote asset dependency, video, WebGL, or animation library.
@@ -14,8 +14,8 @@ The earlier pixel/handheld direction has been retired from the public route. Pix
 
 ## Implemented system
 
-- The stage uses four to six decorative depths: backdrop, skyline, chapter landmark, road, tram/couple, and proscenium.
-- The public route mounts transparent corrugated-cardboard WebP assets from `public/scene/paper-theatre/`.
+- The stage uses one opaque illustrated panorama plus, only where narratively useful, a small number of transparent cardboard performers.
+- The public route mounts opaque JPEG panoramas and transparent PNG overlays from `public/scene/paper-theatre/`. The PNG fallback avoids black alpha rectangles in Android browsers and embedded preview viewers.
 - `components/experience/art/PaperArt.tsx` composes the shared scene and renders chapter-specific paper reward symbols.
 - `PaperArt.module.css` owns the proscenium, curtains, lighting, skyline, paper texture, depth, and restrained scene motion.
 - `ExperienceShell.module.css` owns readable UI, map states, game controls, reward, inventory, finale, and responsive behavior.
@@ -52,24 +52,26 @@ Core tokens:
 ### Invitation
 
 - Copy and CTA come first on small screens.
-- The curtain opens onto the Duomo, couple, and Milan tram as three independent layers.
-- The Duomo is the main landmark; the couple provides emotional scale; the tram provides movement.
+- The curtain opens onto a Galleria-inspired paper panorama. The couple and Milan tram provide emotional scale and a single restrained movement.
+- The Duomo is deliberately absent here so its appearance remains exclusive to the finale.
 - The CTA remains visible in the first phone viewport at 320–430 px where practical.
 
-### Map
+### Theatre index
 
-- The four stops sit above the decorative stage and remain semantic HTML buttons.
+- The four numbered chapters sit above the decorative stage and remain semantic HTML buttons inside a labelled navigation region.
 - Available, complete, and locked states always include text and shape changes, not color alone.
 - The route remains SVG/DOM and is never part of the background artwork.
+- The index background stays abstract and landmark-free; each node owns one unique scene thumbnail instead of repeating the Duomo, tram, or couple.
 - Decorative layers use `pointer-events: none` so they cannot block map interaction.
 
 ### Acts
 
-- Dawn, day, sunset, and night change lighting and painted-cardboard colors; every act also rearranges its foreground props.
-- Each act has one distinct Milanese cardboard flat: a Galleria-inspired portal, a spring Naviglio Grande perspective, an Arco della Pace-inspired arch, or a residential facade with lit windows.
-- The chapter landmark replaces the Duomo instead of stacking another large image. Invitation, map, and finale retain the Duomo as the shared visual anchor.
+- Dawn, day, sunset, and night change lighting and painted-cardboard colors; each act also owns a paper, edge, and accent palette derived from its setting.
+- Each act opens as a hard-cover illustrated volume. A decorative cover rotates once around the left spine, then reveals one continuous spread containing narrative, setting, and challenge; it is skipped when motion is reduced.
+- Each act has one distinct opaque Milanese panorama: a Galleria-inspired portal, a spring Naviglio Grande perspective, an Arco della Pace-inspired arch, or the exterior of Adelchi in Lambrate at night.
+- The chapter panorama replaces every generic landmark layer instead of stacking cutouts. The Duomo appears only in the finale.
 - Act number and location appear as a stamp and ticket inside the decorative scene.
-- The game card is a clean sheet of paper separate from the stage so instructions remain readable.
+- The setting appears only once per act as the full-width illustrated upper part of the same volume. A torn paper edge joins it to the printed narrative and challenge pages below, without a second frame or false pop-up supports.
 
 ### Rewards and inventory
 
@@ -79,15 +81,17 @@ Core tokens:
 
 ### Finale
 
-- The assembled stage gives way to a large ivory letter.
+- The Duomo, couple, and a small arriving tram assemble the final stage before it gives way to a large ivory letter.
 - The letter is the emotional focus; decoration remains subordinate.
 - A future real photograph may appear only after the letter opens and must never replace accessible HTML text.
 
-## Act IV — Le finestre accese
+## Act IV — Le luci di Adelchi
 
 - The former hidden-object spotlight game has been replaced.
-- Three deterministic rounds contain sequences of three, four, and five windows.
-- Four large controls represent Lampada, Pianta, Tende, and Balcone.
+- Three deterministic rounds contain sequences of three, four, and five facade signals.
+- Four large controls represent Lampione, Edera, Ingresso, and Serranda without changing the stable game IDs.
+- The four controls are printed as light tactile tabs below the single Adelchi illustration; the facade image is not duplicated inside the challenge.
+- The scene is an original paper-theatre interpretation of the low grey facade, central ivy, wall lanterns, and two shuttered bays outside the Adelchi venue on Via Adelchi. In its open state, the broad left bay remains a glazed frontage while the raised right shutter reveals the customer door opening inward toward the warm bar.
 - There is no score penalty, time limit, sound dependency, drag, or tiny target.
 - A mistake preserves completed rounds and offers an immediate replay.
 - The sequence can be shown explicitly at any time.
@@ -108,9 +112,9 @@ Core tokens:
 - `481–899px`: compact scene above content; games stay in a single readable column.
 - `≥ 900px`: split composition with roughly 42% copy and 58% stage.
 - Validate at 320×568, 390×844, and desktop.
-- Maximum five or six simultaneous decorative layers per stage.
+- Maximum one opaque panorama and two transparent overlays per illustrated stage.
 - Use `next/image`, intrinsic dimensions, responsive `sizes`, and `priority` only for the invitation.
-- Active cardboard assets should remain within a combined low-hundreds-of-kilobytes budget.
+- Prefer opaque JPEG for full-stage artwork and PNG only for alpha overlays. Never rely on transparent WebP for mounted performers on Android.
 - Avoid animated blur, full-screen backdrop filters, WebGL, video, and heavy shadow stacks on Android.
 
 ## Photography plan
@@ -125,4 +129,10 @@ Original photographs are not yet present. When supplied:
 
 ## Active asset provenance
 
-The active Duomo, tram, and couple marionettes are `duomo-cardboard.webp`, `tram-cardboard.webp`, and `couple-cardboard.webp`. Chapter-specific flats are `galleria-cardboard.webp`, `naviglio-grande-spring-cardboard.webp`, `arco-pace-cardboard.webp`, and `milan-windows-cardboard.webp`. The Naviglio Grande flat follows the real district's broad linear canal, continuous Alzaia and Ripa embankments, aligned low-rise facades, distant iron pedestrian bridge, and a secondary washhouse-like nook. Flowering star jasmine is confined to one facade so spring remains a believable detail instead of a decorative frame. The asset is an original paper-theatre composition generated from researched visual characteristics, not a traced photograph; its chroma-key background was removed locally and the result was converted to transparent WebP. The landmark designs contain no brands, signs, copied photographs, or remote runtime assets. The earlier `navigli-spring-cardboard.webp`, `navigli-cardboard.webp`, and `*-paper.webp` files remain as rollback assets but are not mounted.
+The mounted full-stage files are the opaque `scene-*.jpg` panoramas. They assign one visual role to each setting: Galleria at the entrance and chapter one, Naviglio Grande with spring jasmine in chapter two, Arco della Pace in chapter three, Adelchi in chapter four, and the Duomo only in the finale. Chapter one changes focus from the broad entrance view to a closer ticket-and-signal composition. `tram-cardboard.png` and `couple-cardboard.png` are the only mounted transparent performers and use PNG compatibility fallbacks. The original WebP flats and cutouts remain as editable source or rollback assets, not as Android-facing alpha layers.
+
+Five original props add a transit ticket, analog tuning radio, jasmine postcard, bicycle and letter, and Adelchi lantern with glasses without introducing copied text or branding. The radio appears only inside the first challenge, so its interaction does not repeat the Galleria or ticket already printed in the chapter panorama. The index shows each opaque panorama as a restrained chapter preview. The Naviglio Grande scene follows the district's broad linear canal, continuous Alzaia and Ripa embankments, aligned low-rise facades, distant iron pedestrian bridge, and a secondary washhouse-like nook. Flowering star jasmine is confined to one facade so spring remains a believable detail instead of a decorative frame.
+
+The Adelchi flat was generated as an original cardboard composition after checking the venue's address and multiple public open/closed facade references. Research sources: [Birrificio Lambrate official site](https://birrificiolambrate.com/), Andy Mabbett's four 2019 facade photographs on Wikimedia Commons ([view 01](https://commons.wikimedia.org/wiki/File:Birrificio_Lambrate_(Adelchi)_-_2019-06-30_-_Andy_Mabbett_-_01.jpg), [view 02](https://commons.wikimedia.org/wiki/File:Birrificio_Lambrate_(Adelchi)_-_2019-06-30_-_Andy_Mabbett_-_02.jpg), [view 03](https://commons.wikimedia.org/wiki/File:Birrificio_Lambrate_(Adelchi)_-_2019-06-30_-_Andy_Mabbett_-_03.jpg), [view 04](https://commons.wikimedia.org/wiki/File:Birrificio_Lambrate_(Adelchi)_-_2019-06-30_-_Andy_Mabbett_-_04.jpg)), and Bernt Rostad's [2009 open-front view](https://www.flickr.com/photos/brostad/3444030976). Those photographs are references only and are not shipped, traced, or embedded. The final asset omits logos, copied signs, readable graffiti, cars, and people; its generated chroma background was removed locally and the transparent result was converted to WebP.
+
+All mounted landmark designs are original paper-theatre compositions rather than copied photographs. The final JPEG panoramas were flattened from the project's own cardboard layers; they contain no remote runtime assets and no alpha channel. The earlier `milan-windows-cardboard.webp`, `navigli-spring-cardboard.webp`, `navigli-cardboard.webp`, and `*-paper.webp` files remain as rollback assets but are not mounted.

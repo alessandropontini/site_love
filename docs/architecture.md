@@ -1,6 +1,6 @@
 # Architecture Overview
 
-Alessandro & Bridget is a single-page Next.js 14 App Router experience. The public route is a state-driven journey with an invitation, a Milan map, four lightweight challenges, four rewards, a persistent inventory, and a gated finale.
+Alessandro & Bridget is a single-page Next.js 14 App Router experience. The public route is a state-driven journey with an invitation, a paper-theatre index, four lightweight challenges presented as illustrated book chapters, four rewards, a persistent inventory, and a gated Duomo finale.
 
 This paper-theatre route is the canonical product architecture and the main narrative line for production. Legacy trees remain in the repository for reference, but changes to them do not change the shipped home unless `app/page.tsx` is deliberately remounted.
 
@@ -23,8 +23,8 @@ npm run lint
 ## Current experience structure
 
 - `components/experience/ExperienceShell.tsx` mounts exactly one active screen and owns navigation, focus changes, toolbar state, inventory visibility, and live announcements.
-- `components/experience/JourneyMap.tsx` renders the visual map and its semantic ordered list of chapter nodes.
-- `components/experience/ChapterExperience.tsx` provides a shared narrative frame and selects the configured challenge.
+- `components/experience/JourneyMap.tsx` renders the theatre index and its semantic ordered list of chapter nodes over the visual Milan route.
+- `components/experience/ChapterExperience.tsx` provides the responsive hard-cover book frame, its one-time cover opening, the development-only completion shortcut, the chapter palette, and configured challenge selection.
 - `components/experience/challenges/` contains the frequency, pairing, ordering, and window-sequence interactions.
 - `components/experience/art/` contains the shared paper-stage composition, per-chapter Milan landmark selection, and accessible-independent reward iconography.
 - `components/experience/RewardScene.tsx` presents the newly collected object.
@@ -160,7 +160,7 @@ The current experience layout and controls are isolated in `components/experienc
 - `lib/profile.ts` contains title-screen profile and intro copy.
 - `lib/photos.ts` contains photo metadata.
 - `public/photos/` contains photo documentation/placeholders.
-- `public/scene/paper-theatre/` contains the active transparent WebP cutouts for the Duomo, tram, couple, Galleria-inspired portal, spring Naviglio Grande scene with jasmine, Arco della Pace-inspired arch, and Milanese window facade. Older paper and pixel assets remain as rollback or unmounted legacy references.
+- `public/scene/paper-theatre/` contains the active opaque JPEG panoramas for the entrance, four chapters, and finale, plus PNG compatibility overlays for the couple, tram, and tuning radio. Source WebP cutouts and older paper/pixel assets remain as rollback or unmounted references. Opaque stage art prevents Android/WebView alpha-compositing rectangles.
 - `data/` is ignored except for `.gitkeep` and can hold heavyweight local concept art or exports.
 
 Do not modify visual assets in `public/` without explicit approval.

@@ -1,6 +1,10 @@
 import type { CSSProperties, RefObject } from "react";
+import Image from "next/image";
 
-import { PaperStage } from "@/components/experience/art/PaperArt";
+import {
+  chapterLandmarks,
+  PaperStage
+} from "@/components/experience/art/PaperArt";
 import {
   type ExperienceChapter,
   type ChapterId
@@ -49,7 +53,7 @@ export function JourneyMap({
         <p>{copy.map.description}</p>
       </div>
 
-      <div className={styles.mapWorld}>
+      <nav className={styles.mapWorld} aria-label={copy.map.title}>
         <PaperStage variant="map" tone="night" />
 
         <svg className={styles.journeyPath} viewBox="0 0 1000 560" aria-hidden="true">
@@ -98,6 +102,14 @@ export function JourneyMap({
                         : `${copy.map.locked}. ${copy.map.lockedDetail}`
                   }`}
                 >
+                  <span className={styles.nodeScene} aria-hidden="true">
+                    <Image
+                      src={chapterLandmarks[chapter.id]}
+                      alt=""
+                      fill
+                      sizes="72px"
+                    />
+                  </span>
                   <span className={styles.nodeNumber}>
                     {complete ? "✓" : chapter.number}
                   </span>
@@ -123,7 +135,7 @@ export function JourneyMap({
             {copy.map.openFinale}
           </button>
         )}
-      </div>
+      </nav>
 
       <nav className={styles.mapDock} aria-label={copy.map.actions}>
         <span className={styles.currentLocation}>

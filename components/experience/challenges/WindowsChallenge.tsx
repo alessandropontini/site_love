@@ -230,7 +230,7 @@ export function WindowsChallenge({
             <li key={index} data-state={state}>
               <span aria-hidden="true">{state === "completed" ? "✓" : index + 1}</span>
               <span className={styles.srOnly}>
-                Round {index + 1}:{" "}
+                {copy.windows.roundLabel(index + 1)}:{" "}
                 {state === "completed"
                   ? copy.windows.stateComplete
                   : state === "current"
@@ -243,7 +243,6 @@ export function WindowsChallenge({
       </ol>
 
       <div className={styles.windowScene}>
-        <span className={styles.windowMoon} aria-hidden="true" />
         <div
           className={styles.windowFacade}
           role="group"
@@ -283,7 +282,6 @@ export function WindowsChallenge({
             );
           })}
         </div>
-        <span className={styles.windowStreet} aria-hidden="true" />
       </div>
 
       {showGuide && (

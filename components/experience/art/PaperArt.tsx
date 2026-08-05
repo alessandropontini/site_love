@@ -12,7 +12,7 @@ const imageSizes: Record<
 > = {
   invitation: {
     duomo: "(max-width: 899px) 79vw, 34vw",
-    landmark: "0px",
+    landmark: "100vw",
     tram: "(max-width: 899px) 39vw, 17vw",
     couple: "(max-width: 899px) 25vw, 11vw"
   },
@@ -24,23 +24,23 @@ const imageSizes: Record<
   },
   chapter: {
     duomo: "0px",
-    landmark: "(max-width: 899px) 92vw, 43vw",
+    landmark: "(max-width: 899px) 100vw, 1320px",
     tram: "(max-width: 899px) 38vw, 15vw",
     couple: "(max-width: 899px) 24vw, 10vw"
   },
   finale: {
     duomo: "(max-width: 899px) 70vw, 35vw",
-    landmark: "0px",
+    landmark: "(max-width: 899px) 100vw, 62vw",
     tram: "0px",
     couple: "(max-width: 899px) 32vw, 15vw"
   }
 };
 
-const chapterLandmarks: Record<ChapterId, string> = {
-  spark: "/scene/paper-theatre/galleria-cardboard.webp",
-  coordinates: "/scene/paper-theatre/naviglio-grande-spring-cardboard.webp",
-  promise: "/scene/paper-theatre/arco-pace-cardboard.webp",
-  future: "/scene/paper-theatre/milan-windows-cardboard.webp"
+export const chapterLandmarks: Record<ChapterId, string> = {
+  spark: "/scene/paper-theatre/scene-chapter-galleria.jpg",
+  coordinates: "/scene/paper-theatre/scene-chapter-naviglio.jpg",
+  promise: "/scene/paper-theatre/scene-chapter-arco.jpg",
+  future: "/scene/paper-theatre/scene-chapter-adelchi.jpg"
 };
 
 export function PaperStage({
@@ -60,11 +60,16 @@ export function PaperStage({
   location?: string;
   actLabel?: string;
 }) {
-  const landmark = chapterId ? chapterLandmarks[chapterId] : null;
-  const showTram =
-    variant === "invitation" ||
-    variant === "map" ||
-    (variant === "chapter" && chapterId === "spark");
+  const sceneImage = chapterId
+    ? chapterLandmarks[chapterId]
+    : variant === "invitation"
+      ? "/scene/paper-theatre/scene-entrance-galleria.jpg"
+      : variant === "finale"
+        ? "/scene/paper-theatre/scene-finale-duomo.jpg"
+        : null;
+  const showTram = variant === "invitation" || variant === "finale";
+  const showCouple = variant === "invitation" || variant === "finale";
+  const renderStagePieces = !sceneImage;
 
   return (
     <div
@@ -73,30 +78,25 @@ export function PaperStage({
       data-chapter={chapterId}
       aria-hidden="true"
     >
-      <span className={styles.backdrop} />
-      <span className={styles.paperMoon} />
-      <span className={styles.hangingCloud} />
-      <span className={styles.backSkyline} />
-      <span className={styles.frontSkyline} />
-      <span className={styles.stageRoad} />
+      {renderStagePieces && (
+        <>
+          <span className={styles.backdrop} />
+          <span className={styles.paperMoon} />
+          <span className={styles.hangingCloud} />
+          <span className={styles.backSkyline} />
+          <span className={styles.frontSkyline} />
+          <span className={styles.stageRoad} />
+        </>
+      )}
 
-      {landmark ? (
-        <div className={styles.landmarkLayer}>
+      {sceneImage && (
+        <div className={styles.sceneImageLayer}>
           <Image
-            src={landmark}
-            alt=""
-            fill
-            sizes={imageSizes[variant].landmark}
-          />
-        </div>
-      ) : (
-        <div className={styles.duomoLayer}>
-          <Image
-            src="/scene/paper-theatre/duomo-cardboard.webp"
+            src={sceneImage}
             alt=""
             fill
             priority={priority}
-            sizes={imageSizes[variant].duomo}
+            sizes={imageSizes[variant].landmark}
           />
         </div>
       )}
@@ -104,22 +104,26 @@ export function PaperStage({
       {showTram && (
         <div className={styles.tramLayer}>
           <Image
-            src="/scene/paper-theatre/tram-cardboard.webp"
+            src="/scene/paper-theatre/tram-cardboard.png"
             alt=""
             fill
+            unoptimized
             sizes={imageSizes[variant].tram}
           />
         </div>
       )}
 
-      <div className={styles.coupleLayer}>
-        <Image
-          src="/scene/paper-theatre/couple-cardboard.webp"
-          alt=""
-          fill
-          sizes={imageSizes[variant].couple}
-        />
-      </div>
+      {showCouple && (
+        <div className={styles.coupleLayer}>
+          <Image
+            src="/scene/paper-theatre/couple-cardboard.png"
+            alt=""
+            fill
+            unoptimized
+            sizes={imageSizes[variant].couple}
+          />
+        </div>
+      )}
 
       {chapterNumber && (
         <span className={styles.actBadge}>
@@ -129,10 +133,14 @@ export function PaperStage({
       )}
       {location && <span className={styles.locationTicket}>{location}</span>}
 
-      <span className={styles.footlights} />
-      <span className={styles.prosceniumTop} />
-      <span className={styles.curtainLeft} />
-      <span className={styles.curtainRight} />
+      {renderStagePieces && (
+        <>
+          <span className={styles.footlights} />
+          <span className={styles.prosceniumTop} />
+          <span className={styles.curtainLeft} />
+          <span className={styles.curtainRight} />
+        </>
+      )}
     </div>
   );
 }

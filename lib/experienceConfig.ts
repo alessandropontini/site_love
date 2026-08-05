@@ -130,20 +130,23 @@ const chapterDefinitions: ExperienceChapterDefinition[] = [
   {
     id: "future",
     number: "04",
-    mapLabel: { it: "Le finestre", en: "The windows" },
+    mapLabel: { it: "Adelchi", en: "Adelchi" },
     eyebrow: { it: "Ultima fermata", en: "Final stop" },
-    title: { it: "Accendi la città", en: "Light up the city" },
+    title: {
+      it: "Accendi la sera ad Adelchi",
+      en: "Light up the evening at Adelchi"
+    },
     description: {
-      it: "La sera conserva piccoli segnali dietro ogni vetro. Osserva il loro ritmo e restituisci alla città la stessa luce.",
-      en: "Evening keeps small signals behind every pane. Watch their rhythm and return the same light to the city."
+      it: "Fuori dal birrificio di via Adelchi, l'ingresso illuminato, l'edera e i lampioni diventano una sequenza da ricordare insieme.",
+      en: "Outside the brewery on Via Adelchi, the warm entrance, ivy, and lanterns become a sequence to remember together."
     },
     location: {
-      it: "Milano · Luci della sera",
-      en: "Milan · Evening lights"
+      it: "Milano · Via Adelchi 5",
+      en: "Milan · 5 Via Adelchi"
     },
     instruction: {
-      it: "Osserva le luci e ripeti ogni sequenza, senza fretta.",
-      en: "Watch the lights and repeat each sequence at your own pace."
+      it: "Osserva i quattro segnali della facciata e ripeti ogni sequenza, senza fretta.",
+      en: "Watch the four signals on the facade and repeat each sequence at your own pace."
     },
     tone: "night",
     reward: {

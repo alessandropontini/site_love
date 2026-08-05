@@ -48,7 +48,7 @@ export const messages = {
       english: "English"
     },
     common: {
-      map: "Mappa",
+      map: "Indice",
       cancel: "Annulla",
       act: "ATTO"
     },
@@ -69,21 +69,21 @@ export const messages = {
       enterStory: "Entra nella storia",
       duration: "tappe · circa 6 minuti",
       mapAnnouncement: (count: number, total: number) =>
-        `Mappa aperta. ${count} ${count === 1 ? "ricordo raccolto" : "ricordi raccolti"} su ${total}.`,
+        `Indice aperto. ${count} ${count === 1 ? "ricordo raccolto" : "ricordi raccolti"} su ${total}.`,
       rewardAnnouncement: "Nuovo ricordo raccolto.",
       finaleAnnouncement: "Finale sbloccato."
     },
     map: {
-      kicker: "La città si ricorda",
-      title: "Mappa dei ricordi",
+      kicker: "Il teatro apre il suo libro",
+      title: "Indice dei ricordi",
       description:
-        "Segui la strada illuminata. Ogni fermata cambia il mondo e lascia un oggetto nello zaino. Completa la tappa disponibile per accendere la successiva.",
+        "Scegli il capitolo disponibile. Ogni pagina apre una diversa scena di Milano e lascia un oggetto nello zaino prima di voltarsi verso la successiva.",
       complete: "Completata",
       available: "Disponibile",
       locked: "Bloccata",
       lockedDetail: "Completa prima la tappa precedente",
       openFinale: "Apri il finale",
-      actions: "Azioni della mappa",
+      actions: "Azioni dell'indice",
       location: "Milano, Italia",
       inventory: "Zaino"
     },
@@ -92,7 +92,9 @@ export const messages = {
       collectedBody: (reward: string) =>
         `${reward} è al sicuro nello zaino.`,
       replay: "Rivedi la prova",
-      backToMap: "Torna alla mappa"
+      backToMap: "Torna all'indice",
+      testOnly: "Scorciatoia disponibile solo durante i test locali",
+      testComplete: "Completa subito la pagina"
     },
     reward: {
       kicker: "Nuovo ricordo raccolto",
@@ -114,10 +116,10 @@ export const messages = {
       reset: "Ricomincia dall'inizio"
     },
     finale: {
-      kicker: "I quattro ricordi sono qui",
-      title: "L'ultima pagina non era una fine",
+      kicker: "Ultima scena · Piazza del Duomo",
+      title: "L'ultima pagina ci porta al Duomo",
       description:
-        "Ogni oggetto ha portato una parola. Adesso possono finalmente stare nella stessa lettera.",
+        "Alessandro e Bridget arrivano insieme davanti al Duomo. I quattro ricordi possono finalmente stare nella stessa lettera.",
       collected: "Ricordi raccolti",
       openLetter: "Apri la lettera",
       letterTitle: "La prossima fermata è nostra",
@@ -125,7 +127,7 @@ export const messages = {
       letterParagraphTwo:
         "Questa preferisce continuare: nelle strade ancora da attraversare, nelle cose piccole da ricordare e in tutte le volte in cui sceglieremo di tornare dalla stessa parte.",
       question: "Continuiamo?",
-      reviewMap: "Rivedi la mappa",
+      reviewMap: "Rivedi l'indice",
       restart: "Ricomincia la storia",
       confirmGroup: "Conferma nuovo inizio",
       confirm: "Il progresso verrà cancellato.",
@@ -135,7 +137,7 @@ export const messages = {
       title: "Sintonizza il segnale",
       intro: "Porta l'indicatore nella zona luminosa.",
       imageAlt:
-        "Modello di cartone del Duomo di Milano che emerge dal segnale",
+        "Radio analogica di cartone che emerge dal segnale",
       label: "Frequenza del ricordo",
       found: "Segnale trovato",
       ready: "Il segnale è nitido. Puoi raccogliere il primo ricordo.",
@@ -179,34 +181,35 @@ export const messages = {
     },
     windows: {
       items: [
-        { id: "lamp", label: "Lampada", position: "in alto a sinistra" },
-        { id: "plant", label: "Pianta", position: "in alto a destra" },
-        { id: "curtain", label: "Tende", position: "in basso a sinistra" },
-        { id: "balcony", label: "Balcone", position: "in basso a destra" }
+        { id: "lamp", label: "Lampione", position: "in alto a sinistra" },
+        { id: "plant", label: "Edera", position: "al centro" },
+        { id: "curtain", label: "Ingresso", position: "in basso a destra" },
+        { id: "balcony", label: "Serranda", position: "in alto a destra" }
       ],
       initial: "Round 1 di 3. Avvia la prima sequenza.",
       reduced: (count: number) =>
-        `Movimento ridotto: la sequenza di ${count} finestre resta visibile.`,
+        `Movimento ridotto: la sequenza di ${count} segnali resta visibile.`,
       observe:
-        "Osserva la sequenza. Le finestre saranno disponibili tra poco.",
+        "Osserva la sequenza. I segnali saranno disponibili tra poco.",
       repeat: (count: number) =>
-        `Ora ripeti ${count} finestre nello stesso ordine. Se ti serve, usa la guida testuale.`,
+        `Ora ripeti ${count} segnali nello stesso ordine. Se ti serve, usa la guida testuale.`,
       retry:
         "Ordine diverso. Nessuna penalità: rivedi la sequenza e riprova.",
       correct: (count: number, total: number) =>
-        `Corretto. ${count} ${count === 1 ? "finestra inserita" : "finestre inserite"} su ${total}.`,
-      won: "Tutte le finestre sono accese. La luce di casa è pronta.",
+        `Corretto. ${count} ${count === 1 ? "segnale inserito" : "segnali inseriti"} su ${total}.`,
+      won: "Tutti i segnali di Adelchi sono accesi. La luce di casa è pronta.",
       roundComplete: (round: number) => `Round ${round} completato.`,
       nextRound: (round: number) =>
         `Round ${round} di 3. Osserva la nuova sequenza.`,
-      title: "Le finestre accese",
-      intro: "Osserva il ritmo della città e restituiscile la stessa luce.",
+      roundLabel: (round: number) => `Round ${round}`,
+      title: "Le luci di Adelchi",
+      intro: "Osserva il ritmo della facciata e restituiscile la stessa luce.",
       progress: "Avanzamento della prova",
       stateComplete: "completato",
       stateCurrent: "corrente",
       stateUpcoming: "da completare",
-      group: "Quattro finestre di Milano",
-      lit: "illuminata",
+      group: "Quattro segnali sulla facciata di Adelchi",
+      lit: "segnale attivo",
       guide: (round: number) => `Sequenza del round ${round}`,
       start: "Accendi la prima sequenza",
       watching: "Guarda le luci del palco…",
@@ -231,7 +234,7 @@ export const messages = {
       english: "English"
     },
     common: {
-      map: "Map",
+      map: "Index",
       cancel: "Cancel",
       act: "ACT"
     },
@@ -252,21 +255,21 @@ export const messages = {
       enterStory: "Enter the story",
       duration: "stops · about 6 minutes",
       mapAnnouncement: (count: number, total: number) =>
-        `Map open. ${count} ${count === 1 ? "memory collected" : "memories collected"} out of ${total}.`,
+        `Index open. ${count} ${count === 1 ? "memory collected" : "memories collected"} out of ${total}.`,
       rewardAnnouncement: "New memory collected.",
       finaleAnnouncement: "Finale unlocked."
     },
     map: {
-      kicker: "The city remembers",
-      title: "Map of memories",
+      kicker: "The theatre opens its book",
+      title: "Index of memories",
       description:
-        "Follow the illuminated road. Each stop changes the world and leaves an object in your bag. Complete the available stop to light the next one.",
+        "Choose the available chapter. Each page opens onto a different Milan scene and leaves an object in your bag before turning to the next.",
       complete: "Complete",
       available: "Available",
       locked: "Locked",
       lockedDetail: "Complete the previous stop first",
       openFinale: "Open the finale",
-      actions: "Map actions",
+      actions: "Index actions",
       location: "Milan, Italy",
       inventory: "Bag"
     },
@@ -275,7 +278,9 @@ export const messages = {
       collectedBody: (reward: string) =>
         `${reward} is safe in your bag.`,
       replay: "Replay the challenge",
-      backToMap: "Return to the map"
+      backToMap: "Return to the index",
+      testOnly: "Shortcut available only during local testing",
+      testComplete: "Complete this page now"
     },
     reward: {
       kicker: "New memory collected",
@@ -297,10 +302,10 @@ export const messages = {
       reset: "Start again"
     },
     finale: {
-      kicker: "The four memories are here",
-      title: "The last page was never an ending",
+      kicker: "Final scene · Piazza del Duomo",
+      title: "The last page takes us to the Duomo",
       description:
-        "Each object carried a word. Now they can finally share the same letter.",
+        "Alessandro and Bridget arrive together in front of the Duomo. The four memories can finally share the same letter.",
       collected: "Collected memories",
       openLetter: "Open the letter",
       letterTitle: "The next stop is ours",
@@ -308,7 +313,7 @@ export const messages = {
       letterParagraphTwo:
         "This one would rather continue: through the streets still ahead, the small things worth remembering, and every time we choose to return to the same side.",
       question: "Shall we continue?",
-      reviewMap: "Review the map",
+      reviewMap: "Review the index",
       restart: "Restart the story",
       confirmGroup: "Confirm restart",
       confirm: "Your progress will be deleted.",
@@ -318,7 +323,7 @@ export const messages = {
       title: "Tune the signal",
       intro: "Move the indicator into the illuminated area.",
       imageAlt:
-        "Cardboard model of Milan Cathedral emerging from the signal",
+        "Cardboard analog radio emerging from the signal",
       label: "Memory frequency",
       found: "Signal found",
       ready: "The signal is clear. You can collect the first memory.",
@@ -360,32 +365,33 @@ export const messages = {
     },
     windows: {
       items: [
-        { id: "lamp", label: "Lamp", position: "top left" },
-        { id: "plant", label: "Plant", position: "top right" },
-        { id: "curtain", label: "Curtains", position: "bottom left" },
-        { id: "balcony", label: "Balcony", position: "bottom right" }
+        { id: "lamp", label: "Lantern", position: "top left" },
+        { id: "plant", label: "Ivy", position: "centre" },
+        { id: "curtain", label: "Doorway", position: "bottom right" },
+        { id: "balcony", label: "Shutter", position: "top right" }
       ],
       initial: "Round 1 of 3. Start the first sequence.",
       reduced: (count: number) =>
-        `Reduced motion: the ${count}-window sequence remains visible.`,
-      observe: "Watch the sequence. The windows will be available shortly.",
+        `Reduced motion: the ${count}-signal sequence remains visible.`,
+      observe: "Watch the sequence. The signals will be available shortly.",
       repeat: (count: number) =>
-        `Now repeat ${count} windows in the same order. Use the text guide if needed.`,
+        `Now repeat ${count} signals in the same order. Use the text guide if needed.`,
       retry: "Different order. No penalty: review the sequence and try again.",
       correct: (count: number, total: number) =>
-        `Correct. ${count} ${count === 1 ? "window entered" : "windows entered"} out of ${total}.`,
-      won: "Every window is lit. The light of home is ready.",
+        `Correct. ${count} ${count === 1 ? "signal entered" : "signals entered"} out of ${total}.`,
+      won: "Every signal at Adelchi is lit. The light of home is ready.",
       roundComplete: (round: number) => `Round ${round} complete.`,
       nextRound: (round: number) =>
         `Round ${round} of 3. Watch the new sequence.`,
-      title: "The illuminated windows",
-      intro: "Watch the rhythm of the city and return the same light.",
+      roundLabel: (round: number) => `Round ${round}`,
+      title: "The lights of Adelchi",
+      intro: "Watch the rhythm of the facade and return the same light.",
       progress: "Challenge progress",
       stateComplete: "complete",
       stateCurrent: "current",
       stateUpcoming: "upcoming",
-      group: "Four windows in Milan",
-      lit: "illuminated",
+      group: "Four signals on the Adelchi facade",
+      lit: "signal active",
       guide: (round: number) => `Round ${round} sequence`,
       start: "Light the first sequence",
       watching: "Watch the stage lights…",

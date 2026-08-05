@@ -1,6 +1,6 @@
 # Alessandro & Bridget — La nostra avventura
 
-Un microsito Next.js mobile-first costruito come una piccola storia interattiva. Non è una landing page né un lungo scorrimento: il visitatore entra in una mappa illustrata di Milano, completa quattro fermate, raccoglie ricordi e apre una lettera finale.
+Un microsito Next.js mobile-first costruito come una piccola storia interattiva. Non è una landing page né un lungo scorrimento: il visitatore entra in un teatro di cartone, sceglie dall'indice, apre quattro capitoli illustrati di Milano, raccoglie ricordi e arriva al Duomo per la lettera finale.
 
 Il teatro di cartone montato da `app/page.tsx` è la linea narrativa principale e l'esperienza destinata alla produzione. Le implementazioni precedenti restano nel repository soltanto come riferimenti non montati.
 
@@ -27,13 +27,13 @@ Il selettore visibile **IT / EN** permette sempre di cambiare lingua. La scelta 
 Il percorso pubblico montato da `app/page.tsx` è:
 
 1. **Invito** — promessa, durata e ingresso esplicito.
-2. **Mappa viva** — una sola fermata disponibile alla volta.
+2. **Indice del teatro** — una sola pagina disponibile alla volta.
 3. **La scintilla** — sintonizzazione di un segnale.
 4. **Le coordinate** — tre abbinamenti accessibili tramite tap.
 5. **Le scelte** — quattro gesti da ricomporre.
-6. **Le finestre accese** — tre sequenze luminose da osservare e ripetere.
+6. **Le luci di Adelchi** — tre sequenze luminose sulla facciata di via Adelchi.
 7. **Ricompense** — un oggetto entra nello zaino dopo ogni prova.
-8. **Finale** — i quattro oggetti aprono una lettera HTML.
+8. **Finale al Duomo** — Alessandro e Bridget riuniscono i quattro oggetti e aprono una lettera HTML.
 
 Il progresso è sequenziale, idempotente e salvato soltanto nel browser tramite `localStorage`. Inventario e finale sono derivati dai capitoli completati; non servono account, database, API o servizi a pagamento. Il comando per ridurre il movimento è visibile e viene ricordato sul dispositivo, mentre la preferenza di sistema ha sempre la precedenza.
 
@@ -45,8 +45,8 @@ Le vecchie implementazioni scrollytelling e arcade restano nel repository come r
 - `lib/i18n.ts` – dizionari IT/EN, metadata e rilevamento iniziale della lingua.
 - `components/experience/LocaleProvider.tsx` – stato locale, persistenza e selettore lingua.
 - `lib/useExperienceProgress.ts` – stato versionato, gating, migrazione e persistenza locale.
-- `components/experience/ExperienceShell.tsx` – regia di invito, mappa, capitoli, ricompense e finale.
-- `components/experience/JourneyMap.tsx` – hub visuale e stati `completata`, `disponibile`, `bloccata`.
+- `components/experience/ExperienceShell.tsx` – regia di invito, indice, capitoli, ricompense e finale.
+- `components/experience/JourneyMap.tsx` – indice visuale e stati `completata`, `disponibile`, `bloccata`.
 - `components/experience/challenges/*` – le quattro interazioni leggere.
 - `components/experience/art/*` – quinte, landmark e marionette del teatro di cartone.
 - `components/experience/ExperienceShell.module.css` – design system, scene e layout responsive.
@@ -54,7 +54,7 @@ Le vecchie implementazioni scrollytelling e arcade restano nel repository come r
 - `components/quest/questSchema.tsx` – legacy arcade chapter metadata.
 - `components/quest/games/*` – legacy arcade mini-game mechanics.
 - `components/pixel/` – componenti legacy, non montati dalla route pubblica.
-- `public/scene/paper-theatre/` – Duomo, tram, coppia e landmark milanesi locali, incluso il Naviglio Grande primaverile; nessuna immagine remota è necessaria a runtime.
+- `public/scene/paper-theatre/` – Duomo, tram, coppia e landmark milanesi locali, inclusi il Naviglio Grande primaverile e l'esterno serale di Adelchi; nessuna immagine remota è necessaria a runtime.
 - `data/` – still ignored; stash heavyweight concept art or exports here if needed.
 
 - Per struttura, stato e confini legacy: `docs/architecture.md`.
@@ -81,7 +81,7 @@ Lo script esegue anche lint, build e smoke workflow, non modifica file applicati
 ## Experience checklist
 
 - L&apos;invito resta sempre leggibile e non parte automaticamente.
-- La mappa mostra una sola tappa disponibile; le successive restano bloccate.
+- L'indice mostra una sola tappa disponibile; le successive restano bloccate.
 - Ogni successo assegna la ricompensa una volta sola.
 - Il finale richiede tutti e quattro gli ID configurati, non soltanto un conteggio.
 - Il reset richiede conferma e cancella soltanto i dati locali del sito.
@@ -94,6 +94,8 @@ Lo script esegue anche lint, build e smoke workflow, non modifica file applicati
 npm run build
 npm start
 ```
+
+Arresta sempre `npm run dev` prima di eseguire `npm run build`: entrambi scrivono nella directory `.next` e non devono girare contemporaneamente. Dopo una build, riavvia il server di sviluppo da una cache `.next` pulita prima di condividere la preview locale.
 
 La build è statica sul percorso `/` e può essere pubblicata su un piano gratuito compatibile con Next.js. Per preview temporanee si può usare un tunnel gratuito; l&apos;URL del tunnel cambia quando il processo viene riavviato.
 
