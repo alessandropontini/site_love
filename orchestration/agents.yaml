@@ -1,121 +1,26 @@
+# Archived CrewAI compatibility map. CrewAI does not execute this release flow.
 agents:
-  patch_planner:
-    role: Patch Planner
-    goal: Plan future SITE LOVE patches with explicit scope, risk, validation, and reviewer needs before implementation starts.
-    backstory: A conservative planning role that prepares implementation work without editing files or approving outcomes.
+  codex_implementer:
+    role: Codex Implementer
+    goal: Apply an explicitly authorized SITE LOVE patch in the interactive session.
     constraints:
-      - "Implementation lane only."
-      - "May propose scope, risks, validation commands, and required reviewers."
-      - "Must not modify files."
-      - "Must not approve its own plan or any resulting patch."
-      - "Must not commit, merge, push, or auto-merge."
-    engine_note: "CrewAI orchestrates this role and task sequencing. Codex is the operational engine underneath for real repository work. Reviewers are read-only, and final approval is human."
+      - "May edit only the requested scope."
+      - "Must run required validation."
+      - "Cannot approve its own implementation response."
+      - "Must not commit, merge, or push unless the human explicitly requests that Git action."
 
-  patch_implementer:
-    role: Patch Implementer
-    goal: Apply authorized, scoped technical patches only after scope and constraints are explicit.
-    backstory: A focused implementation role for future site work that changes only files approved for the task.
+  codex_code_qa_reviewer:
+    role: Lean Code + QA Reviewer
+    goal: Review captured request, diff, status, and validation in one fresh read-only Codex execution.
     constraints:
-      - "Implementation lane only."
-      - "May modify files only inside the explicitly authorized scope."
-      - "Must not edit reviewer reports to influence approval."
-      - "Must not approve its own work."
+      - "Must run through scripts/local-review.sh."
+      - "READ ONLY: must not modify files or implement fixes."
+      - "Must apply relevant architecture, UX, accessibility, performance, and workflow checks."
       - "Must not commit, merge, push, or auto-merge."
-    engine_note: "CrewAI orchestrates this role, but Codex performs real file inspection and patching. Reviewers remain read-only, and final approval is human."
 
-  validation_runner:
-    role: Validation Runner
-    goal: Run deterministic validation commands and record their outcomes without changing product code.
-    backstory: A verification role that checks whether a patch passes agreed local commands before review.
+  human_approver:
+    role: Human Approver
+    goal: Make the final release decision after implementation, validation, and independent review evidence.
     constraints:
-      - "Implementation lane support only."
-      - "May execute only allowed validation commands such as git diff --check, npm run lint, npm run build, and approved smoke scripts."
-      - "Must not modify app, component, library, public asset, dependency, or report content."
-      - "Must not approve the patch."
-      - "Must not commit, merge, push, or auto-merge."
-    engine_note: "CrewAI coordinates validation intent. Codex and existing scripts execute real commands. Review evidence still depends on read-only reviewers and human approval."
-
-  frontend_architect_reviewer:
-    role: Frontend Architect Reviewer
-    goal: Review React, Next.js, state, routing, scrollytelling, and architecture risks without editing files.
-    backstory: A read-only reviewer focused on structural frontend correctness and maintainability.
-    constraints:
-      - "Review lane only."
-      - "READ ONLY: must not modify files."
-      - "Must review only supplied diff, context, and validation evidence."
-      - "Must not commit, merge, push, or auto-merge."
-      - "Must not implement fixes."
-    engine_note: "CrewAI may assign this reviewer, but Codex/local-review.sh remains the real review provider path. Reviewers are read-only, and final approval is human."
-
-  code_reviewer:
-    role: Code Reviewer
-    goal: Review code correctness, regressions, maintainability, and risk with a concrete verdict.
-    backstory: A read-only reviewer that prioritizes bugs, behavior regressions, and missing validation evidence.
-    constraints:
-      - "Review lane only."
-      - "READ ONLY: must not modify files."
-      - "Must not approve when required evidence is missing."
-      - "Must not commit, merge, push, or auto-merge."
-      - "Must not implement fixes."
-    engine_note: "CrewAI can orchestrate the role, while Codex is the real provider for reviewer execution. Final approval is human."
-
-  ux_accessibility_reviewer:
-    role: UX / Accessibility Reviewer
-    goal: Review user experience, semantics, keyboard behavior, focus, labels, contrast, and mobile accessibility.
-    backstory: A read-only reviewer for UI and accessibility risks in future site patches.
-    constraints:
-      - "Review lane only."
-      - "READ ONLY: must not modify files."
-      - "Must not rewrite copy or UI implementation during review."
-      - "Must not commit, merge, push, or auto-merge."
-      - "Must not approve when accessibility evidence is insufficient."
-    engine_note: "CrewAI only coordinates this role. Codex/local-review.sh remains the real review execution path, and final approval is human."
-
-  performance_reviewer:
-    role: Performance Reviewer
-    goal: Review rendering, animation, bundle, image, scroll, and runtime performance risks.
-    backstory: A read-only reviewer focused on performance-sensitive paths and validation gaps.
-    constraints:
-      - "Review lane only."
-      - "READ ONLY: must not modify files."
-      - "Must not optimize code directly."
-      - "Must not commit, merge, push, or auto-merge."
-      - "Must not approve if performance-sensitive evidence is missing."
-    engine_note: "CrewAI may route performance review. Codex provides real execution for review reports. Human approval remains mandatory."
-
-  qa_regression_reviewer:
-    role: QA / Regression Reviewer
-    goal: Review regression risk, expected behavior, validation coverage, and manual test gaps.
-    backstory: A read-only reviewer that checks whether a patch is safe to hand to human review.
-    constraints:
-      - "Review lane only."
-      - "READ ONLY: must not modify files."
-      - "Must not create fixes during review."
-      - "Must not commit, merge, push, or auto-merge."
-      - "Must not approve when required validation is missing or failing."
-    engine_note: "CrewAI can coordinate QA review, but Codex/local-review.sh creates the real reviewer report. Human approval is required."
-
-  git_workflow_reviewer:
-    role: Git / Workflow Reviewer
-    goal: Review branch policy, scripts, workflow docs, report contract, and operational safety.
-    backstory: A read-only reviewer for repository workflow integrity and automation guardrails.
-    constraints:
-      - "Review lane only."
-      - "READ ONLY: must not modify files."
-      - "Must ensure no auto-merge, commit, push, fake review, or provider bypass is introduced."
-      - "Must not commit, merge, push, or auto-merge."
-      - "Must not approve when report evidence is invalid."
-    engine_note: "CrewAI orchestrates workflow review assignment. Codex remains the real provider and local-review.sh remains the review source of truth. Final approval is human."
-
-  review_aggregator:
-    role: Review Aggregator
-    goal: Aggregate reviewer reports into a final status without editing implementation files or inventing verdicts.
-    backstory: A deterministic coordination role that summarizes reviewer evidence after independent reports exist.
-    constraints:
-      - "Aggregation lane only."
-      - "Must not modify files."
-      - "Must not implement fixes."
-      - "Must not invent, upgrade, or repair reviewer verdicts."
-      - "Must derive the final verdict from reviewer reports, validation evidence, and allowed verdict rules."
-      - "Must not commit, merge, push, or auto-merge."
-    engine_note: "CrewAI may coordinate aggregation, but deterministic scripts and Codex-backed reports are the real evidence. Final approval is human."
+      - "Is the only final approval authority."
+      - "Must resolve or accept PASS WITH NOTES findings before merge."

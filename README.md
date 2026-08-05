@@ -54,30 +54,29 @@ Le vecchie implementazioni scrollytelling e arcade restano nel repository come r
 - `components/quest/questSchema.tsx` – legacy arcade chapter metadata.
 - `components/quest/games/*` – legacy arcade mini-game mechanics.
 - `components/pixel/` – componenti legacy, non montati dalla route pubblica.
-- `public/scene/paper-theatre/` – Duomo, tram e coppia di cartone locali; nessuna immagine remota è necessaria.
+- `public/scene/paper-theatre/` – Duomo, tram, coppia e landmark milanesi locali, incluso il Naviglio Grande primaverile; nessuna immagine remota è necessaria a runtime.
 - `data/` – still ignored; stash heavyweight concept art or exports here if needed.
 
 - Per struttura, stato e confini legacy: `docs/architecture.md`.
 - Per personalizzare capitoli, prove e ricompense: `docs/quest-guide.md`.
 - Per la direzione visiva corrente: `docs/visual-direction.md`.
 - Per il workflow AI e le review: `docs/ai-workflow.md` e `docs/multiagent-workflow.md`.
-- Per l'infrastruttura CrewAI candidata: `docs/crewai-orchestration.md`.
+- Per lo stato degli esperimenti CrewAI e OpenClaw: `docs/crewai-orchestration.md` e `docs/openclaw-orchestration.md`.
 
-## Local Review Workflow
+## Lean Codex Review
 
-Ruflo is not part of this project workflow. Real multi-agent review uses Codex CLI only:
+Codex è l'unico strumento AI operativo. La sessione interattiva sviluppa; una nuova esecuzione Codex in sola lettura svolge una sola review combinata Code + QA. Inserisci obiettivo e criteri di accettazione in un file locale, poi esegui:
 
 ```bash
-npm run lint
-npm run build
-MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh
+git diff --check
+MULTIAGENT_PROVIDER=codex \
+  ./scripts/local-review.sh --request-file /tmp/site-love-review-request.md
 RUN_DIR="$(ls -td .agent/reports/* | head -1)"
+cat "$RUN_DIR/10_review-code-qa.md"
 cat "$RUN_DIR/99_final-verdict.md"
 ```
 
-`noop` is only for smoke tests and must produce `INFRASTRUCTURE BLOCKED`; it is not review evidence. A valid review requires `Provider: codex` and `Real execution: yes` in the required reports. `PASS` and `PASS WITH NOTES` still require final human approval, and `PASS WITH NOTES` requires notes to be resolved or explicitly accepted before merge.
-
-CrewAI is scaffolded only for future orchestration of implementation and review lanes; it does not replace Codex review or approve patches.
+Lo script esegue anche lint, build e smoke workflow, non modifica file applicativi e non fa commit, merge o push. `noop` resta gratuito per testare soltanto l'infrastruttura e deve produrre `INFRASTRUCTURE BLOCKED`. Anche `PASS` richiede approvazione umana finale. CrewAI e OpenClaw sono esperimenti inattivi, non passaggi di rilascio.
 
 ## Experience checklist
 

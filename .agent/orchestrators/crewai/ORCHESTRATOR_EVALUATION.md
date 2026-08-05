@@ -1,5 +1,7 @@
 # CrewAI Orchestrator Evaluation Matrix
 
+> Archived evaluation record. These criteria do not define the current merge gate; the active release policy is the single combined read-only Codex review in `docs/multiagent-workflow.md`.
+
 This matrix defines how SITE LOVE evaluates CrewAI as a pluggable orchestrator candidate. Fase 5c evaluates real CrewAI dry-run execution while keeping Codex as the operational executor. Fase 5d adds the executor boundary documented in `.agent/contracts/crewai-codex-executor-contract.md`. Fase 5e tests a real CrewAI Executor Request dry-run without executing Codex. Fase 5f tests a real no-write handshake where CrewAI generates the request and a local Codex no-write adapter reads it and produces a response. Fase 5g tests a no-write scoped patch plan where the adapter produces a plan and reviewer evaluation without a real code diff. The evaluation is limited to orchestration behavior, request/response contracts, planning artifacts, and report quality. It does not change the merge gate.
 
 ## 1. Role Separation

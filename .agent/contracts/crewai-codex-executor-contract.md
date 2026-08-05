@@ -1,5 +1,7 @@
 # CrewAI + Codex Executor Contract
 
+> Archived experiment: this contract is not the current SITE LOVE release path or merge gate. The active policy is the direct Codex implementation plus one separate combined read-only review documented in `docs/multiagent-workflow.md`.
+
 ## 1. Purpose
 
 This contract defines the safe boundary between CrewAI and Codex for SITE LOVE workflow experiments.

@@ -56,7 +56,7 @@ Challenge completion must remain keyboard and touch accessible. Avoid drag-only 
 - The finale requires all configured IDs, not only a matching number.
 - Reset removes only current and legacy SITE LOVE progress keys.
 
-Changing these rules is high risk and requires focused tests plus independent Code Review and QA / Regression.
+Changing these rules is high risk and requires focused tests plus the independent combined Code + QA review.
 
 ## Art and styling
 

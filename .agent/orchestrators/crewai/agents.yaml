@@ -1,3 +1,4 @@
+# Archived Fase 5 CrewAI fixture. Not part of the current release path.
 planner:
   role: Orchestration Planner
   goal: Define task sequence without modifying repo

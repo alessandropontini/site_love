@@ -313,10 +313,7 @@ provider_model() {
     codex)
       printf '%s\n' "${MULTIAGENT_CODEX_MODEL:-codex-config-default}"
       ;;
-    ollama)
-      printf '%s\n' "${MULTIAGENT_OLLAMA_MODEL:-qwen2.5-coder:7b}"
-      ;;
-    gemini | noop)
+    noop)
       printf '%s\n' "n/a"
       ;;
     *)
@@ -369,7 +366,7 @@ write_infrastructure_blocked_report() {
 - Provider: $provider
 - Model: $model
 - Real execution: $real_execution
-- Input files: 00_context.md, 01_git_status.txt, 02_git_diff.patch, 03_git_diff_stat.txt, 04_validation.md, 06_review_scope.md, 07_touched_files.txt, 05_untracked_files.md if present
+- Input files: 00_context.md, 01_git_status.txt, 02_git_diff.patch, 03_git_diff_stat.txt, 04_validation.md, 06_review_scope.md, 07_touched_files.txt, 05_untracked_files.md and 08_review_evidence.md if present
 - Verdict: INFRASTRUCTURE BLOCKED
 
 ## Summary
@@ -448,6 +445,11 @@ build_agent_prompt() {
       echo "## Untracked Files Context"
       cat "$run_dir/05_untracked_files.md"
     fi
+    if [[ -f "$run_dir/08_review_evidence.md" ]]; then
+      echo
+      echo "## Additional Review Evidence"
+      cat "$run_dir/08_review_evidence.md"
+    fi
     echo
     echo "## Required Report Format"
     echo
@@ -459,7 +461,7 @@ build_agent_prompt() {
 - Provider: $provider
 - Model: $model
 - Real execution: yes
-- Input files: 00_context.md, 01_git_status.txt, 02_git_diff.patch, 03_git_diff_stat.txt, 04_validation.md, 06_review_scope.md, 07_touched_files.txt, 05_untracked_files.md if present
+- Input files: 00_context.md, 01_git_status.txt, 02_git_diff.patch, 03_git_diff_stat.txt, 04_validation.md, 06_review_scope.md, 07_touched_files.txt, 05_untracked_files.md and 08_review_evidence.md if present
 - Verdict: PASS | PASS WITH NOTES | CHANGES REQUESTED | BLOCKED | INFRASTRUCTURE BLOCKED
 
 ## Summary
@@ -481,6 +483,11 @@ extract_verdict() {
 is_real_execution() {
   local report_file="$1"
   grep -Eq '^- Real execution:[[:space:]]*yes[[:space:]]*$' "$report_file"
+}
+
+is_codex_provider() {
+  local report_file="$1"
+  grep -Eq '^- Provider:[[:space:]]*codex[[:space:]]*$' "$report_file"
 }
 
 validate_agent_report() {
@@ -544,9 +551,12 @@ agent_report_validation_errors() {
 
 validate_real_agent_report() {
   local report_file="$1"
+  local execution_provider="$2"
 
+  [[ "$execution_provider" == "codex" ]] || return 1
   validate_agent_report "$report_file" || return 1
   is_real_execution "$report_file" || return 1
+  is_codex_provider "$report_file" || return 1
 }
 
 run_command_with_timeout() {
@@ -704,62 +714,12 @@ run_codex_agent() {
 
   cp "$raw_tmp" "$output_file"
 
-  if ! validate_real_agent_report "$output_file"; then
+  if ! validate_real_agent_report "$output_file" "codex"; then
     validation_reason="$(agent_report_validation_errors "$output_file")"
     if validate_agent_report "$output_file" && ! is_real_execution "$output_file"; then
       validation_reason="report did not contain 'Real execution: yes'"
     fi
     write_infrastructure_blocked_report "$output_file" "$agent" "codex" "$model" "codex output was invalid: ${validation_reason}; raw output saved to $(basename "$raw_tmp"); raw stderr saved to $(basename "$stderr_tmp")" "no"
-  fi
-}
-
-run_gemini_agent() {
-  local run_dir="$1"
-  local agent="$2"
-  local _prompt_file="$3"
-  local output_file="$4"
-
-  if ! command -v gemini >/dev/null 2>&1; then
-    write_infrastructure_blocked_report "$output_file" "$agent" "gemini" "n/a" "gemini CLI not found" "no"
-    return 0
-  fi
-
-  write_infrastructure_blocked_report "$output_file" "$agent" "gemini" "n/a" "gemini CLI found, but Phase 2A does not assume a stable non-interactive invocation syntax; TODO: wire an approved gemini command" "no"
-}
-
-run_ollama_agent() {
-  local run_dir="$1"
-  local agent="$2"
-  local prompt_file="$3"
-  local output_file="$4"
-  local model="${MULTIAGENT_OLLAMA_MODEL:-qwen2.5-coder:7b}"
-  local prompt_tmp raw_tmp
-
-  if ! command -v ollama >/dev/null 2>&1; then
-    write_infrastructure_blocked_report "$output_file" "$agent" "ollama" "$model" "ollama CLI not found" "no"
-    return 0
-  fi
-
-  ollama list > "$run_dir/ollama-list.txt" 2>&1 || true
-
-  prompt_tmp="$run_dir/${agent}-prompt.txt"
-  raw_tmp="$run_dir/${agent}-raw-output.md"
-  build_agent_prompt "$run_dir" "$agent" "$prompt_file" > "$prompt_tmp"
-
-  if ! ollama run "$model" < "$prompt_tmp" > "$raw_tmp" 2>&1; then
-    write_infrastructure_blocked_report "$output_file" "$agent" "ollama" "$model" "ollama command failed; see ${agent}-raw-output.md" "no"
-    return 0
-  fi
-
-  if [[ ! -s "$raw_tmp" ]]; then
-    write_infrastructure_blocked_report "$output_file" "$agent" "ollama" "$model" "ollama returned empty output" "no"
-    return 0
-  fi
-
-  cp "$raw_tmp" "$output_file"
-
-  if ! validate_real_agent_report "$output_file"; then
-    write_infrastructure_blocked_report "$output_file" "$agent" "ollama" "$model" "ollama output did not match the required report format or did not mark Real execution: yes; raw output saved to ${agent}-raw-output.md" "no"
   fi
 }
 
@@ -776,12 +736,6 @@ run_agent() {
       ;;
     codex)
       run_codex_agent "$run_dir" "$agent" "$prompt_file" "$output_file"
-      ;;
-    gemini)
-      run_gemini_agent "$run_dir" "$agent" "$prompt_file" "$output_file"
-      ;;
-    ollama)
-      run_ollama_agent "$run_dir" "$agent" "$prompt_file" "$output_file"
       ;;
     *)
       write_infrastructure_blocked_report "$output_file" "$agent" "$provider" "unknown" "unsupported MULTIAGENT_PROVIDER: $provider" "no"
@@ -817,7 +771,7 @@ aggregate_reports_basic() {
     fi
 
     verdict="$(extract_verdict "$report")"
-    if is_real_execution "$report"; then
+    if validate_real_agent_report "$report" "${MULTIAGENT_PROVIDER:-noop}"; then
       real="yes"
     else
       real="no"
@@ -894,7 +848,7 @@ aggregate_reports_basic() {
     echo
     echo "## Blocking Rules"
     echo
-    echo "- Missing required reports, missing diff/status/scope/validation, empty diff, invalid reports, or Real execution: no produce INFRASTRUCTURE BLOCKED."
+    echo "- Missing required reports, missing diff/status/scope/validation, empty diff, invalid reports, Provider other than codex, or Real execution: no produce INFRASTRUCTURE BLOCKED."
     echo "- Any reviewer verdict of CHANGES REQUESTED, BLOCKED, or INFRASTRUCTURE BLOCKED makes the patch non-mergeable."
     echo "- Final human approval is still required before merge."
   } > "$final_file"

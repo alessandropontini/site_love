@@ -6,11 +6,9 @@ This repository is `alessandropontini/site_love`, a private Next.js microsite na
 
 The paper-theatre experience mounted by `app/page.tsx` is the canonical product and the main narrative line. The earlier scrollytelling and pixel arcade implementations remain unmounted legacy references and must not be treated as the current home experience.
 
-Ruflo has been removed from the SITE LOVE workflow. Reviews do not use Ruflo, Claude Flow, MCP, WASM agents, or unvalidated automatic multi-agent orchestration. The local Ruflo/WASM runtime was retired because it did not produce autonomous review output without an external model provider/API key. Codex remains the active real executor/provider for implementation support, file inspection, lint/build execution, and independent reviewer reports.
+Codex is the only active AI development and review tool. An interactive Codex session may implement a scoped patch; approval evidence must come from one fresh read-only Codex execution launched by `scripts/local-review.sh`. The combined reviewer covers Code + QA and relevant specialist risks in one report. Final approval remains human.
 
-OpenClaw is being evaluated as an optional experimental orchestrator above the existing Codex-backed workflow. It may coordinate reviewer roles and launch documented local workflow commands, but it must not replace Codex as the real provider, bypass `scripts/local-review.sh`, invent reports, auto-merge, push, or become required for runtime, lint, build, start, or deployment. See `docs/openclaw-orchestration.md`.
-
-CrewAI is being evaluated as a pluggable orchestrator with a documented Codex executor boundary. CrewAI may generate structured Executor Requests and Codex may produce Executor Responses, but CrewAI must not directly modify the repository, bypass local review, or enter the merge gate without a separate reviewed project decision. See `.agent/contracts/crewai-codex-executor-contract.md`.
+Ruflo has been removed. CrewAI and OpenClaw are retained only as inactive experiments and compatibility documentation; they are not part of the release path or merge gate. Do not reintroduce automatic multi-agent orchestration without an explicit project decision.
 
 ## Tech stack
 
@@ -41,15 +39,14 @@ CrewAI is being evaluated as a pluggable orchestrator with a documented Codex ex
 - `docs/visual-direction.md` — approved visual/design direction.
 - `docs/architecture.md` — architecture overview for maintainers and agents.
 - `docs/ai-workflow.md` — Codex usage and manual review workflow guidance.
-- `docs/multiagent-workflow.md` — local multi-agent patch policy, provider hooks, and report rules.
-- `docs/codex-multiagent-setup.md` — operational Codex reviewer setup notes.
-- `docs/openclaw-orchestration.md` — optional OpenClaw orchestration spike and fallback rules.
-- `.openclaw/` — experimental OpenClaw role and workflow templates.
-- `.agent/prompts/` — separate implementer, reviewer, and aggregator prompts.
-- `.agent/contracts/` — CrewAI/Codex executor contract, request/response templates, and document-only examples.
-- `.agent/reports/` — per-run implementer/reviewer reports and captured context.
-- `scripts/local-multiagent.sh`, `scripts/local-patch.sh`, `scripts/local-review.sh` — safe local workflow entrypoints.
-- `scripts/openclaw-orchestrate.sh` — experimental safe OpenClaw wrapper and Codex fallback helper.
+- `docs/multiagent-workflow.md` — canonical lean Codex review policy and report contract.
+- `docs/codex-multiagent-setup.md` — operational setup for the single combined reviewer.
+- `docs/crewai-orchestration.md` and `docs/openclaw-orchestration.md` — inactive experiment status.
+- `.agent/prompts/review-code-qa.md` — combined independent reviewer prompt.
+- `.agent/contracts/` — archived CrewAI/Codex design contracts.
+- `.agent/reports/` — per-run context, validation, reviewer report, and deterministic verdict.
+- `scripts/local-review.sh` — canonical review entrypoint.
+- `scripts/local-multiagent.sh`, `scripts/crewai-orchestrate.sh`, and `scripts/openclaw-orchestrate.sh` — compatibility entrypoints only.
 - `scripts/lib/multiagent-provider.sh` — provider abstraction and deterministic report aggregation.
 
 ## Safe tasks for Codex
@@ -149,37 +146,31 @@ Documentation-only changes describing these files are allowed when they do not m
 - Ruflo has been removed from this project and must not be reintroduced as a required workflow tool without an explicit project decision.
 - Do not add Ruflo, Claude Flow, MCP servers, WASM agents, Anthropic/Claude managed agents, or provider API keys to this repository.
 - Do not add orchestration tools to `dependencies` or `devDependencies`.
-- OpenClaw may be used only as an optional experimental orchestrator unless a future reviewed project decision promotes it.
-- OpenClaw output is not valid review evidence unless it preserves real Codex-backed reviewer execution and the existing report contract.
-- CrewAI may be used only as a pluggable orchestrator candidate unless a future reviewed project decision promotes it.
-- CrewAI may generate Executor Requests for Codex, but it must not modify repository files directly or become merge-gate evidence by itself.
+- CrewAI and OpenClaw are inactive experiments and cannot produce merge-gate evidence by themselves.
 - Install Codex CLI separately when needed with `npm i -g @openai/codex`.
 - Do not require Codex or any AI tool for `npm run dev`, `npm run build`, `npm run start`, `npm run lint`, or deployment.
-- Codex may implement scoped patches, read files, run commands, and summarize results, but it does not replace final manual/human review.
-- The review process is: keep patches small and limited, run `npm run lint`, run `npm run build`, document any known environment-only build limitation, then require manual/human review before merge.
-- Do not present simulated multi-agent output as an independent review.
+- Codex may implement scoped patches, read files, run commands, and summarize results.
+- The implementation response cannot approve its own patch. Review must run in a fresh read-only `codex exec` process.
+- Keep patches small, run `git diff --check`, `npm run lint`, and `npm run build`, then require human review before merge.
+- Do not present simulated roles inside one response as independent review.
 
-## Multi-Agent Patch Policy
+## Lean Codex Review Policy
 
 - Every patch requires independent review before merge.
-- The minimum required independent reviewers are Code Review and QA / Regression.
-- Add specialized reviewers when relevant:
-  - Frontend Architect for React, Next.js routing, state, components, the paper-theatre experience, or architecture.
-  - UX / Accessibility for UI, copy, interactions, mobile, focus, keyboard, semantics, or ARIA.
-  - Performance for rendering, animation, scroll, bundle, images, or performance-sensitive paths.
-  - Git / Workflow Reviewer for scripts, CI, operational docs, package files, AI workflow, or this `AGENTS.md`.
-- The implementer cannot approve their own patch.
-- Reviewer reports must be real, separate, and stored under `.agent/reports/<run-id>/`.
+- The minimum review is one combined Code + QA report from a fresh read-only Codex execution.
+- The combined reviewer must apply architecture, UX/accessibility, performance, and Git/workflow checks when relevant to touched files.
+- The interactive implementer response cannot count as review evidence.
+- The reviewer report must be real and stored under `.agent/reports/<run-id>/`.
 - A reviewer report is real only when it contains `Real execution: yes` and a valid verdict.
 - Valid reviewer verdicts are `PASS`, `PASS WITH NOTES`, `CHANGES REQUESTED`, `BLOCKED`, and `INFRASTRUCTURE BLOCKED`.
-- Codex is the only active real review provider. A valid review must be run with `MULTIAGENT_PROVIDER=codex` and each required report must contain `Provider: codex` and `Real execution: yes`.
+- Codex is the only active real review provider. A valid review must use `MULTIAGENT_PROVIDER=codex` and contain `Provider: codex` plus `Real execution: yes`.
 - `noop` is only for smoke/regression testing workflow infrastructure and can never approve a patch or count as review.
-- The deterministic aggregator must treat missing, empty, invalid, or `Real execution: no` reports as `INFRASTRUCTURE BLOCKED`.
-- OpenClaw is an optional experimental orchestrator in the Phase 5 spike. It is not a provider and cannot approve patches independently of the Codex-backed workflow.
+- The deterministic aggregator must treat a missing, empty, invalid, or `Real execution: no` report as `INFRASTRUCTURE BLOCKED`.
 - `git diff --check`, `npm run lint`, and `npm run build` are required validation inputs for approval.
-- If the diff is missing, lint/build output is missing, or required real reviewer reports are missing, the correct verdict is `INFRASTRUCTURE BLOCKED`.
-- If any reviewer returns `CHANGES REQUESTED`, `BLOCKED`, or `INFRASTRUCTURE BLOCKED`, the patch is not mergeable.
+- Pass the original request and acceptance criteria with `--request-file` whenever scope cannot be proven from the diff alone.
+- Pass binary, screenshot, or environment verification with `--evidence-file` when it cannot be represented in the text diff.
+- If the diff, essential request context, lint/build output, or real reviewer report is missing, the correct verdict is `INFRASTRUCTURE BLOCKED`.
+- If the reviewer returns `CHANGES REQUESTED`, `BLOCKED`, or `INFRASTRUCTURE BLOCKED`, the patch is not mergeable.
 - `PASS` and `PASS WITH NOTES` never authorize automatic merge; final human approval is always required.
 - `PASS WITH NOTES` requires every note to be resolved or explicitly accepted before merge.
-- Ruflo must not be reintroduced as a required workflow tool without an explicit project decision.
-- Simulated multi-agent reviews are prohibited; do not ask one model to pretend to be several independent reviewers.
+- No review command may commit, merge, or push.

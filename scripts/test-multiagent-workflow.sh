@@ -10,6 +10,7 @@ PASS_EXPLICIT="PENDING"
 PASS_COMMITTED="PENDING"
 PASS_WORKING_TREE="PENDING"
 PASS_TIMEOUT_CLEANUP="PENDING"
+PASS_PROVIDER_GATE="PENDING"
 
 log() {
   printf '%s\n' "$*" >&2
@@ -92,6 +93,75 @@ smoke_timeout_cleanup() {
   PASS_TIMEOUT_CLEANUP="PASS"
 }
 
+write_provider_fixture() {
+  local output_file="$1"
+  local provider="$2"
+
+  {
+    echo "# Agent Report"
+    echo
+    echo "- Agent: review-code-qa"
+    echo "- Provider: $provider"
+    echo "- Model: smoke"
+    echo "- Real execution: yes"
+    echo "- Input files: smoke"
+    echo "- Verdict: PASS"
+    echo
+    echo "## Summary"
+    echo
+    echo "Smoke fixture."
+    echo
+    echo "## Findings"
+    echo
+    echo "None."
+    echo
+    echo "## Required changes"
+    echo
+    echo "None."
+    echo
+    echo "## Evidence"
+    echo
+    echo "Smoke fixture."
+  } > "$output_file"
+}
+
+smoke_provider_gate() {
+  local fixture_dir codex_report other_report spoof_report aggregate_dir final_file
+
+  log "==> codex-only provider gate smoke"
+  fixture_dir="$TMP_PARENT/provider-gate"
+  mkdir -p "$fixture_dir"
+  codex_report="$fixture_dir/codex.md"
+  other_report="$fixture_dir/other.md"
+  spoof_report="$fixture_dir/spoof.md"
+
+  write_provider_fixture "$codex_report" "codex"
+  write_provider_fixture "$other_report" "ollama"
+  write_provider_fixture "$spoof_report" "codex"
+
+  validate_real_agent_report "$codex_report" "codex" || fail "Codex report was rejected by the real-provider gate."
+  if validate_real_agent_report "$other_report" "ollama"; then
+    fail "A non-Codex report passed the real-provider gate."
+  fi
+  if validate_real_agent_report "$spoof_report" "ollama"; then
+    fail "A non-Codex runner passed by declaring Provider: codex."
+  fi
+
+  aggregate_dir="$fixture_dir/aggregate"
+  final_file="$aggregate_dir/99_final-verdict.md"
+  mkdir -p "$aggregate_dir"
+  printf 'context\n' > "$aggregate_dir/00_context.md"
+  printf 'status\n' > "$aggregate_dir/01_git_status.txt"
+  printf 'diff\n' > "$aggregate_dir/02_git_diff.patch"
+  printf 'stat\n' > "$aggregate_dir/03_git_diff_stat.txt"
+  printf 'Result: pass\n' > "$aggregate_dir/04_validation.md"
+  printf '%s\n' '- Scope result: pass' > "$aggregate_dir/06_review_scope.md"
+  printf 'file\n' > "$aggregate_dir/07_touched_files.txt"
+  MULTIAGENT_PROVIDER=ollama aggregate_reports_basic "$aggregate_dir" "$final_file" "$spoof_report"
+  assert_final_verdict "$aggregate_dir" "INFRASTRUCTURE BLOCKED"
+  PASS_PROVIDER_GATE="PASS"
+}
+
 latest_report_dir() {
   local run_dir
   run_dir="$(find "$WORKTREE/.agent/reports" -mindepth 1 -maxdepth 1 -type d -print 2>/dev/null | sort -r | head -n 1 || true)"
@@ -154,20 +224,26 @@ assert_common_noop_report() {
   assert_contains "$run_dir" "06_review_scope.md" "- Review mode: $expected_mode"
   assert_contains "$run_dir" "06_review_scope.md" "- Scope result: pass"
   assert_final_verdict "$run_dir" "INFRASTRUCTURE BLOCKED"
-  assert_contains "$run_dir" "10_review-code.md" "- Real execution: no"
-  assert_contains "$run_dir" "11_review-qa-regression.md" "- Real execution: no"
+  assert_contains "$run_dir" "10_review-code-qa.md" "- Real execution: no"
 }
 
 smoke_explicit_range() {
-  local run_dir
+  local run_dir request_file evidence_file
+
+  request_file="$TMP_PARENT/review-request.md"
+  evidence_file="$TMP_PARENT/review-evidence.md"
+  printf 'Acceptance: preserve the requested patch scope.\n' > "$request_file"
+  printf 'Evidence: deterministic fixture.\n' > "$evidence_file"
 
   run_dir="$(run_local_review \
     "explicit-range smoke" \
-    env REVIEW_BASE=HEAD~1 REVIEW_HEAD=HEAD MULTIAGENT_PROVIDER=noop MULTIAGENT_SKIP_WORKFLOW_SMOKE=1 ./scripts/local-review.sh)"
+    env REVIEW_BASE=HEAD~1 REVIEW_HEAD=HEAD MULTIAGENT_PROVIDER=noop MULTIAGENT_SKIP_WORKFLOW_SMOKE=1 "$REPO_ROOT/scripts/local-review.sh" --request-file "$request_file" --evidence-file "$evidence_file")"
 
   assert_common_noop_report "$run_dir" "explicit-range"
   assert_contains "$run_dir" "06_review_scope.md" "- Review base: HEAD~1"
   assert_contains "$run_dir" "06_review_scope.md" "- Review head: HEAD"
+  assert_contains "$run_dir" "00_context.md" "Acceptance: preserve the requested patch scope."
+  assert_contains "$run_dir" "08_review_evidence.md" "Evidence: deterministic fixture."
   PASS_EXPLICIT="PASS"
 }
 
@@ -183,7 +259,7 @@ smoke_committed_range() {
 
   run_dir="$(run_local_review \
     "committed-range smoke" \
-    env MULTIAGENT_PROVIDER=noop MULTIAGENT_SKIP_WORKFLOW_SMOKE=1 ./scripts/local-review.sh)"
+    env MULTIAGENT_PROVIDER=noop MULTIAGENT_SKIP_WORKFLOW_SMOKE=1 "$REPO_ROOT/scripts/local-review.sh")"
 
   assert_common_noop_report "$run_dir" "committed-range"
   assert_contains "$run_dir" "06_review_scope.md" "- Review base: HEAD~1"
@@ -200,7 +276,7 @@ smoke_working_tree() {
 
   run_dir="$(run_local_review \
     "working-tree smoke" \
-    env MULTIAGENT_PROVIDER=noop MULTIAGENT_SKIP_WORKFLOW_SMOKE=1 ./scripts/local-review.sh)"
+    env MULTIAGENT_PROVIDER=noop MULTIAGENT_SKIP_WORKFLOW_SMOKE=1 "$REPO_ROOT/scripts/local-review.sh")"
 
   assert_common_noop_report "$run_dir" "working-tree"
   assert_contains "$run_dir" "07_touched_files.txt" "$fixture"
@@ -217,6 +293,7 @@ main() {
 
   log "Using temporary worktree: $WORKTREE"
   smoke_timeout_cleanup
+  smoke_provider_gate
   smoke_explicit_range
   smoke_committed_range
   smoke_working_tree
@@ -227,6 +304,7 @@ main() {
   log "- committed-range: $PASS_COMMITTED"
   log "- working-tree: $PASS_WORKING_TREE"
   log "- timeout cleanup: $PASS_TIMEOUT_CLEANUP"
+  log "- codex-only provider gate: $PASS_PROVIDER_GATE"
   log "- final status: PASS"
 }
 

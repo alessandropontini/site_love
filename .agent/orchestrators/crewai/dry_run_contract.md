@@ -1,5 +1,7 @@
 # CrewAI Dry-Run Report Contract
 
+> Archived Fase 5 contract. It is retained for historical reproducibility and is not release evidence for the current lean Codex workflow.
+
 Every CrewAI evaluation report must contain at least the following fields and sections.
 
 The dry-run report contract is separate from the executor bridge contract in `.agent/contracts/crewai-codex-executor-contract.md`. Fase 5d allows CrewAI to describe an Executor Request and Codex to describe an Executor Response, but it does not activate automatic Codex execution, direct CrewAI repository writes, or merge-gate integration.

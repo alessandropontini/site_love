@@ -1,11 +1,5 @@
 #!/usr/bin/env python3
-"""Safe CrewAI scaffold for SITE LOVE.
-
-CrewAI is prepared here as a future orchestrator only. Codex remains the
-operational executor for repository inspection, patching, validation, and real
-review. Reviewers are read-only, real review still flows through
-scripts/local-review.sh, and final human approval is mandatory before merge.
-"""
+"""Non-destructive status checks for the archived SITE LOVE CrewAI experiment."""
 
 from __future__ import annotations
 
@@ -19,8 +13,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 REQUIRED_FILES = [
-    ".agent/prompts/review-code.md",
-    ".agent/prompts/review-qa-regression.md",
+    ".agent/prompts/review-code-qa.md",
     ".agent/reports/.gitkeep",
     "scripts/local-review.sh",
     "scripts/test-multiagent-workflow.sh",
@@ -28,24 +21,13 @@ REQUIRED_FILES = [
     "orchestration/tasks.yaml",
 ]
 
-LANES = {
-    "implementation": [
-        "patch_planner",
-        "patch_implementer",
-        "validation_runner",
-    ],
-    "review": [
-        "frontend_architect_reviewer",
-        "code_reviewer",
-        "ux_accessibility_reviewer",
-        "performance_reviewer",
-        "qa_regression_reviewer",
-        "git_workflow_reviewer",
-    ],
-    "aggregation": [
-        "review_aggregator",
-    ],
-}
+FLOW = [
+    "interactive Codex implementation",
+    "required shell validation",
+    "one fresh read-only Codex Code + QA review",
+    "deterministic verdict aggregation",
+    "human approval",
+]
 
 
 def run_git(args: list[str], *, preserve_status_spacing: bool = False) -> str:
@@ -105,12 +87,10 @@ def validate_required_files() -> int:
     return 1 if missing else 0
 
 
-def print_lanes() -> None:
-    print("CrewAI lanes:")
-    for lane, agents in LANES.items():
-        print(f"- {lane}:")
-        for agent in agents:
-            print(f"  - {agent}")
+def print_flow() -> None:
+    print("Current release flow (CrewAI inactive):")
+    for step in FLOW:
+        print(f"- {step}")
 
 
 def print_config_preview() -> None:
@@ -125,7 +105,7 @@ def print_crewai_status() -> None:
         print("CrewAI package: installed")
     else:
         print("CrewAI package: not installed")
-        print("This is acceptable for scaffold smoke checks; CrewAI is not executing site work yet.")
+        print("This is expected; CrewAI is not part of the release path.")
 
 
 def command_status(_args: argparse.Namespace) -> int:
@@ -134,8 +114,8 @@ def command_status(_args: argparse.Namespace) -> int:
     print_crewai_status()
     print_config_preview()
     file_status = validate_required_files()
-    print_lanes()
-    print("Safety: no commit, merge, push, or site work is performed by this scaffold.")
+    print_flow()
+    print("Safety: this archived scaffold does not implement, review, commit, merge, or push.")
     return file_status
 
 
@@ -144,33 +124,31 @@ def command_smoke(_args: argparse.Namespace) -> int:
     print_repo_state()
     print_crewai_status()
     file_status = validate_required_files()
-    print_lanes()
-    print("Smoke result: non-destructive scaffold checks completed.")
+    print_flow()
+    print("Smoke result: archived scaffold files are internally consistent.")
     return file_status
 
 
 def command_explain(_args: argparse.Namespace) -> int:
     refuse_prod()
     print(
-        "SITE LOVE CrewAI scaffold prepares future orchestration only. "
-        "CrewAI coordinates lanes and role intent; Codex performs real repository work."
+        "CrewAI is an archived SITE LOVE experiment. The release path uses Codex directly."
     )
     print()
-    print_lanes()
+    print_flow()
     print()
     print("Rules:")
-    print("- Implementation lane may plan, implement authorized patches, and run validation, but cannot approve.")
-    print("- Review lane is READ ONLY and cannot modify files.")
-    print("- Aggregation lane derives verdicts from reviewer reports and cannot invent evidence.")
-    print("- Real review remains scripts/local-review.sh with Codex provider reports.")
+    print("- The interactive implementation response cannot approve its own work.")
+    print("- Real review is one fresh read-only Codex execution through scripts/local-review.sh.")
+    print("- The deterministic shell aggregator cannot invent or repair evidence.")
     print("- Human approval is mandatory before merge.")
-    print("- This scaffold never commits, merges, pushes, or runs site-changing tasks.")
+    print("- CrewAI is not invoked by this flow and this scaffold never changes the site.")
     return 0
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Safe CrewAI scaffold for SITE LOVE orchestration."
+        description="Archived CrewAI scaffold status for SITE LOVE."
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("status", help="Show repository and scaffold status.")

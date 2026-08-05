@@ -160,7 +160,7 @@ The current experience layout and controls are isolated in `components/experienc
 - `lib/profile.ts` contains title-screen profile and intro copy.
 - `lib/photos.ts` contains photo metadata.
 - `public/photos/` contains photo documentation/placeholders.
-- `public/scene/paper-theatre/` contains the active transparent WebP cutouts for the Duomo, tram, couple, Galleria-inspired portal, spring Navigli scene with jasmine, Arco della Pace-inspired arch, and Milanese window facade. Older pixel assets remain only for unmounted legacy implementations.
+- `public/scene/paper-theatre/` contains the active transparent WebP cutouts for the Duomo, tram, couple, Galleria-inspired portal, spring Naviglio Grande scene with jasmine, Arco della Pace-inspired arch, and Milanese window facade. Older paper and pixel assets remain as rollback or unmounted legacy references.
 - `data/` is ignored except for `.gitkeep` and can hold heavyweight local concept art or exports.
 
 Do not modify visual assets in `public/` without explicit approval.
@@ -171,16 +171,16 @@ Do not modify visual assets in `public/` without explicit approval.
 - `docs/quest-guide.md` documents the active chapter configuration, challenge files, progress invariants, paper art, and regression checks.
 - `docs/visual-direction.md` records the current paper-theatre direction, Milan/Duomo composition guidance, typography, materials, motion, and responsive rules.
 - `docs/ai-workflow.md` documents Codex usage, validation commands, and the manual review process for this repository.
-- `docs/multiagent-workflow.md` documents the Phase 1 local multi-agent patch policy, report structure, verdicts, and future provider integration path.
+- `docs/multiagent-workflow.md` documents the lean Codex review policy, combined report contract, and verdict rules.
 
 ## AI assistance and review workflow
 
-AI workflow guidance for this repository lives at the root in `AGENTS.md`, with details in `docs/ai-workflow.md` and `docs/multiagent-workflow.md`. Ruflo has been removed from the project workflow because the local Ruflo/WASM runtime did not produce autonomous review output without an external model provider/API key.
+AI workflow guidance lives in `AGENTS.md`, `docs/ai-workflow.md`, and `docs/multiagent-workflow.md`. Codex is the only active AI development and review tool; CrewAI, OpenClaw, and Ruflo are outside the release path.
 
 - Do not add Ruflo, Claude Flow, MCP servers, WASM agents, Anthropic/Claude managed agents, or provider API keys to the repository.
 - Codex CLI may be installed separately when needed with `npm i -g @openai/codex`.
-- Codex may be used to implement scoped changes, inspect files, run lint/build, and prepare summaries.
-- Phase 1 prepares prompts, report folders, and safe placeholder scripts for future local/freemium multi-agent review.
-- Independent reviewer reports must be real and separate; simulated multi-agent output is not valid.
-- Final review is manual/human before merge even when future reviewer providers are configured.
+- Codex may implement scoped changes, inspect files, run validation, and prepare summaries.
+- One fresh read-only Codex execution performs the combined Code + QA review after implementation.
+- The implementation response is not review evidence; simulated role splitting is invalid.
+- Final approval remains manual/human even after a valid reviewer report.
 - AI tooling must not be required for runtime, build, lint, start, or deployment.

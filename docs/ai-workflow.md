@@ -1,213 +1,104 @@
-# AI Workflow: Codex and Multi-Agent Review Preparation
+# AI Workflow: Codex Development and Lean Review
 
-Ruflo has been removed from the SITE LOVE workflow. Reviews no longer use Ruflo, Claude Flow, MCP, WASM agents, or unvalidated automatic multi-agent orchestration.
+Codex is the only active AI development and review tool for SITE LOVE. CrewAI, OpenClaw, Ruflo, Claude Flow, MCP agent runtimes, and WASM agents are not part of the release path.
 
-The local Ruflo/WASM runtime was retired because it created agent records but did not produce autonomous review output without an external model provider/API key. Do not configure Anthropic/Claude managed agents, provider keys, or replacement orchestration tooling for this project unless the project owner explicitly approves a new workflow.
+## Runtime Boundary
 
-The current multi-agent workflow uses Codex CLI as the active real review provider through `codex exec`. It can only produce valid reviewer reports when Codex CLI is installed, configured, and returns separate reports with `Provider: codex` and `Real execution: yes`. Otherwise the workflow verdict must be `INFRASTRUCTURE BLOCKED`, not `PASS`.
-
-OpenClaw is documented as an optional Phase 5 orchestration spike in `docs/openclaw-orchestration.md`. In SITE LOVE, OpenClaw may coordinate reviewer roles and point to the existing local workflow, but Codex remains the real provider and `scripts/local-review.sh` remains the source of truth for validation capture, report validation, and deterministic aggregation.
-
-CrewAI has a documented executor boundary in `.agent/contracts/crewai-codex-executor-contract.md`. CrewAI may prepare structured Executor Requests for Codex and Codex may return Executor Responses, but this does not activate direct CrewAI repository writes or merge-gate integration.
-
-## What Codex is for
-
-Codex remains useful as an operational development assistant:
-
-- Implement small, scoped patches.
-- Read and summarize repository files.
-- Run validation commands such as lint and build.
-- Collect raw command output.
-- Prepare concise implementation summaries.
-
-Codex may be used as an executor for scoped patches, file inspection, command execution, and report preparation. Codex does not replace final review, and Codex output must not be presented as independent multi-agent review unless separate real reviewer runs produce separate reports.
-
-## Local multi-agent phases
-
-Phase 1 added the infrastructure for future local/freemium multi-agent review:
-
-- Agent prompts live in `.agent/prompts/`.
-- Run reports belong in `.agent/reports/<run-id>/`.
-- Safe scripts capture local diff/status context and blocked placeholders.
-
-Phase 2A adds provider hooks:
-
-- `MULTIAGENT_PROVIDER=noop` is the default and cannot approve a patch.
-- `MULTIAGENT_PROVIDER=codex` uses Codex CLI as the first real reviewer provider through `codex exec`.
-- `MULTIAGENT_PROVIDER=gemini` checks for Gemini CLI but remains blocked until an approved non-interactive command is wired.
-- `MULTIAGENT_PROVIDER=ollama` can call `ollama run "$MULTIAGENT_OLLAMA_MODEL"` and validate the returned report format.
-- `scripts/local-review.sh` writes separate minimum reviewer reports and a deterministic final verdict.
-
-Codex review execution:
-
-```bash
-npm run lint
-npm run build
-MULTIAGENT_PROVIDER=codex ./scripts/local-review.sh
-RUN_DIR="$(ls -td .agent/reports/* | head -1)"
-cat "$RUN_DIR/99_final-verdict.md"
-```
-
-The deterministic safe-provider smoke check is:
-
-```bash
-./scripts/test-multiagent-workflow.sh
-```
-
-`noop` is only for smoke/regression testing workflow infrastructure. It must never be used as review evidence and can never approve a patch.
-
-`local-review` can generate real reports only when Codex is configured and returns valid reports with `Provider: codex` and `Real execution: yes`. Valid reviewer verdicts are `PASS`, `PASS WITH NOTES`, `CHANGES REQUESTED`, `BLOCKED`, and `INFRASTRUCTURE BLOCKED`. Any missing, placeholder, empty, invalid, or non-real report remains `INFRASTRUCTURE BLOCKED`.
-
-When Codex output is invalid, the wrapper keeps diagnostics in `.agent/reports/<run-id>/`, including `<agent>-codex-stdout.md`, `<agent>-codex-stderr.md`, `<agent>-codex-transcript.txt`, `<agent>-codex-diagnostics.md`, and `<agent>-codex-exit-code.txt`.
-
-Gemini remains a nominal hook. Ollama remains experimental and optional, especially on 8 GB Intel Macs. OpenClaw is optional experimental orchestration only; it is not a provider and cannot approve patches outside the existing report contract. Automatic patch implementation is still disabled.
-
-See `docs/multiagent-workflow.md`, `docs/codex-multiagent-setup.md`, `.agent/contracts/crewai-codex-executor-contract.md`, and `docs/openclaw-orchestration.md` for the full policy, local setup, executor contract, and orchestration spike rules.
-
-## Runtime boundary
-
-The shipped website must continue to work with normal Next.js commands only:
+The website must work with ordinary Next.js commands only:
 
 ```bash
 npm run dev
+npm run lint
 npm run build
 npm run start
-npm run lint
 ```
 
-Do not add AI orchestration tools to `dependencies` or `devDependencies`. Do not require AI tooling, MCP servers, local agent runtimes, provider API keys, or external review services for deployment.
+Do not add AI tools, provider SDKs, or orchestration packages to runtime or development dependencies. Local Codex CLI authentication and reports stay outside the deployed app.
 
-OpenClaw, if installed locally by a developer, is outside the app runtime. It must not become required for `npm run dev`, `npm run build`, `npm run start`, `npm run lint`, or deployment until an explicit reviewed project decision changes the workflow.
+## Codex Responsibilities
 
-## Recommended workflow
+The interactive Codex session may:
+
+- Inspect repository files and documentation.
+- Plan and implement a scoped patch.
+- Generate or process approved visual assets.
+- Run validation and local browser checks.
+- Update project documentation.
+- Prepare intentional commits when the user asks.
+
+The interactive implementation response cannot approve its own patch.
+
+## Independent Review Boundary
+
+After implementation, `scripts/local-review.sh` launches one new read-only `codex exec` process. That combined reviewer covers code quality, QA/regression, and relevant specialist risks in one report. It receives captured status, diff, touched files, validation output, and the request file.
+
+This is the minimum token-efficient separation:
+
+- Same product/provider: Codex.
+- Different execution and prompt: required.
+- Reviewer cannot edit files: required.
+- Deterministic shell aggregation: required.
+- Human final approval: required.
+
+See `docs/multiagent-workflow.md` for policy and `docs/codex-multiagent-setup.md` for commands.
+
+## Standard Work Sequence
 
 ### 1. Inspect
 
-Before editing, inspect the relevant source and docs:
-
-```bash
-rg --files -g '!node_modules' -g '!.next'
-cat package.json
-sed -n '1,220p' README.md
-sed -n '1,220p' docs/quest-guide.md
-sed -n '1,260p' docs/visual-direction.md
-```
-
-For feature work, also inspect the relevant component, schema, or CSS file.
-
-For work on the mounted paper-theatre experience, inspect at minimum:
-
-```bash
-sed -n '1,220p' AGENTS.md
-sed -n '1,220p' docs/architecture.md
-sed -n '1,260p' docs/visual-direction.md
-sed -n '1,280p' components/experience/ExperienceShell.tsx
-sed -n '1,220p' lib/experienceConfig.ts
-sed -n '1,360p' lib/useExperienceProgress.ts
-```
+Read `AGENTS.md`, `docs/architecture.md`, `docs/visual-direction.md`, and the relevant source files before editing the mounted paper-theatre experience.
 
 ### 2. Plan
 
-Write a short implementation plan before changing files. Call out:
-
-- Files to edit
-- Files intentionally avoided
-- Validation commands to run
-- Any risky areas, especially mini-games, visual assets, dependencies, or deployment configuration
-- For paper-theatre changes: how chapter gating, idempotent rewards, persistence, reduced motion, and finale guards remain intact
+State candidate files, intended changes, risks, validation, and paths intentionally left untouched.
 
 ### 3. Implement
 
-Keep changes small and scoped. Prefer documentation updates or isolated component changes. Do not modify mini-game logic, visual assets, dependency sections, deployment config, or secrets unless explicitly approved.
+Keep changes scoped. Do not change challenge mechanics, progression, dependencies, deployment files, secrets, or approved visual assets without explicit authorization.
 
 ### 4. Validate
 
-Run the normal project validations:
-
 ```bash
+git diff --check
 npm run lint
 npm run build
 ```
 
-If `node_modules/` is missing, install first:
-
-```bash
-npm install
-```
-
-If `npm run build` fails only because the environment cannot fetch Google Fonts through `next/font/google`, classify it as an environment/network limitation unless the task changed font loading or `app/layout.tsx`.
-
-For perceptible UI changes, run the app locally and capture/review a screenshot when possible:
-
-```bash
-npm run dev
-```
+For visible changes, run the local app and inspect desktop and mobile layouts. For generated imagery, verify composition, alpha, dimensions, file size, and mounted rendering.
 
 ### 5. Review
 
-Before merge, require independent review plus manual/human approval. Every patch requires real separate Code Review and QA / Regression reports. Add specialized reviewers when the patch touches frontend architecture, UX/accessibility, performance, scripts, CI, package files, AI workflow, or `AGENTS.md`.
-
-The review should verify:
-
-- Patch scope is small and matches the request.
-- `npm run lint` passes.
-- `npm run build` passes or has a documented environment-only failure.
-- Mini-game logic was not changed unless explicitly requested.
-- Visual assets in `public/` were not changed unless explicitly approved.
-- Deployment configuration and environment files were not touched.
-- Accessibility and mobile readability were preserved or improved.
-- Documentation reflects any workflow or architecture changes.
-
-Automatic approval is prohibited. `PASS` and `PASS WITH NOTES` still require final human approval before merge. `PASS WITH NOTES` also requires the notes to be resolved or explicitly accepted before merge. `CHANGES REQUESTED`, `BLOCKED`, and `INFRASTRUCTURE BLOCKED` mean no merge.
-
-When separate reviewer reports are missing, simulated, incomplete, invalid, or marked `Real execution: no`, the correct verdict is `INFRASTRUCTURE BLOCKED`.
-
-For paper-theatre changes, also verify:
-
-- The invitation remains readable and does not auto-start.
-- Chapter order and finale requirements derive from `experienceConfig`.
-- Only the first incomplete chapter is available; later chapters remain locked.
-- Replaying or restoring state cannot duplicate rewards or bypass progression.
-- Inventory and finale derive from completed chapter IDs.
-- All challenges remain completable with keyboard/touch controls and without drag-only input.
-- Focus moves to the new view, returns after the inventory closes, and visible focus is preserved.
-- `prefers-reduced-motion` overrides the in-app motion setting and timed visual sequences retain a readable fallback.
-- The active route still mounts `ExperienceShell`; legacy story and arcade trees remain unmounted.
-
-## Safe first prompts
-
-Good starter prompts for Codex in this repository:
-
-- “Inspect the project structure and summarize the Next.js app, quest components, and docs without editing files.”
-- “Review `docs/visual-direction.md` and list constraints to preserve before making layout changes.”
-- “Find accessibility improvements for buttons and headings, then propose a plan before editing.”
-- “Run lint/build and explain any failures without changing production code.”
-- “Update documentation to reflect the current architecture; do not modify app code.”
-
-Avoid broad prompts such as “improve the game,” “redesign the site,” or “upgrade everything” unless the scope and approvals are explicit.
-
-## Validation command reference
+Write the real request and acceptance criteria to a local file, then run:
 
 ```bash
-npm install
-npm run lint
-npm run build
+MULTIAGENT_PROVIDER=codex \
+  ./scripts/local-review.sh --request-file /tmp/site-love-review-request.md
 ```
 
-Record any environment limitations, such as unavailable CLI tools or package registry access restrictions, in the final report for the task.
+The request file prevents reviewers from receiving only a diff without the original intent. For binary assets, endpoint checks, screenshots, or other non-diff verification, first create a supplemental file and then add `--evidence-file /path/to/evidence.md`. Missing essential context must remain `INFRASTRUCTURE BLOCKED`.
 
-## Troubleshooting
+### 6. Human Decision
 
-### `codex: command not found`
+`PASS` and `PASS WITH NOTES` are review evidence, not merge commands. Resolve or accept notes, inspect the site, and make the final merge decision manually.
 
-Codex CLI is separate from this repository. Install it on the developer machine when needed:
+## Paper-Theatre Regression Checks
 
-```bash
-npm i -g @openai/codex
-```
+- Invitation stays readable and never auto-starts.
+- Exactly the first incomplete chapter is available.
+- Rewards remain idempotent and derive from completed IDs.
+- The finale requires every configured chapter ID.
+- Keyboard, touch, focus restoration, and visible focus remain usable.
+- `prefers-reduced-motion` overrides the saved motion setting.
+- Italian and English stay complete with language-independent progress IDs.
+- `app/page.tsx` continues to mount `ExperienceShell`.
+- Legacy story and arcade implementations remain unmounted.
 
-Do not add `@openai/codex` to this project's `dependencies` or `devDependencies` just to satisfy local CLI usage.
+## Review Outcomes
 
-### `npm run build` fails on Google Fonts or `next/font`
+- `PASS`: no blocking issue found; human approval still required.
+- `PASS WITH NOTES`: non-blocking risks require explicit resolution or acceptance.
+- `CHANGES REQUESTED`: fix the patch and rerun validation/review.
+- `BLOCKED`: a substantive condition prevents approval.
+- `INFRASTRUCTURE BLOCKED`: required review evidence was not produced.
 
-This project uses Next font integration in `app/layout.tsx`. In restricted environments, `next build` may fail when it cannot fetch Manrope from Google Fonts. Treat that as an environment/network limitation unless the task explicitly asks to change font loading. Do not make invasive production-code changes only to bypass a local network restriction.
+`noop` is only for `scripts/test-multiagent-workflow.sh` and can never approve a patch.

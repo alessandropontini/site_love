@@ -1,4 +1,6 @@
-# CrewAI Orchestrator Evaluation Spike
+# CrewAI Orchestrator Evaluation Spike (Archived)
+
+> This directory preserves the earlier Fase 5 CrewAI evaluation fixtures. It is not the current SITE LOVE release path, must not be used for patch approval, and is not run by the lean Codex workflow. See `docs/multiagent-workflow.md`.
 
 Fase 5c evaluates CrewAI through a real dry-run execution. The goal is to test whether CrewAI can orchestrate distinct agents and tasks, capture separate outputs, and produce a canonical report without becoming part of the merge gate.
 

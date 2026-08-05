@@ -1,3 +1,4 @@
+# Archived Fase 5 CrewAI fixture. Not part of the current release path.
 scenario: "Valutare una futura modifica accessibile al pulsante finale Replay nel componente finale, senza modificare il repository."
 phase: "Fase 5c — Real CrewAI Dry-Run Execution"
 merge_gate_integration: false

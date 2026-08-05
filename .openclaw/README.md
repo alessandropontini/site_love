@@ -1,12 +1,12 @@
-# SITE LOVE OpenClaw Templates
+# Archived OpenClaw Experiment
 
-This directory contains experimental, documentation-only OpenClaw orchestration notes for SITE LOVE.
+OpenClaw is not part of the SITE LOVE release path. Its former role and workflow templates were removed when the project adopted direct Codex implementation plus one separate combined read-only Codex review.
 
-OpenClaw is treated as an optional orchestrator above the existing Codex-backed workflow. It must not replace `scripts/local-review.sh`, generate simulated reviewer reports, require secrets, perform auto-merge, push branches, or become required for `npm run dev`, `npm run lint`, `npm run build`, `npm run start`, or deployment.
+Use the canonical command:
 
-Use these files as local spike input:
+```bash
+MULTIAGENT_PROVIDER=codex \
+  ./scripts/local-review.sh --request-file /tmp/site-love-review-request.md
+```
 
-- `agents.md`: reviewer role to prompt-file mapping.
-- `workflow.md`: safe orchestration expectations and fallback commands.
-
-The source-of-truth operational guide is `docs/openclaw-orchestration.md`.
+See `docs/openclaw-orchestration.md` for the current status.

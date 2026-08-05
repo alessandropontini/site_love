@@ -146,8 +146,7 @@ check_required_files() {
   require_file "orchestration/tasks.yaml"
   require_executable "scripts/local-review.sh"
   require_executable "scripts/test-multiagent-workflow.sh"
-  require_file ".agent/prompts/review-code.md"
-  require_file ".agent/prompts/review-qa-regression.md"
+  require_file ".agent/prompts/review-code-qa.md"
   require_file ".agent/reports/.gitkeep"
 }
 
