@@ -257,11 +257,13 @@ assert_common_noop_report() {
   local expected_mode="$2"
 
   assert_file_exists "$run_dir" "00_context.md"
+  assert_file_nonempty "$run_dir" "01_git_status.txt"
   assert_file_nonempty "$run_dir" "02_git_diff.patch"
   assert_file_nonempty "$run_dir" "03_git_diff_stat.txt"
   assert_file_exists "$run_dir" "06_review_scope.md"
   assert_file_nonempty "$run_dir" "07_touched_files.txt"
   assert_contains "$run_dir" "00_context.md" "- Review mode: $expected_mode"
+  assert_contains "$run_dir" "01_git_status.txt" "## "
   assert_contains "$run_dir" "06_review_scope.md" "- Review mode: $expected_mode"
   assert_contains "$run_dir" "06_review_scope.md" "- Scope result: pass"
   assert_final_verdict "$run_dir" "INFRASTRUCTURE BLOCKED"

@@ -115,7 +115,7 @@ write_context_files() {
     fi
   } > "$run_dir/00_context.md"
 
-  status_without_generated_reports > "$run_dir/01_git_status.txt"
+  git status --branch --short --untracked-files=all | grep -v '^?? \.agent/reports/' > "$run_dir/01_git_status.txt" || true
   : > "$run_dir/02_git_diff.patch"
   : > "$run_dir/03_git_diff_stat.txt"
   : > "$run_dir/07_touched_files.txt"
