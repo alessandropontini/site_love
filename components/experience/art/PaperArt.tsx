@@ -38,7 +38,7 @@ const imageSizes: Record<
 
 const chapterLandmarks: Record<ChapterId, string> = {
   spark: "/scene/paper-theatre/galleria-cardboard.webp",
-  coordinates: "/scene/paper-theatre/navigli-spring-cardboard.webp",
+  coordinates: "/scene/paper-theatre/naviglio-grande-spring-cardboard.webp",
   promise: "/scene/paper-theatre/arco-pace-cardboard.webp",
   future: "/scene/paper-theatre/milan-windows-cardboard.webp"
 };

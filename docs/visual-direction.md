@@ -66,7 +66,7 @@ Core tokens:
 ### Acts
 
 - Dawn, day, sunset, and night change lighting and painted-cardboard colors; every act also rearranges its foreground props.
-- Each act has one distinct Milanese cardboard flat: a Galleria-inspired portal, spring Navigli facades and bridge, an Arco della Pace-inspired arch, or a residential facade with lit windows.
+- Each act has one distinct Milanese cardboard flat: a Galleria-inspired portal, a spring Naviglio Grande perspective, an Arco della Pace-inspired arch, or a residential facade with lit windows.
 - The chapter landmark replaces the Duomo instead of stacking another large image. Invitation, map, and finale retain the Duomo as the shared visual anchor.
 - Act number and location appear as a stamp and ticket inside the decorative scene.
 - The game card is a clean sheet of paper separate from the stage so instructions remain readable.
@@ -125,4 +125,4 @@ Original photographs are not yet present. When supplied:
 
 ## Active asset provenance
 
-The active Duomo, tram, and couple marionettes are `duomo-cardboard.webp`, `tram-cardboard.webp`, and `couple-cardboard.webp`. Chapter-specific flats are `galleria-cardboard.webp`, `navigli-spring-cardboard.webp`, `arco-pace-cardboard.webp`, and `milan-windows-cardboard.webp`. The spring Navigli flat uses an original arrangement of canal facades, bridge, washhouse-like nook, balconies, and flowering jasmine vines. They were generated as original project assets with the built-in image-generation workflow, removed from a flat chroma-key background locally, converted to transparent WebP, and stored under `public/scene/paper-theatre/`. The landmark designs are original paper-theatre interpretations rather than architectural replicas and contain no brands, signs, copied photographs, or remote assets. The earlier `navigli-cardboard.webp` and `*-paper.webp` files remain as rollback assets but are not mounted.
+The active Duomo, tram, and couple marionettes are `duomo-cardboard.webp`, `tram-cardboard.webp`, and `couple-cardboard.webp`. Chapter-specific flats are `galleria-cardboard.webp`, `naviglio-grande-spring-cardboard.webp`, `arco-pace-cardboard.webp`, and `milan-windows-cardboard.webp`. The Naviglio Grande flat follows the real district's broad linear canal, continuous Alzaia and Ripa embankments, aligned low-rise facades, distant iron pedestrian bridge, and a secondary washhouse-like nook. Flowering star jasmine is confined to one facade so spring remains a believable detail instead of a decorative frame. The asset is an original paper-theatre composition generated from researched visual characteristics, not a traced photograph; its chroma-key background was removed locally and the result was converted to transparent WebP. The landmark designs contain no brands, signs, copied photographs, or remote runtime assets. The earlier `navigli-spring-cardboard.webp`, `navigli-cardboard.webp`, and `*-paper.webp` files remain as rollback assets but are not mounted.
