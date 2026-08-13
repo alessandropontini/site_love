@@ -64,7 +64,7 @@ body {
 }
 
 body {
-  font-family: var(--font-ui), "Courier New", monospace;
+  font-family: var(--font-ui), "Helvetica Neue", Arial, sans-serif;
   background:
     linear-gradient(180deg, rgba(180, 219, 251, 0.92), rgba(244, 246, 220, 0.96) 45%),
     linear-gradient(180deg, transparent 0 60%, rgba(184, 209, 135, 0.32) 60% 100%);

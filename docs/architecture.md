@@ -6,7 +6,7 @@ This paper-theatre route is the canonical product architecture and the main narr
 
 ## Next.js app structure
 
-- `app/layout.tsx` defines app metadata, loads the Manrope UI font, and imports `app/globals.css`. Editorial headings use a local system serif stack, so the public route has no decorative font download.
+- `app/layout.tsx` defines app metadata, loads the Sarah & Matt-inspired `Instrument Sans` UI font and `Newsreader` editorial font through `next/font`, and imports `app/globals.css`.
 - `app/page.tsx` is a minimal Server Component that mounts `ExperienceShell`.
 - `next.config.mjs` contains Next.js configuration for remote image host patterns.
 - `tsconfig.json` enables strict TypeScript settings and the `@/*` path alias.

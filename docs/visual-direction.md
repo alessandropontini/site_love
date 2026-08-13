@@ -14,12 +14,12 @@ The earlier pixel/handheld direction has been retired from the public route. Pix
 
 ## Implemented system
 
-- The stage uses one opaque illustrated panorama plus, only where narratively useful, a small number of transparent cardboard performers.
+- The stage uses one opaque illustrated panorama plus, only where narratively useful, a small number of cardboard performers. Every visible paper object is fully opaque; transparency is reserved for the empty pixels around PNG cut-outs.
 - The public route mounts opaque JPEG panoramas and transparent PNG overlays from `public/scene/paper-theatre/`. The PNG fallback avoids black alpha rectangles in Android browsers and embedded preview viewers.
 - `components/experience/art/PaperArt.tsx` composes the shared scene and renders chapter-specific paper reward symbols.
 - `PaperArt.module.css` owns the proscenium, curtains, lighting, skyline, paper texture, depth, and restrained scene motion.
 - `ExperienceShell.module.css` owns readable UI, map states, game controls, reward, inventory, finale, and responsive behavior.
-- Manrope remains the functional UI font. Titles use the free system serif stack `Iowan Old Style`, `Palatino`, and `Georgia`.
+- The selected Sarah & Matt-inspired type system uses `Newsreader` for editorial display and `Instrument Sans` for UI and body copy. Both are open-source equivalents of the reference site's commercial Romie/Instrument pairing and are loaded locally through `next/font`.
 - No text, button, progress state, clue, or instruction is baked into an image.
 
 ## Palette and materials
@@ -44,6 +44,7 @@ Core tokens:
 - Cardboard is matte ivory or painted kraft with visible corrugation, scored folds, layered edges, and hard contact shadows.
 - Curtain red frames the scene and marks primary actions; it must not dominate long-form content.
 - Gold is reserved for lights, borders, progress, and collected objects. Never use it for small text on a light surface.
+- The invitation adds a Milanese architectural sub-palette inspired by Portaluppi interiors: petrol and malachite greens, merlot red, pale stone, smoked glass blue, and tram/brass yellow. Cream is a paper highlight, not the dominant field color.
 - Shadows describe the distance between cardboard planes, not glossy cards or floating SaaS panels.
 - Avoid tape, random tears, doodles, pastel craft colors, plastic 3D, and heart confetti.
 
@@ -52,7 +53,11 @@ Core tokens:
 ### Invitation
 
 - Copy and CTA come first on small screens.
-- The curtain opens onto a Galleria-inspired paper panorama. The couple and Milan tram provide emotional scale and a single restrained movement.
+- The curtain opens onto the daytime Piazza Duomo facade of the real Galleria Vittorio Emanuele II, reconstructed from 57 distinct architectural references rather than an invented station-like entrance.
+- The viewpoint is frontal and axial: the monumental triumphal arch, paired arched windows, Corinthian columns, relief bands, side wings and long iron-and-glass arcade provide recognition. Four to five coherent paper planes, visible corrugated edges, shallow embossed relief and one light direction carry the handmade treatment without distorting the architecture.
+- The couple remains the only separate foreground performer on the empty paper-paved forecourt. The tram has been removed from the invitation because it had no believable narrative or spatial relationship to Piazza Duomo; it is not replaced with a generic prop.
+- Two slow, fully opaque paper clouds, one static saffron paper sun and three recognisable grey paper pigeons inhabit only the open sky above the facade. The sky mask prevents them from crossing the building or entering the arcade; no airplane is used.
+- A single cool color grade, shared light direction, contact shadows, and one common stage edge bind panorama and performers into the same set; visible individual cardboard plinths are avoided.
 - The Duomo is deliberately absent here so its appearance remains exclusive to the finale.
 - The CTA remains visible in the first phone viewport at 320–430 px where practical.
 
@@ -103,6 +108,8 @@ Core tokens:
 - Animate only opacity, transform, simple SVG progress, and window-light state.
 - One dominant animation per screen; parallax remains below roughly 12 px.
 - Curtains animate only on the invitation, not on every action.
+- On the invitation, the panorama resolves with a short optical settle and the couple is placed gently. Rigid paper clouds and pigeons move as whole cut-outs; the sun remains still.
+- Only the far-background sky layer may loop: clouds drift on 28–38 second cycles; two pigeons cross on staggered 14–18 second cycles and one smaller silhouette hovers gently. The movement remains visible without competing with the CTA.
 - No flicker, autoplay audio, vibration, or rapidly repeating light.
 - `prefers-reduced-motion` and the saved user toggle disable scene translation, pulses, and timed visual playback.
 
@@ -117,6 +124,14 @@ Core tokens:
 - Prefer opaque JPEG for full-stage artwork and PNG only for alpha overlays. Never rely on transparent WebP for mounted performers on Android.
 - Avoid animated blur, full-screen backdrop filters, WebGL, video, and heavy shadow stacks on Android.
 
+## Invitation type scale
+
+- The responsive title follows `44–76px`, `1.01` line height, `-0.018em` tracking, and a maximum measure of `9.5ch`.
+- The romantic marker follows `20–24px`; the uppercase eyebrow is `14px` with `0.14em` tracking.
+- The lede follows `17–20px`, `1.5` line height, and a maximum measure of `36ch`.
+- UI controls remain at least `16px / 48px`; the CTA is `18px / 60px`, with a maximum width of `22rem`; supporting metadata is `15px`.
+- These constraints synthesize the [USWDS typography guidance](https://designsystem.digital.gov/components/typography/), [GOV.UK type scale](https://design-system.service.gov.uk/styles/type-scale/), [Carbon editorial type sets](https://carbondesignsystem.com/elements/typography/type-sets/), [Material 3 type scale](https://developer.android.com/develop/ui/compose/designsystems/material3), and [W3C reflow guidance](https://www.w3.org/WAI/WCAG21/Understanding/reflow).
+
 ## Photography plan
 
 Original photographs are not yet present. When supplied:
@@ -129,7 +144,13 @@ Original photographs are not yet present. When supplied:
 
 ## Active asset provenance
 
-The mounted full-stage files are the opaque `scene-*.jpg` panoramas. They assign one visual role to each setting: Galleria at the entrance and chapter one, Naviglio Grande with spring jasmine in chapter two, Arco della Pace in chapter three, Adelchi in chapter four, and the Duomo only in the finale. Chapter one changes focus from the broad entrance view to a closer ticket-and-signal composition. `tram-cardboard.png` and `couple-cardboard.png` are the only mounted transparent performers and use PNG compatibility fallbacks. The original WebP flats and cutouts remain as editable source or rollback assets, not as Android-facing alpha layers.
+The mounted full-stage files are the opaque `scene-*.jpg` backgrounds. The invitation mounts `scene-entrance-duomo-cromolitografia-v2.jpg`, the selected proposal 02 recomposed specifically for the tall split-screen stage. It preserves the early-1900s chromolithographic theatre language, gives the upper animations real sky space, grounds the couple on a generous piazza floor and renders the traditional Madonnina in antique gold leaf paper. The approved Galleria scene remains intact as `scene-entrance-galleria-v6.jpg` and is reused for the first story stop. Earlier entrance scenes remain versioned rollback assets.
+
+Ten alternative Duomo directions are preserved under `public/duomo-proposals/` and presented at `/duomo-proposals` for art-direction voting. They share a lower cathedral scale and generous upper sky so the sun, moon, clouds and location plaque can remain separate interactive HTML layers.
+
+The scenes assign one visual role to each setting: Galleria at the entrance and chapter one, Naviglio Grande with spring jasmine in chapter two, Arco della Pace in chapter three, Adelchi in chapter four, and the Duomo only in the finale. Chapter one changes focus from the broad entrance view to a closer ticket-and-signal composition. `tram-cardboard.png` and `couple-cardboard.png` are the only mounted transparent performers and use PNG compatibility fallbacks. The original WebP flats and cutouts remain as editable source or rollback assets, not as Android-facing alpha layers.
+
+The invitation art direction uses [The Paper Architect](https://www.studiomcguire.com/thepaperarchitect) as the primary paper-architecture and theatre benchmark, [Micropolis](https://www.studiomcguire.com/micropolis) for believable scale, [Paperholm](https://www.paperholm.com/) for mechanical micro-motion, and [Owen Gildersleeve](https://owengildersleeve.com/art) for coherent layers, edges, light, and shadow.
 
 Five original props add a transit ticket, analog tuning radio, jasmine postcard, bicycle and letter, and Adelchi lantern with glasses without introducing copied text or branding. The radio appears only inside the first challenge, so its interaction does not repeat the Galleria or ticket already printed in the chapter panorama. The index shows each opaque panorama as a restrained chapter preview. The Naviglio Grande scene follows the district's broad linear canal, continuous Alzaia and Ripa embankments, aligned low-rise facades, distant iron pedestrian bridge, and a secondary washhouse-like nook. Flowering star jasmine is confined to one facade so spring remains a believable detail instead of a decorative frame.
 

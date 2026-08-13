@@ -268,11 +268,17 @@
 }
 
 .invitation {
+  --invitation-petrol: #0d292f;
+  --invitation-malachite: #173c35;
+  --invitation-merlot: #741f38;
+  --invitation-merlot-deep: #3b1022;
+  --invitation-stone: #e4e0d7;
+  --invitation-brass: #c79a36;
   display: grid;
   min-height: 100svh;
   grid-template-columns: minmax(390px, .82fr) minmax(480px, 1.18fr);
-  background: var(--stage-night);
-  color: var(--paper-light);
+  background: var(--invitation-petrol);
+  color: var(--invitation-stone);
 }
 
 .invitationCopy {
@@ -282,26 +288,27 @@
   min-width: 0;
   flex-direction: column;
   justify-content: center;
-  padding: clamp(2.5rem, 6vw, 6.5rem);
-  border-right: 1px solid rgba(240,207,131,.4);
+  padding: clamp(2.5rem, 5.2vw, 5.5rem);
+  border-right: 3px solid var(--invitation-brass);
   background:
-    radial-gradient(circle at 10% 20%, rgba(196,145,59,.12), transparent 30%),
-    repeating-linear-gradient(86deg, rgba(255,255,255,.02) 0 2px, transparent 2px 8px),
-    linear-gradient(145deg, #1b303a, #102027 70%);
-  box-shadow: 18px 0 40px rgba(10,13,13,.22);
+    radial-gradient(circle at 86% 16%, rgba(199,154,54,.14), transparent 29%),
+    radial-gradient(circle at 8% 84%, rgba(116,31,56,.15), transparent 32%),
+    repeating-linear-gradient(90deg, rgba(228,224,215,.025) 0 1px, transparent 1px 9px),
+    linear-gradient(145deg, var(--invitation-malachite), var(--invitation-petrol) 58%, #081c21);
+  box-shadow: 20px 0 48px rgba(5,14,16,.34);
 }
 
 .invitationCopy::after {
   position: absolute;
-  right: -13px;
-  top: 9%;
-  bottom: 9%;
-  width: 24px;
-  border: 1px solid rgba(196,145,59,.48);
-  background: var(--curtain);
-  box-shadow: 5px 0 14px rgba(0,0,0,.2);
+  right: -11px;
+  top: 0;
+  bottom: 0;
+  width: 10px;
+  border-right: 1px solid rgba(228,224,215,.18);
+  border-left: 1px solid rgba(228,224,215,.18);
+  background: linear-gradient(90deg, var(--invitation-merlot-deep), var(--invitation-merlot) 52%, var(--invitation-brass));
+  box-shadow: 6px 0 20px rgba(2,10,12,.34);
   content: "";
-  clip-path: polygon(0 0, 100% 3%, 62% 8%, 100% 14%, 62% 20%, 100% 27%, 62% 34%, 100% 41%, 62% 48%, 100% 55%, 62% 62%, 100% 69%, 62% 76%, 100% 83%, 62% 90%, 100% 97%, 0 100%);
 }
 
 .invitationTopline {
@@ -310,7 +317,7 @@
   gap: 1rem;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: clamp(2rem, 7vh, 4.75rem);
+  margin-bottom: clamp(1.75rem, 5.5vh, 3.5rem);
 }
 
 .invitationControls {
@@ -322,15 +329,21 @@
 }
 
 .invitation .kicker {
-  color: var(--gold-light);
+  color: #e5bc62;
+  font-size: .875rem;
+  line-height: 1.4;
+  letter-spacing: .14em;
 }
 
 .chapterMarker {
   margin: 0 0 .65rem;
-  color: #d98071;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(1rem, 1.8vw, 1.35rem);
-  font-weight: 700;
+  color: #dc8b79;
+  font-family: var(--font-display), "Iowan Old Style", Georgia, serif;
+  font-size: clamp(1.25rem, 1.1rem + .45vw, 1.5rem);
+  line-height: 1.25;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -.015em;
 }
 
 .invitation h1,
@@ -340,54 +353,89 @@
 .finaleAssembly h1,
 .openLetter h1 {
   margin: 0;
-  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-  font-weight: 600;
-  letter-spacing: -.045em;
+  font-family: var(--font-display), "Iowan Old Style", Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -.035em;
 }
 
 .invitation h1 {
-  max-width: 8.7ch;
-  font-size: clamp(3.25rem, 6.7vw, 7.4rem);
-  line-height: .88;
+  max-width: 9.5ch;
+  font-size: clamp(2.75rem, 2.05rem + 2.2vw, 4.75rem);
+  line-height: .98;
+  letter-spacing: -.025em;
+  font-optical-sizing: auto;
+  text-wrap: balance;
 }
 
 .lede {
-  max-width: 31rem;
-  margin: clamp(1.4rem, 4vh, 2.5rem) 0 0;
-  color: rgba(255,249,238,.78);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(1.05rem, 1.6vw, 1.35rem);
+  max-width: 36ch;
+  margin: clamp(1.2rem, 3vh, 2rem) 0 0;
+  color: rgba(228,224,215,.82);
+  font-family: var(--font-ui), Arial, sans-serif;
+  font-size: clamp(1.0625rem, 1rem + .25vw, 1.25rem);
+  font-weight: 400;
   line-height: 1.55;
+}
+
+.weddingDate {
+  max-width: 36ch;
+  margin: .85rem 0 0;
+  color: #e5bc62;
+  font-family: var(--font-ui), Arial, sans-serif;
+  font-size: clamp(.82rem, .75rem + .18vw, .94rem);
+  font-weight: 750;
+  letter-spacing: .055em;
+  line-height: 1.45;
+  text-transform: uppercase;
 }
 
 .invitationActions {
   display: grid;
   gap: 1.25rem;
-  max-width: 31rem;
+  width: min(100%, 22rem);
   margin-top: clamp(1.6rem, 5vh, 3rem);
 }
 
 .invitationActions .primaryButton {
   width: 100%;
-  min-height: 62px;
+  min-height: 60px;
   padding-inline: 1.4rem;
-  border-color: #b27943;
-  font-size: 1.05rem;
+  border-color: var(--invitation-brass);
+  background: linear-gradient(180deg, #862844, var(--invitation-merlot));
+  box-shadow: 5px 6px 0 rgba(35,12,20,.34), inset 0 0 0 1px rgba(228,224,215,.14);
+  font-size: 1.125rem;
+  line-height: 1.2;
 }
 
 .duration {
-  color: rgba(255,249,238,.68);
-  font-size: .82rem;
+  color: rgba(228,224,215,.68);
+  font-size: .9375rem;
   font-weight: 800;
   letter-spacing: .08em;
   text-align: center;
+}
+
+.invitationControls .languageSelector,
+.invitationControls .languageSelector button,
+.invitationControls .motionButton {
+  min-height: 48px;
+}
+
+.invitationControls .languageSelector button {
+  min-width: 48px;
+  font-size: 1rem;
+}
+
+.invitationControls .motionButton {
+  font-size: 1rem;
+  font-weight: 700;
 }
 
 .invitationWorld {
   position: relative;
   min-height: 100svh;
   overflow: hidden;
-  background: #284b58;
+  background: #183d45;
 }
 
 .mapScreen {
@@ -2229,12 +2277,14 @@
 
   .invitationCopy::after {
     top: auto;
-    right: 7%;
-    bottom: -13px;
-    left: 7%;
+    right: 0;
+    bottom: -7px;
+    left: 0;
     width: auto;
-    height: 24px;
-    clip-path: polygon(0 0, 3% 100%, 8% 62%, 14% 100%, 20% 62%, 27% 100%, 34% 62%, 41% 100%, 48% 62%, 55% 100%, 62% 62%, 69% 100%, 76% 62%, 83% 100%, 90% 62%, 97% 100%, 100% 0);
+    height: 8px;
+    border: 0;
+    background: linear-gradient(90deg, var(--invitation-merlot-deep), var(--invitation-merlot) 48%, var(--invitation-brass));
+    box-shadow: 0 5px 18px rgba(2,10,12,.32);
   }
 
   .invitationTopline {
@@ -2243,7 +2293,7 @@
 
   .invitation h1 {
     max-width: 10ch;
-    font-size: clamp(3.3rem, 14vw, 5.8rem);
+    font-size: clamp(2.75rem, 10.5vw, 4rem);
   }
 
   .lede {
@@ -2425,7 +2475,7 @@
   }
 
   .invitation h1 {
-    font-size: clamp(3rem, 16vw, 4.7rem);
+    font-size: clamp(2.75rem, 12vw, 3.75rem);
   }
 
   .invitationActions .primaryButton {
@@ -2637,7 +2687,7 @@
   }
 
   .invitation h1 {
-    font-size: clamp(2.75rem, 15vw, 3.55rem);
+    font-size: clamp(2.6rem, 13vw, 3.25rem);
   }
 
   .lede {

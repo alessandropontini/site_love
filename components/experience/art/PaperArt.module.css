@@ -184,6 +184,541 @@
   object-position: center;
 }
 
+.invitation::before,
+.invitation::after {
+  position: absolute;
+  right: 0;
+  left: 0;
+  pointer-events: none;
+  content: "";
+}
+
+.invitation::before {
+  inset: 0;
+  z-index: 2;
+  background:
+    radial-gradient(circle at 50% 22%, rgba(255,255,255,.18), transparent 30%),
+    linear-gradient(115deg, rgba(198,221,224,.08), transparent 48%, rgba(116,31,56,.06));
+  mix-blend-mode: soft-light;
+  opacity: .28;
+}
+
+.invitation::after {
+  bottom: 0;
+  z-index: 5;
+  height: 5%;
+  background: linear-gradient(180deg, transparent, rgba(58,32,25,.2));
+  box-shadow: inset 0 -2px 0 rgba(197,149,55,.38);
+}
+
+.invitation .sceneImageLayer img {
+  object-fit: cover;
+  object-position: center center;
+  filter: saturate(1.02) brightness(1.02) contrast(1.02);
+  transition: filter 900ms ease;
+}
+
+.invitation[data-night="true"] .sceneImageLayer img {
+  filter: saturate(.72) brightness(.54) contrast(1.08) hue-rotate(8deg);
+}
+
+.invitation[data-night="true"]::before {
+  background: linear-gradient(180deg, rgba(6, 20, 48, .48), rgba(14, 25, 48, .12));
+  mix-blend-mode: multiply;
+  opacity: 1;
+}
+
+.skyLife {
+  position: absolute;
+  top: 6%;
+  right: 7%;
+  left: 7%;
+  height: 25%;
+  z-index: 3;
+  overflow: hidden;
+  isolation: isolate;
+  contain: paint;
+  /* A rigid rear diorama tray: nothing can cross into the facade or arcade. */
+  clip-path: polygon(0 0, 100% 0, 96% 100%, 4% 100%);
+}
+
+.paperSun {
+  position: absolute;
+  top: 13%;
+  right: 9%;
+  width: clamp(58px, 6.2vw, 94px);
+  aspect-ratio: 1;
+  z-index: 0;
+  filter: drop-shadow(5px 6px 0 rgba(31, 49, 61, .3));
+  rotate: 2deg;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: translate 700ms ease, rotate 700ms ease, opacity 500ms ease;
+}
+
+.paperSun:hover,
+.paperSun:focus-visible {
+  translate: 0 3px;
+  rotate: -3deg;
+}
+
+.invitation[data-night="true"] .paperSun {
+  translate: 0 150%;
+  rotate: 18deg;
+  opacity: .08;
+}
+
+.invitationMoon {
+  position: absolute;
+  top: 13%;
+  right: 9%;
+  width: clamp(58px, 6.2vw, 94px);
+  aspect-ratio: 1;
+  border: 2px solid #8c7659;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 34%, rgba(138,119,84,.18) 0 8%, transparent 9%),
+    radial-gradient(circle at 68% 58%, rgba(138,119,84,.14) 0 6%, transparent 7%),
+    repeating-linear-gradient(87deg, rgba(92,78,56,.07) 0 1px, transparent 1px 5px),
+    #f3e5ba;
+  box-shadow: 5px 6px 0 rgba(29,42,59,.34), inset -7px -5px 0 #d2be88;
+  opacity: 0;
+  scale: .72;
+  translate: 0 -36px;
+  transition: opacity 700ms ease, scale 800ms ease, translate 800ms ease;
+  padding: 0;
+  cursor: pointer;
+  pointer-events: none;
+}
+
+.invitation[data-night="true"] .invitationMoon {
+  opacity: 1;
+  scale: 1;
+  translate: 0 0;
+  pointer-events: auto;
+}
+
+.cathedralLights {
+  position: absolute;
+  right: 9%;
+  bottom: -8%;
+  left: 9%;
+  height: 92%;
+  background:
+    radial-gradient(ellipse at 19% 100%, rgba(255,190,87,.6), transparent 22%),
+    radial-gradient(ellipse at 39% 100%, rgba(255,201,104,.48), transparent 25%),
+    radial-gradient(ellipse at 61% 100%, rgba(255,201,104,.48), transparent 25%),
+    radial-gradient(ellipse at 81% 100%, rgba(255,190,87,.6), transparent 22%);
+  z-index: 2;
+  mix-blend-mode: screen;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 900ms ease;
+}
+
+.invitation[data-night="true"] .cathedralLights { opacity: .88; }
+
+.moonSpotlight {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background:
+    radial-gradient(ellipse at 23% 91%, rgba(246,239,197,.38) 0 7%, rgba(204,222,225,.16) 18%, transparent 31%);
+  clip-path: polygon(85% 12%, 94% 12%, 43% 100%, 4% 100%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1s ease;
+}
+
+.invitation[data-night="true"] .moonSpotlight { opacity: 1; }
+
+.invitation[data-night="true"] .paperCloud {
+  filter: brightness(.72) saturate(.72) drop-shadow(3px 4px 0 rgba(10,22,38,.28));
+}
+
+.paperSun::before,
+.invitationMoon::before {
+  position: absolute;
+  bottom: calc(100% - 7px);
+  left: calc(50% - 1px);
+  width: 2px;
+  height: clamp(22px, 3.2vh, 46px);
+  background: repeating-linear-gradient(90deg, #564438 0 1px, #c2a174 1px 2px);
+  box-shadow: 2px 0 0 rgba(43, 55, 61, .18);
+  content: "";
+}
+
+.sunRays,
+.sunDisc {
+  position: absolute;
+  display: block;
+}
+
+.sunRays {
+  inset: 0;
+  background: repeating-conic-gradient(from -7.5deg, #e4a33b 0 10deg, #c97929 10deg 20deg, #efb84b 20deg 30deg);
+  clip-path: polygon(50% 0, 58% 18%, 75% 7%, 74% 27%, 93% 25%, 80% 41%, 100% 50%, 80% 59%, 93% 75%, 74% 73%, 75% 93%, 58% 82%, 50% 100%, 42% 82%, 25% 93%, 26% 73%, 7% 75%, 20% 59%, 0 50%, 20% 41%, 7% 25%, 26% 27%, 25% 7%, 42% 18%);
+  filter: drop-shadow(3px 3px 0 #925126);
+}
+
+.sunDisc {
+  inset: 20%;
+  border: 3px solid #8b5528;
+  border-radius: 50%;
+  background:
+    repeating-linear-gradient(87deg, rgba(112,65,24,.12) 0 1px, transparent 1px 5px),
+    #efb849;
+  box-shadow: 4px 4px 0 #b96828, inset 0 0 0 4px #f4ca67, inset -5px -4px 0 #d78b2d;
+}
+
+.sunDisc::after {
+  position: absolute;
+  inset: 29%;
+  border: 1px solid #a9682d;
+  border-radius: 50%;
+  background: #f7d678;
+  box-shadow: 2px 2px 0 rgba(151, 87, 36, .35);
+  content: "";
+}
+
+.paperCloud {
+  --cloud-scale: 1;
+  position: absolute;
+  width: clamp(112px, 12vw, 182px);
+  height: clamp(27px, 3vw, 44px);
+  border: 2px solid #958775;
+  border-radius: 48% 52% 44% 56%;
+  background:
+    repeating-linear-gradient(88deg, rgba(80,70,56,.06) 0 1px, transparent 1px 6px),
+    linear-gradient(180deg, #fffaf0 0 72%, #e3d6c2 73%);
+  box-shadow: 5px 6px 0 #c7b69c, 8px 9px 0 rgba(28,51,65,.2);
+  opacity: 1;
+  scale: var(--cloud-scale);
+  z-index: 1;
+}
+
+.paperCloud::before,
+.paperCloud::after {
+  position: absolute;
+  bottom: 36%;
+  border: 2px solid #958775;
+  border-bottom: 0;
+  border-radius: 50% 50% 0 0;
+  background: inherit;
+  content: "";
+}
+
+.paperCloud::before {
+  left: 12%;
+  width: 42%;
+  height: 124%;
+}
+
+.paperCloud::after {
+  right: 10%;
+  width: 38%;
+  height: 92%;
+}
+
+.paperCloud > span::before {
+  position: absolute;
+  bottom: 45%;
+  left: 46%;
+  width: 27%;
+  height: 70%;
+  border: 2px solid #958775;
+  border-bottom: 0;
+  border-radius: 50% 50% 0 0;
+  background: #fffaf0;
+  content: "";
+}
+
+.paperCloud > span::after {
+  position: absolute;
+  right: 12%;
+  bottom: 18%;
+  left: 12%;
+  height: 1px;
+  background: #c6b79f;
+  content: "";
+}
+
+.cloudOne {
+  top: 24%;
+  left: -25%;
+  rotate: -2deg;
+}
+
+.cloudTwo {
+  --cloud-scale: .78;
+  top: 48%;
+  left: -25%;
+  width: clamp(100px, 10.5vw, 158px);
+  height: clamp(25px, 2.7vw, 39px);
+  border-radius: 57% 43% 55% 45%;
+  rotate: 2deg;
+}
+
+.cloudTwo::before {
+  left: 27%;
+  width: 34%;
+  height: 110%;
+}
+
+.cloudTwo::after {
+  right: 7%;
+  width: 31%;
+  height: 72%;
+}
+
+.cloudTwo > span::before {
+  left: 7%;
+  width: 32%;
+  height: 68%;
+}
+
+.pigeonFlight {
+  --flight-duration: 18s;
+  --flight-delay: 0s;
+  --flight-mid-y: -8px;
+  --flight-end-y: -13px;
+  position: absolute;
+  left: 0;
+  width: clamp(48px, 4vw, 72px);
+  aspect-ratio: 5 / 3;
+  opacity: 1;
+  z-index: 2;
+}
+
+.paperPigeon {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(3px 4px 0 rgba(35, 53, 63, .2));
+}
+
+.paperPigeon::before {
+  position: absolute;
+  top: 28%;
+  left: 18%;
+  width: 66%;
+  height: 50%;
+  border: 2px solid #303a40;
+  border-radius: 52% 58% 48% 52%;
+  background: #858f92;
+  box-shadow: inset -9px -3px 0 #657176;
+  rotate: 4deg;
+  content: "";
+}
+
+.paperPigeon::after {
+  position: absolute;
+  top: 9%;
+  right: 1%;
+  width: 32%;
+  aspect-ratio: 1;
+  border: 2px solid #303a40;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 66% 31%, #171c1e 0 5%, #d7aa55 6% 9%, transparent 10%),
+    #90999b;
+  box-shadow: inset -5px -2px 0 #56746e;
+  content: "";
+}
+
+.pigeonWing {
+  position: absolute;
+  top: 4%;
+  left: 36%;
+  width: 43%;
+  height: 64%;
+  border: 2px solid #303a40;
+  background:
+    linear-gradient(104deg, transparent 0 44%, #3d474c 45% 49%, transparent 50% 62%, #3d474c 63% 67%, transparent 68%),
+    #667278;
+  clip-path: polygon(9% 76%, 16% 21%, 48% 0, 100% 38%, 72% 83%, 25% 100%);
+  transform-origin: 78% 72%;
+}
+
+.pigeonBeak {
+  position: absolute;
+  top: 22%;
+  right: -7%;
+  width: 14%;
+  height: 16%;
+  border: 1px solid #704b2c;
+  background: #c9833d;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+.pigeonTail {
+  position: absolute;
+  bottom: 17%;
+  left: 1%;
+  width: 25%;
+  height: 27%;
+  border: 1px solid #303a40;
+  background: #4d585e;
+  clip-path: polygon(100% 10%, 18% 0, 34% 42%, 0 82%, 83% 100%);
+}
+
+.pigeonOne {
+  top: 1%;
+  left: 30%;
+  --flight-duration: 17s;
+  --flight-delay: -3s;
+  --flight-mid-y: -10px;
+  --flight-end-y: -16px;
+}
+
+.pigeonTwo {
+  top: 12%;
+  left: 47%;
+  width: clamp(41px, 3.3vw, 60px);
+  --flight-duration: 21s;
+  --flight-delay: -11s;
+  --flight-mid-y: 3px;
+  --flight-end-y: -8px;
+}
+
+.pigeonThree {
+  top: 24%;
+  left: 61%;
+  width: clamp(34px, 2.7vw, 49px);
+  --flight-duration: 25s;
+  --flight-delay: -17s;
+  --flight-mid-y: -5px;
+  --flight-end-y: -12px;
+}
+
+.placeBillboard {
+  position: absolute;
+  top: 9%;
+  left: 6%;
+  z-index: 6;
+  display: grid;
+  min-width: 0;
+  max-width: clamp(128px, 13vw, 190px);
+  padding: .42rem .75rem .38rem;
+  border: 1px solid #c3a05c;
+  background:
+    repeating-linear-gradient(88deg, rgba(100, 62, 39, .07) 0 1px, transparent 1px 5px),
+    #173c35;
+  box-shadow: 3px 4px 0 #0b2629, 5px 6px 0 rgba(22,37,47,.2);
+  color: #ecd18c;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(.62rem, .54rem + .18vw, .76rem);
+  font-weight: 600;
+  letter-spacing: .055em;
+  line-height: 1.25;
+  text-align: center;
+  text-transform: none;
+  rotate: -1deg;
+}
+
+.placeBillboard::before,
+.placeBillboard::after {
+  position: absolute;
+  bottom: 100%;
+  width: 1px;
+  height: clamp(30px, 5vh, 54px);
+  border: 0;
+  background: #b89b68;
+  content: "";
+}
+
+.placeBillboard::before { left: 18%; }
+.placeBillboard::after { right: 18%; }
+
+.madonninaHotspot {
+  position: absolute;
+  top: 28%;
+  left: 48.5%;
+  z-index: 7;
+  width: clamp(28px, 2.5vw, 40px);
+  height: clamp(62px, 6vw, 92px);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  transform-origin: 50% 100%;
+}
+
+.madonninaSpark {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  width: 9px;
+  aspect-ratio: 1;
+  display: block;
+  background: #f6d66f;
+  clip-path: polygon(50% 0,62% 36%,100% 50%,62% 64%,50% 100%,38% 64%,0 50%,38% 36%);
+  filter: drop-shadow(0 0 5px #f0b644);
+  opacity: 0;
+}
+
+.madonninaHotspot[data-waving="true"] {
+  animation: madonninaBow 1.6s ease-in-out;
+}
+
+.madonninaHotspot[data-waving="true"] .madonninaSpark {
+  animation: madonninaBlessing 1.6s ease-in forwards;
+}
+
+.pigeonPerch {
+  position: absolute;
+  right: 3.5%;
+  bottom: 5%;
+  z-index: 8;
+  width: clamp(120px, 13vw, 198px);
+  height: clamp(70px, 10vw, 132px);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.pigeonPerch .pigeonFlight {
+  left: auto;
+  animation: none;
+  transition: transform 320ms ease;
+}
+
+.pigeonPerch:not([data-flying="true"]) .pigeonWing {
+  top: 22%;
+  left: 34%;
+  transform: rotate(18deg) scale(.72);
+}
+
+.pigeonPerch .pigeonOne { top: 48%; right: 65%; width: 25%; rotate: -5deg; }
+.pigeonPerch .pigeonTwo { top: 61%; right: 47%; width: 21%; rotate: 4deg; }
+.pigeonPerch .pigeonThree { top: 42%; right: 34%; width: 24%; rotate: -2deg; }
+.pigeonPerch .pigeonFour { top: 67%; right: 25%; width: 19%; rotate: 7deg; }
+.pigeonPerch .pigeonFive { top: 52%; right: 12%; width: 22%; rotate: -6deg; }
+.pigeonPerch .pigeonSix { top: 72%; right: 4%; width: 17%; rotate: 3deg; }
+.pigeonPerch .pigeonSeven { top: 65%; right: 70%; width: 18%; rotate: 6deg; }
+
+.pigeonPerch:hover .pigeonFlight,
+.pigeonPerch:focus-visible .pigeonFlight {
+  transform: translateY(-4px);
+}
+
+.pigeonPerch[data-flying="true"] .pigeonOne { animation: flockRouteOne 7s cubic-bezier(.38,.02,.28,1) both; }
+.pigeonPerch[data-flying="true"] .pigeonTwo { animation: flockRouteTwo 7s .12s cubic-bezier(.38,.02,.28,1) both; }
+.pigeonPerch[data-flying="true"] .pigeonThree { animation: flockRouteThree 7s .22s cubic-bezier(.38,.02,.28,1) both; }
+.pigeonPerch[data-flying="true"] .pigeonFour { animation: flockRouteFour 7s .3s cubic-bezier(.38,.02,.28,1) both; }
+.pigeonPerch[data-flying="true"] .pigeonFive { animation: flockRouteFive 7s .38s cubic-bezier(.38,.02,.28,1) both; }
+.pigeonPerch[data-flying="true"] .pigeonSix { animation: flockRouteSix 7s .46s cubic-bezier(.38,.02,.28,1) both; }
+.pigeonPerch[data-flying="true"] .pigeonSeven { animation: flockRouteSeven 7s .18s cubic-bezier(.38,.02,.28,1) both; }
+.pigeonPerch[data-flying="true"] .pigeonWing { animation: pigeonWingBeat 280ms steps(2, end) infinite; }
+
 .duomoLayer,
 .landmarkLayer,
 .tramLayer,
@@ -283,6 +818,36 @@
   width: 22%;
   height: 50%;
   z-index: 4;
+}
+
+.invitation .coupleLayer {
+  bottom: 0;
+  left: 10%;
+  width: 18%;
+  height: 31%;
+  transform-origin: 46% 100%;
+}
+
+.invitation .coupleLayer {
+  clip-path: none;
+}
+
+.invitation .coupleLayer img {
+  object-position: center bottom;
+  filter: saturate(.82) contrast(1.06) brightness(.92) drop-shadow(0 12px 9px rgba(15,23,24,.28));
+}
+
+.invitation .coupleLayer::before {
+  right: 10%;
+  bottom: 0;
+  left: 10%;
+  height: 6%;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(13,24,25,.58), transparent 72%);
+  box-shadow: none;
+  filter: blur(2px);
+  transform: scaleX(.88);
 }
 
 .chapterPropLayer {
@@ -672,14 +1237,26 @@
   animation: curtainRightIn 900ms cubic-bezier(.22,.8,.24,1) both;
 }
 
-:global([data-motion="on"]) .invitation .duomoLayer,
 :global([data-motion="on"]) .chapter .landmarkLayer,
-:global([data-motion="on"]) .sceneImageLayer {
+:global([data-motion="on"]) .chapter .sceneImageLayer,
+:global([data-motion="on"]) .finale .sceneImageLayer {
   animation: stageRise 760ms cubic-bezier(.22,.8,.24,1) both;
 }
 
-:global([data-motion="on"]) .invitation .tramLayer {
-  animation: tramArrival 7.5s cubic-bezier(.18,.7,.24,1) both;
+:global([data-motion="on"]) .invitation .sceneImageLayer {
+  animation: invitationReveal 1150ms cubic-bezier(.2,.72,.18,1) both;
+}
+
+:global([data-motion="on"]) .invitation .coupleLayer {
+  animation: puppetArrival 2.4s 300ms cubic-bezier(.2,.72,.18,1) both;
+}
+
+:global([data-motion="on"]) .invitation .cloudOne {
+  animation: cloudCrossOne 31s -8s linear infinite;
+}
+
+:global([data-motion="on"]) .invitation .cloudTwo {
+  animation: cloudCrossTwo 43s -29s linear infinite;
 }
 
 :global([data-motion="on"]) .map .tramLayer {
@@ -709,10 +1286,137 @@
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-@keyframes tramArrival {
-  0% { opacity: .2; transform: translate3d(46px, 5px, 0) scale(.96); }
-  62% { opacity: 1; transform: translate3d(-3px, 0, 0) scale(1); }
-  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+@keyframes invitationReveal {
+  from { opacity: .58; transform: scale(1.018); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes coupleSettle {
+  0% { opacity: 0; transform: translate3d(-10px, 12px, 0) rotate(-1.4deg); }
+  72% { opacity: 1; transform: translate3d(1px, -1px, 0) rotate(.25deg); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0) rotate(0); }
+}
+
+@keyframes puppetArrival {
+  0% { opacity: 0; transform: translate3d(-145%, 0, 0) rotate(-3deg); }
+  44% { opacity: 1; transform: translate3d(-62%, 0, 0) rotate(2deg); }
+  72% { transform: translate3d(-18%, 0, 0) rotate(-1deg); }
+  88% { transform: translate3d(2%, 0, 0) rotate(.4deg); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0) rotate(0); }
+}
+
+@keyframes madonninaBow {
+  0%, 100% { rotate: 0deg; }
+  38% { rotate: 3deg; }
+  68% { rotate: -1deg; }
+}
+
+@keyframes madonninaBlessing {
+  0% { opacity: 0; transform: translate3d(-50%, 0, 0) scale(.5) rotate(0); }
+  18% { opacity: 1; }
+  72% { opacity: 1; transform: translate3d(-900%, 46vh, 0) scale(1.15) rotate(220deg); }
+  100% { opacity: 0; transform: translate3d(-1150%, 65vh, 0) scale(.7) rotate(360deg); }
+}
+
+@keyframes flockRouteOne {
+  0%,100% { transform:translate3d(0,0,0) rotate(0); }
+  18% { transform:translate3d(-24vw,-18vh,0) rotate(-12deg); }
+  36% { transform:translate3d(-58vw,-42vh,0) rotate(5deg); }
+  48% { opacity:0; transform:translate3d(-90vw,-30vh,0) rotate(8deg); }
+  57% { opacity:0; transform:translate3d(32vw,-40vh,0) rotate(-7deg); }
+  78% { opacity:1; transform:translate3d(12vw,-14vh,0) rotate(4deg); }
+}
+
+@keyframes flockRouteTwo {
+  0%,100% { transform:translate3d(0,0,0) rotate(0); }
+  20% { transform:translate3d(-12vw,-34vh,0) rotate(-8deg); }
+  39% { opacity:0; transform:translate3d(-25vw,-78vh,0) rotate(6deg); }
+  51% { opacity:0; transform:translate3d(-82vw,18vh,0) rotate(-5deg); }
+  76% { opacity:1; transform:translate3d(-18vw,-10vh,0) rotate(3deg); }
+}
+
+@keyframes flockRouteThree {
+  0%,100% { transform:translate3d(0,0,0) rotate(0); }
+  22% { transform:translate3d(18vw,-26vh,0) rotate(9deg); }
+  42% { opacity:0; transform:translate3d(48vw,-52vh,0) rotate(-6deg); }
+  55% { opacity:0; transform:translate3d(-88vw,-20vh,0) rotate(7deg); }
+  79% { opacity:1; transform:translate3d(-14vw,-12vh,0) rotate(-3deg); }
+}
+
+@keyframes flockRouteFour {
+  0%,100% { transform:translate3d(0,0,0) rotate(0); }
+  20% { transform:translate3d(-36vw,-14vh,0) rotate(-11deg); }
+  40% { opacity:0; transform:translate3d(-86vw,10vh,0) rotate(8deg); }
+  53% { opacity:0; transform:translate3d(38vw,-68vh,0) rotate(-4deg); }
+  78% { opacity:1; transform:translate3d(13vw,-15vh,0) rotate(3deg); }
+}
+
+@keyframes flockRouteFive {
+  0%,100% { transform:translate3d(0,0,0) rotate(0); }
+  19% { transform:translate3d(14vw,-40vh,0) rotate(8deg); }
+  38% { opacity:0; transform:translate3d(31vw,-82vh,0) rotate(-5deg); }
+  52% { opacity:0; transform:translate3d(-91vw,-54vh,0) rotate(6deg); }
+  79% { opacity:1; transform:translate3d(-17vw,-16vh,0) rotate(-2deg); }
+}
+
+@keyframes flockRouteSix {
+  0%,100% { transform:translate3d(0,0,0) rotate(0); }
+  23% { transform:translate3d(-17vw,-23vh,0) rotate(-9deg); }
+  43% { opacity:0; transform:translate3d(-50vw,-57vh,0) rotate(5deg); }
+  56% { opacity:0; transform:translate3d(44vw,-22vh,0) rotate(-7deg); }
+  80% { opacity:1; transform:translate3d(11vw,-11vh,0) rotate(3deg); }
+}
+
+@keyframes flockRouteSeven {
+  0%,100% { transform:translate3d(0,0,0) rotate(0); }
+  18% { transform:translate3d(-31vw,-37vh,0) rotate(-10deg); }
+  37% { opacity:0; transform:translate3d(-67vw,-81vh,0) rotate(7deg); }
+  54% { opacity:0; transform:translate3d(51vw,7vh,0) rotate(-6deg); }
+  80% { opacity:1; transform:translate3d(15vw,-13vh,0) rotate(2deg); }
+}
+
+@keyframes perchFlightOne {
+  0%, 100% { transform: translate3d(0,0,0) rotate(0); }
+  22% { transform: translate3d(-140%, -140%, 0) rotate(-10deg); }
+  52% { transform: translate3d(-330%, -70%, 0) rotate(5deg); }
+  78% { transform: translate3d(-120%, -170%, 0) rotate(-5deg); }
+}
+
+@keyframes perchFlightTwo {
+  0%, 100% { transform: translate3d(0,0,0) rotate(0); }
+  26% { transform: translate3d(-80%, -190%, 0) rotate(-8deg); }
+  54% { transform: translate3d(-250%, -120%, 0) rotate(6deg); }
+  80% { transform: translate3d(-90%, -130%, 0) rotate(-4deg); }
+}
+
+@keyframes perchFlightThree {
+  0%, 100% { transform: translate3d(0,0,0) rotate(0); }
+  24% { transform: translate3d(-110%, -120%, 0) rotate(-12deg); }
+  58% { transform: translate3d(-390%, -210%, 0) rotate(7deg); }
+  82% { transform: translate3d(-150%, -90%, 0) rotate(-3deg); }
+}
+
+@keyframes cloudCrossOne {
+  0% { left: -25%; translate: 0 0; }
+  48% { translate: 0 4px; }
+  100% { left: 105%; translate: 0 0; }
+}
+
+@keyframes cloudCrossTwo {
+  0% { left: -25%; translate: 0 2px; }
+  52% { translate: 0 -3px; }
+  100% { left: 105%; translate: 0 2px; }
+}
+
+@keyframes pigeonFlyRight {
+  0% { transform: translate3d(-8rem, 7px, 0) rotate(-2deg); }
+  50% { transform: translate3d(52vw, var(--flight-mid-y), 0) rotate(1deg); }
+  100% { transform: translate3d(112vw, var(--flight-end-y), 0) rotate(-1deg); }
+}
+
+@keyframes pigeonWingBeat {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(10deg) translateY(1px); }
 }
 
 @keyframes tramMapPass {
@@ -739,6 +1443,10 @@
   .landmarkLayer { right: 1%; width: 92%; height: 70%; }
   .tramLayer { right: 2%; width: 39%; height: 25%; }
   .coupleLayer { left: 5%; width: 25%; height: 48%; }
+  .skyLife { right: 3%; left: 3%; }
+  .invitation .coupleLayer { left: 8%; width: 16%; height: 31%; }
+  .placeBillboard { top: 34%; left: 5%; }
+  .pigeonPerch { right: 2%; bottom: 3%; }
   .map .duomoLayer { right: 15%; width: 65%; height: 55%; }
   .map .tramLayer { width: 31%; height: 20%; }
   .map .coupleLayer { width: 18%; height: 31%; }
@@ -754,6 +1462,10 @@
   .chapter[data-chapter="future"] .chapterPropLayer { width: 26%; height: 48%; }
   .finale .coupleLayer { left: 34%; width: 32%; height: 55%; }
   .finale .tramLayer { right: -7%; width: 31%; height: 20%; }
+}
+
+@media (max-height: 600px) and (orientation: landscape) {
+  .invitation .skyLife { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

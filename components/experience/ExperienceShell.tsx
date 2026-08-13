@@ -75,7 +75,9 @@ function ExperienceShellContent() {
   }[experience.view];
   const motionControlLabel = motionLockedBySystem
     ? copy.shell.reducedMotionSystem
-    : copy.shell.reducedMotion;
+    : experience.motionEnabled
+      ? copy.shell.disableMotion
+      : copy.shell.enableMotion;
   const screenKey = `${experience.view}-${activeChapter ?? "home"}`;
 
   useEffect(() => {
@@ -200,7 +202,9 @@ function ExperienceShellContent() {
                       title={motionControlLabel}
                       disabled={motionLockedBySystem}
                     >
-                      {copy.shell.reducedMotion}
+                      {experience.motionEnabled
+                        ? copy.shell.motionOn
+                        : copy.shell.motionOff}
                     </button>
                   </div>
                 </div>
@@ -209,6 +213,7 @@ function ExperienceShellContent() {
                 </p>
                 <h1 id="invitation-title">Alessandro &amp; Bridget</h1>
                 <p className={styles.lede}>{copy.shell.invitationLede}</p>
+                <p className={styles.weddingDate}>{copy.shell.weddingDate}</p>
                 <div className={styles.invitationActions}>
                   <button
                     type="button"
@@ -229,8 +234,16 @@ function ExperienceShellContent() {
                 </div>
               </div>
 
-              <div className={styles.invitationWorld} aria-hidden="true">
-                <PaperStage variant="invitation" priority />
+              <div className={styles.invitationWorld}>
+                <PaperStage
+                  variant="invitation"
+                  priority
+                  placeLabel={copy.shell.duomoPlace}
+                  pigeonLabel={copy.shell.pigeonAction}
+                  sunLabel={copy.shell.sunAction}
+                  moonLabel={copy.shell.moonAction}
+                  madonninaLabel={copy.shell.madonninaAction}
+                />
               </div>
             </section>
           )}

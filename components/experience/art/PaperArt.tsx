@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useState } from "react";
 
 import type { ChapterId, ChapterTone } from "@/lib/experienceConfig";
 
@@ -13,8 +16,8 @@ const imageSizes: Record<
   invitation: {
     duomo: "(max-width: 899px) 79vw, 34vw",
     landmark: "100vw",
-    tram: "(max-width: 899px) 39vw, 17vw",
-    couple: "(max-width: 899px) 25vw, 11vw"
+    tram: "0px",
+    couple: "(max-width: 899px) 17vw, 9vw"
   },
   map: {
     duomo: "(max-width: 899px) 65vw, 36vw",
@@ -37,7 +40,7 @@ const imageSizes: Record<
 };
 
 export const chapterLandmarks: Record<ChapterId, string> = {
-  spark: "/scene/paper-theatre/scene-chapter-galleria.jpg",
+  spark: "/scene/paper-theatre/scene-entrance-galleria-v6.jpg",
   coordinates: "/scene/paper-theatre/scene-chapter-naviglio.jpg",
   promise: "/scene/paper-theatre/scene-chapter-arco.jpg",
   future: "/scene/paper-theatre/scene-chapter-adelchi.jpg"
@@ -50,7 +53,12 @@ export function PaperStage({
   chapterId,
   chapterNumber,
   location,
-  actLabel = "ATTO"
+  actLabel = "ATTO",
+  placeLabel,
+  pigeonLabel = "Fai volare i piccioni",
+  sunLabel = "Cambia la luce",
+  moonLabel = "Riporta il giorno",
+  madonninaLabel = "Fai brillare la Madonnina"
 }: {
   variant: PaperStageVariant;
   tone?: ChapterTone;
@@ -59,15 +67,23 @@ export function PaperStage({
   chapterNumber?: string;
   location?: string;
   actLabel?: string;
+  placeLabel?: string;
+  pigeonLabel?: string;
+  sunLabel?: string;
+  moonLabel?: string;
+  madonninaLabel?: string;
 }) {
+  const [pigeonsFlying, setPigeonsFlying] = useState(false);
+  const [isNight, setIsNight] = useState(false);
+  const [madonninaWaving, setMadonninaWaving] = useState(false);
   const sceneImage = chapterId
     ? chapterLandmarks[chapterId]
     : variant === "invitation"
-      ? "/scene/paper-theatre/scene-entrance-galleria.jpg"
+      ? "/scene/paper-theatre/scene-entrance-duomo-cromolitografia-v2.jpg"
       : variant === "finale"
         ? "/scene/paper-theatre/scene-finale-duomo.jpg"
         : null;
-  const showTram = variant === "invitation" || variant === "finale";
+  const showTram = variant === "finale";
   const showCouple = variant === "invitation" || variant === "finale";
   const renderStagePieces = !sceneImage;
 
@@ -76,7 +92,7 @@ export function PaperStage({
       className={`${styles.stage} ${styles[variant]}`}
       data-tone={tone}
       data-chapter={chapterId}
-      aria-hidden="true"
+      data-night={variant === "invitation" && isNight ? "true" : "false"}
     >
       {renderStagePieces && (
         <>
@@ -101,6 +117,85 @@ export function PaperStage({
         </div>
       )}
 
+      {variant === "invitation" && (
+        <div className={styles.skyLife}>
+          <button
+            type="button"
+            className={styles.paperSun}
+            onClick={() => setIsNight(true)}
+            aria-label={sunLabel}
+            aria-hidden={isNight}
+            tabIndex={isNight ? -1 : 0}
+          >
+            <span className={styles.sunRays} />
+            <span className={styles.sunDisc} />
+          </button>
+          <button
+            type="button"
+            className={styles.invitationMoon}
+            onClick={() => setIsNight(false)}
+            aria-label={moonLabel}
+            aria-hidden={!isNight}
+            tabIndex={isNight ? 0 : -1}
+          />
+          <span className={`${styles.paperCloud} ${styles.cloudOne}`}>
+            <span />
+          </span>
+          <span className={`${styles.paperCloud} ${styles.cloudTwo}`}>
+            <span />
+          </span>
+        </div>
+      )}
+
+      {variant === "invitation" && (
+        <>
+          <span className={styles.cathedralLights} aria-hidden="true" />
+          <span className={styles.moonSpotlight} aria-hidden="true" />
+          {placeLabel && <span className={styles.placeBillboard}>{placeLabel}</span>}
+          <button
+            type="button"
+            className={styles.madonninaHotspot}
+            onClick={() => {
+              setMadonninaWaving(true);
+              window.setTimeout(() => setMadonninaWaving(false), 1600);
+            }}
+            data-waving={madonninaWaving ? "true" : "false"}
+            aria-label={madonninaLabel}
+          >
+            <span className={styles.madonninaSpark} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            className={styles.pigeonPerch}
+            data-flying={pigeonsFlying ? "true" : "false"}
+            onClick={() => {
+              if (pigeonsFlying) return;
+              setPigeonsFlying(true);
+              window.setTimeout(() => setPigeonsFlying(false), 7300);
+            }}
+            aria-label={pigeonLabel}
+          >
+            {[
+              styles.pigeonOne,
+              styles.pigeonTwo,
+              styles.pigeonThree,
+              styles.pigeonFour,
+              styles.pigeonFive,
+              styles.pigeonSix,
+              styles.pigeonSeven
+            ].map((position) => (
+              <span className={`${styles.pigeonFlight} ${position}`} key={position}>
+                <span className={styles.paperPigeon}>
+                  <span className={styles.pigeonTail} />
+                  <span className={styles.pigeonWing} />
+                  <span className={styles.pigeonBeak} />
+                </span>
+              </span>
+            ))}
+          </button>
+        </>
+      )}
+
       {showTram && (
         <div className={styles.tramLayer}>
           <Image
@@ -116,7 +211,9 @@ export function PaperStage({
       {showCouple && (
         <div className={styles.coupleLayer}>
           <Image
-            src="/scene/paper-theatre/couple-cardboard.png"
+            src={variant === "invitation"
+              ? "/scene/paper-theatre/couple-cardboard-v4.png"
+              : "/scene/paper-theatre/couple-cardboard.png"}
             alt=""
             fill
             unoptimized
