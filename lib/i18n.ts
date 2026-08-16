@@ -69,7 +69,7 @@ export const messages = {
       invitationLede:
         "La nostra storia attraversa Milano e ci accompagna verso il giorno in cui ci diremo sì.",
       weddingDate: "Verso maggio 2028 · Il prossimo capitolo è il nostro matrimonio",
-      duomoPlace: "Piazza del Duomo · Milano",
+      duomoPlace: "Piazza del Duomo",
       pigeonAction: "Fai volare i piccioni",
       sunAction: "Trasforma il giorno in notte",
       moonAction: "Riporta il giorno",
@@ -265,7 +265,7 @@ export const messages = {
       invitationLede:
         "Our story crosses Milan and carries us toward the day we say yes.",
       weddingDate: "Toward May 2028 · Our wedding is the next chapter",
-      duomoPlace: "Piazza del Duomo · Milan",
+      duomoPlace: "Piazza del Duomo",
       pigeonAction: "Make the pigeons fly",
       sunAction: "Turn day into night",
       moonAction: "Bring back daylight",

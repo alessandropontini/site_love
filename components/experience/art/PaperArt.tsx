@@ -75,6 +75,7 @@ export function PaperStage({
 }) {
   const [pigeonsFlying, setPigeonsFlying] = useState(false);
   const [isNight, setIsNight] = useState(false);
+  const [weddingStarsVisible, setWeddingStarsVisible] = useState(false);
   const [madonninaWaving, setMadonninaWaving] = useState(false);
   const sceneImage = chapterId
     ? chapterLandmarks[chapterId]
@@ -122,7 +123,10 @@ export function PaperStage({
           <button
             type="button"
             className={styles.paperSun}
-            onClick={() => setIsNight(true)}
+            onClick={() => {
+              setIsNight(true);
+              setWeddingStarsVisible(false);
+            }}
             aria-label={sunLabel}
             aria-hidden={isNight}
             tabIndex={isNight ? -1 : 0}
@@ -133,7 +137,10 @@ export function PaperStage({
           <button
             type="button"
             className={styles.invitationMoon}
-            onClick={() => setIsNight(false)}
+            onClick={() => {
+              setIsNight(false);
+              setWeddingStarsVisible(false);
+            }}
             aria-label={moonLabel}
             aria-hidden={!isNight}
             tabIndex={isNight ? 0 : -1}
@@ -151,13 +158,29 @@ export function PaperStage({
         <>
           <span className={styles.cathedralLights} aria-hidden="true" />
           <span className={styles.moonSpotlight} aria-hidden="true" />
+          <button
+            type="button"
+            className={styles.weddingStars}
+            data-visible={weddingStarsVisible ? "true" : "false"}
+            onClick={() => setWeddingStarsVisible((visible) => !visible)}
+            aria-label="Mostra la data tra le stelle"
+            aria-hidden={!isNight}
+            tabIndex={isNight ? 0 : -1}
+          >
+            <span className={styles.starOne} />
+            <span className={styles.starTwo} />
+            <span className={styles.starThree} />
+            <span className={styles.starFour} />
+            <span className={styles.starFive} />
+            <strong>20 · 05 · 2028</strong>
+          </button>
           {placeLabel && <span className={styles.placeBillboard}>{placeLabel}</span>}
           <button
             type="button"
             className={styles.madonninaHotspot}
             onClick={() => {
               setMadonninaWaving(true);
-              window.setTimeout(() => setMadonninaWaving(false), 1600);
+              window.setTimeout(() => setMadonninaWaving(false), 2300);
             }}
             data-waving={madonninaWaving ? "true" : "false"}
             aria-label={madonninaLabel}
@@ -219,6 +242,16 @@ export function PaperStage({
             unoptimized
             sizes={imageSizes[variant].couple}
           />
+        </div>
+      )}
+
+      {variant === "invitation" && (
+        <div className={styles.foregroundCurtains} aria-hidden="true">
+          <span className={styles.curtainRevealLeft} />
+          <span className={styles.curtainRevealRight} />
+          <span className={styles.foregroundCurtainTop} />
+          <span className={styles.foregroundCurtainLeft} />
+          <span className={styles.foregroundCurtainRight} />
         </div>
       )}
 

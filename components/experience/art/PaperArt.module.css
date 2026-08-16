@@ -230,23 +230,20 @@
 
 .skyLife {
   position: absolute;
-  top: 6%;
-  right: 7%;
-  left: 7%;
-  height: 25%;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 34%;
   z-index: 3;
-  overflow: hidden;
+  overflow: visible;
   isolation: isolate;
-  contain: paint;
-  /* A rigid rear diorama tray: nothing can cross into the facade or arcade. */
-  clip-path: polygon(0 0, 100% 0, 96% 100%, 4% 100%);
 }
 
 .paperSun {
   position: absolute;
-  top: 13%;
-  right: 9%;
-  width: clamp(58px, 6.2vw, 94px);
+  top: 27%;
+  right: 16%;
+  width: clamp(82px, 7.8vw, 124px);
   aspect-ratio: 1;
   z-index: 0;
   filter: drop-shadow(5px 6px 0 rgba(31, 49, 61, .3));
@@ -266,16 +263,17 @@
 }
 
 .invitation[data-night="true"] .paperSun {
-  translate: 0 150%;
-  rotate: 18deg;
-  opacity: .08;
+  translate: 0 -125%;
+  rotate: -12deg;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .invitationMoon {
   position: absolute;
-  top: 13%;
-  right: 9%;
-  width: clamp(58px, 6.2vw, 94px);
+  top: 27%;
+  right: 16%;
+  width: clamp(82px, 7.8vw, 124px);
   aspect-ratio: 1;
   border: 2px solid #8c7659;
   border-radius: 50%;
@@ -303,38 +301,61 @@
 
 .cathedralLights {
   position: absolute;
-  right: 9%;
-  bottom: -8%;
-  left: 9%;
-  height: 92%;
+  right: 7%;
+  bottom: 12%;
+  left: 7%;
+  height: 58%;
   background:
-    radial-gradient(ellipse at 19% 100%, rgba(255,190,87,.6), transparent 22%),
-    radial-gradient(ellipse at 39% 100%, rgba(255,201,104,.48), transparent 25%),
-    radial-gradient(ellipse at 61% 100%, rgba(255,201,104,.48), transparent 25%),
-    radial-gradient(ellipse at 81% 100%, rgba(255,190,87,.6), transparent 22%);
-  z-index: 2;
+    linear-gradient(84deg, transparent 0 9%, rgba(255,211,139,.19) 16%, transparent 24%),
+    linear-gradient(94deg, transparent 29%, rgba(255,219,153,.22) 38%, transparent 47%),
+    linear-gradient(86deg, transparent 53%, rgba(255,219,153,.22) 62%, transparent 71%),
+    linear-gradient(96deg, transparent 76%, rgba(255,211,139,.19) 84%, transparent 92%),
+    radial-gradient(ellipse at 50% 88%, rgba(255,195,103,.34), transparent 31%);
+  z-index: 4;
+  clip-path: polygon(3% 100%, 4% 49%, 11% 49%, 13% 26%, 20% 26%, 22% 8%, 31% 8%, 36% 0, 64% 0, 69% 8%, 78% 8%, 80% 26%, 87% 26%, 89% 49%, 96% 49%, 97% 100%);
   mix-blend-mode: screen;
   opacity: 0;
   pointer-events: none;
   transition: opacity 900ms ease;
 }
 
-.invitation[data-night="true"] .cathedralLights { opacity: .88; }
+.cathedralLights::after {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 59%, rgba(255,181,75,.58) 0 2%, transparent 5%),
+    radial-gradient(ellipse at 36% 72%, rgba(255,187,83,.4) 0 1.5%, transparent 4%),
+    radial-gradient(ellipse at 64% 72%, rgba(255,187,83,.4) 0 1.5%, transparent 4%);
+  content: "";
+}
+
+.invitation[data-night="true"] .cathedralLights { opacity: 1; }
 
 .moonSpotlight {
   position: absolute;
   inset: 0;
-  z-index: 3;
-  background:
-    radial-gradient(ellipse at 23% 91%, rgba(246,239,197,.38) 0 7%, rgba(204,222,225,.16) 18%, transparent 31%);
-  clip-path: polygon(85% 12%, 94% 12%, 43% 100%, 4% 100%);
+  z-index: 7;
+  background: linear-gradient(108deg, transparent, rgba(250,240,186,.14) 48%, rgba(203,222,222,.06) 76%, transparent);
+  clip-path: polygon(80% 9%, 87% 9%, 39% 100%, 14% 100%);
+  filter: blur(13px);
   mix-blend-mode: screen;
   opacity: 0;
   pointer-events: none;
   transition: opacity 1s ease;
 }
 
-.invitation[data-night="true"] .moonSpotlight { opacity: 1; }
+.invitation[data-night="true"] .moonSpotlight { opacity: .62; }
+
+.moonSpotlight::after {
+  position: absolute;
+  right: 56%;
+  bottom: -2%;
+  width: 42%;
+  height: 34%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(249,240,190,.2), rgba(206,224,220,.07) 48%, transparent 72%);
+  content: "";
+}
 
 .invitation[data-night="true"] .paperCloud {
   filter: brightness(.72) saturate(.72) drop-shadow(3px 4px 0 rgba(10,22,38,.28));
@@ -448,14 +469,14 @@
 }
 
 .cloudOne {
-  top: 24%;
+  top: 31%;
   left: -25%;
   rotate: -2deg;
 }
 
 .cloudTwo {
   --cloud-scale: .78;
-  top: 48%;
+  top: 57%;
   left: -25%;
   width: clamp(100px, 10.5vw, 158px);
   height: clamp(25px, 2.7vw, 39px);
@@ -499,7 +520,7 @@
   display: block;
   width: 100%;
   height: 100%;
-  filter: drop-shadow(3px 4px 0 rgba(35, 53, 63, .2));
+  filter: drop-shadow(3px 4px 0 rgba(54, 42, 33, .3));
 }
 
 .paperPigeon::before {
@@ -508,10 +529,12 @@
   left: 18%;
   width: 66%;
   height: 50%;
-  border: 2px solid #303a40;
+  border: 2px solid #493f39;
   border-radius: 52% 58% 48% 52%;
-  background: #858f92;
-  box-shadow: inset -9px -3px 0 #657176;
+  background:
+    repeating-linear-gradient(88deg, rgba(71,58,48,.1) 0 1px, transparent 1px 5px),
+    #94928c;
+  box-shadow: 2px 2px 0 #b98c5d, inset -9px -3px 0 #6d7472;
   rotate: 4deg;
   content: "";
 }
@@ -522,12 +545,13 @@
   right: 1%;
   width: 32%;
   aspect-ratio: 1;
-  border: 2px solid #303a40;
+  border: 2px solid #493f39;
   border-radius: 50%;
   background:
     radial-gradient(circle at 66% 31%, #171c1e 0 5%, #d7aa55 6% 9%, transparent 10%),
-    #90999b;
-  box-shadow: inset -5px -2px 0 #56746e;
+    repeating-linear-gradient(90deg, rgba(77,59,45,.09) 0 1px, transparent 1px 5px),
+    #9b9992;
+  box-shadow: 2px 2px 0 #b98c5d, inset -5px -2px 0 #667973;
   content: "";
 }
 
@@ -537,10 +561,12 @@
   left: 36%;
   width: 43%;
   height: 64%;
-  border: 2px solid #303a40;
+  border: 2px solid #493f39;
   background:
     linear-gradient(104deg, transparent 0 44%, #3d474c 45% 49%, transparent 50% 62%, #3d474c 63% 67%, transparent 68%),
-    #667278;
+    repeating-linear-gradient(87deg, rgba(58,48,42,.1) 0 1px, transparent 1px 5px),
+    #727a7b;
+  box-shadow: 2px 2px 0 #b98c5d;
   clip-path: polygon(9% 76%, 16% 21%, 48% 0, 100% 38%, 72% 83%, 25% 100%);
   transform-origin: 78% 72%;
 }
@@ -562,8 +588,8 @@
   left: 1%;
   width: 25%;
   height: 27%;
-  border: 1px solid #303a40;
-  background: #4d585e;
+  border: 1px solid #493f39;
+  background: repeating-linear-gradient(88deg, rgba(52,44,38,.12) 0 1px, transparent 1px 4px), #596164;
   clip-path: polygon(100% 10%, 18% 0, 34% 42%, 0 82%, 83% 100%);
 }
 
@@ -598,50 +624,56 @@
 
 .placeBillboard {
   position: absolute;
-  top: 9%;
-  left: 6%;
-  z-index: 6;
+  top: 13%;
+  left: 3.2%;
+  z-index: 9;
   display: grid;
   min-width: 0;
-  max-width: clamp(128px, 13vw, 190px);
-  padding: .42rem .75rem .38rem;
-  border: 1px solid #c3a05c;
+  width: clamp(190px, 20vw, 296px);
+  max-width: none;
+  padding: .72rem 1rem .66rem;
+  border: 2px solid #8f8477;
+  border-radius: 2px;
   background:
-    repeating-linear-gradient(88deg, rgba(100, 62, 39, .07) 0 1px, transparent 1px 5px),
-    #173c35;
-  box-shadow: 3px 4px 0 #0b2629, 5px 6px 0 rgba(22,37,47,.2);
-  color: #ecd18c;
-  font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(.62rem, .54rem + .18vw, .76rem);
-  font-weight: 600;
-  letter-spacing: .055em;
-  line-height: 1.25;
+    linear-gradient(103deg, transparent 0 31%, rgba(139,126,111,.11) 32% 33%, transparent 34% 66%, rgba(139,126,111,.08) 67% 68%, transparent 69%),
+    repeating-linear-gradient(87deg, rgba(91,79,67,.055) 0 1px, transparent 1px 6px),
+    #eee7d9;
+  box-shadow: 3px 3px 0 #b58b60, 6px 7px 0 rgba(31,35,36,.24);
+  color: #282a29;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(.75rem, .67rem + .28vw, .98rem);
+  font-weight: 700;
+  letter-spacing: .075em;
+  line-height: 1.15;
   text-align: center;
-  text-transform: none;
-  rotate: -1deg;
+  text-transform: uppercase;
+  rotate: -.4deg;
 }
 
 .placeBillboard::before,
 .placeBillboard::after {
   position: absolute;
-  bottom: 100%;
-  width: 1px;
-  height: clamp(30px, 5vh, 54px);
-  border: 0;
-  background: #b89b68;
+  top: 50%;
+  width: 7px;
+  aspect-ratio: 1;
+  border: 1px solid #746b61;
+  border-radius: 50%;
+  background: #b9aea0;
+  box-shadow: inset 1px 1px 0 #f8f2e7, 1px 1px 0 rgba(77,61,48,.2);
   content: "";
+  transform: translateY(-50%);
 }
 
-.placeBillboard::before { left: 18%; }
-.placeBillboard::after { right: 18%; }
+.placeBillboard::before { left: .45rem; }
+.placeBillboard::after { right: .45rem; }
 
 .madonninaHotspot {
   position: absolute;
-  top: 28%;
-  left: 48.5%;
+  top: 27%;
+  left: 47.6%;
   z-index: 7;
-  width: clamp(28px, 2.5vw, 40px);
-  height: clamp(62px, 6vw, 92px);
+  width: clamp(52px, 4.4vw, 72px);
+  height: clamp(90px, 8vw, 126px);
   padding: 0;
   border: 0;
   background: transparent;
@@ -652,32 +684,45 @@
 
 .madonninaSpark {
   position: absolute;
-  top: 10%;
+  top: 3%;
   left: 50%;
-  width: 9px;
+  width: 68%;
   aspect-ratio: 1;
   display: block;
-  background: #f6d66f;
-  clip-path: polygon(50% 0,62% 36%,100% 50%,62% 64%,50% 100%,38% 64%,0 50%,38% 36%);
-  filter: drop-shadow(0 0 5px #f0b644);
+  border: 3px double #f6d66f;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,227,125,.5), transparent 62%);
+  box-shadow: 0 0 0 7px rgba(240,182,68,.2), 0 0 18px #f0b644;
   opacity: 0;
+  transform: translateX(-50%) scale(.35);
 }
 
+.madonninaSpark::before,
+.madonninaSpark::after {
+  position: absolute;
+  background: #f6d66f;
+  clip-path: polygon(50% 0,61% 38%,100% 50%,61% 62%,50% 100%,39% 62%,0 50%,39% 38%);
+  content: "";
+}
+
+.madonninaSpark::before { inset: -28%; }
+.madonninaSpark::after { inset: 18%; background: #fff1ad; }
+
 .madonninaHotspot[data-waving="true"] {
-  animation: madonninaBow 1.6s ease-in-out;
+  animation: madonninaBow 2.2s ease-in-out;
 }
 
 .madonninaHotspot[data-waving="true"] .madonninaSpark {
-  animation: madonninaBlessing 1.6s ease-in forwards;
+  animation: madonninaBlessing 2.2s ease-in-out forwards;
 }
 
 .pigeonPerch {
   position: absolute;
-  right: 3.5%;
-  bottom: 5%;
+  right: 9%;
+  bottom: 6%;
   z-index: 8;
-  width: clamp(120px, 13vw, 198px);
-  height: clamp(70px, 10vw, 132px);
+  width: clamp(176px, 18vw, 276px);
+  height: clamp(100px, 13vw, 172px);
   padding: 0;
   border: 0;
   background: transparent;
@@ -834,20 +879,133 @@
 
 .invitation .coupleLayer img {
   object-position: center bottom;
-  filter: saturate(.82) contrast(1.06) brightness(.92) drop-shadow(0 12px 9px rgba(15,23,24,.28));
+  filter: saturate(.82) contrast(1.06) brightness(.92);
 }
 
 .invitation .coupleLayer::before {
-  right: 10%;
+  display: none;
+}
+
+.foregroundCurtains {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.curtainRevealLeft,
+.curtainRevealRight {
+  position: absolute;
+  top: 0;
   bottom: 0;
-  left: 10%;
-  height: 6%;
+  z-index: 2;
+  width: 52%;
+  border: 2px solid #6e2f37;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,214,154,.07) 0 2px, transparent 2px 24px),
+    repeating-linear-gradient(88deg, rgba(67,22,31,.18) 0 1px, transparent 1px 6px),
+    #7f2f3e;
+  box-shadow: inset 0 0 0 5px rgba(202,149,66,.26), inset 0 -18px 0 rgba(68,25,32,.22);
+}
+
+.curtainRevealLeft {
+  left: 0;
+  clip-path: polygon(0 0,100% 0,96% 8%,100% 18%,96% 28%,100% 38%,96% 48%,100% 58%,96% 68%,100% 78%,96% 88%,100% 100%,0 100%);
+}
+
+.curtainRevealRight {
+  right: 0;
+  clip-path: polygon(0 0,100% 0,100% 100%,0 100%,4% 88%,0 78%,4% 68%,0 58%,4% 48%,0 38%,4% 28%,0 18%,4% 8%);
+}
+
+:global([data-motion="on"]) .curtainRevealLeft {
+  animation: openingCurtainLeft 1.8s .15s cubic-bezier(.7,0,.2,1) both;
+}
+
+:global([data-motion="on"]) .curtainRevealRight {
+  animation: openingCurtainRight 1.8s .15s cubic-bezier(.7,0,.2,1) both;
+}
+
+.weddingStars {
+  position: absolute;
+  top: 11%;
+  left: 27%;
+  z-index: 8;
+  width: 42%;
+  height: 20%;
+  padding: 0;
   border: 0;
-  border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(13,24,25,.58), transparent 72%);
-  box-shadow: none;
-  filter: blur(2px);
-  transform: scaleX(.88);
+  background: transparent;
+  color: #f6d778;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 700ms ease;
+}
+
+.invitation[data-night="true"] .weddingStars {
+  opacity: .58;
+  pointer-events: auto;
+}
+
+.weddingStars span {
+  position: absolute;
+  width: clamp(7px, .8vw, 12px);
+  aspect-ratio: 1;
+  background: #f6d778;
+  clip-path: polygon(50% 0,61% 38%,100% 50%,61% 62%,50% 100%,39% 62%,0 50%,39% 38%);
+  filter: drop-shadow(0 0 4px rgba(246,215,120,.7));
+  scale: .65;
+  transition: scale 550ms ease, rotate 700ms ease;
+}
+
+.starOne { top: 12%; left: 9%; }
+.starTwo { top: 58%; left: 24%; }
+.starThree { top: 7%; right: 35%; }
+.starFour { top: 62%; right: 19%; }
+.starFive { top: 25%; right: 2%; }
+
+.weddingStars strong {
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  color: #f6d778;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(.8rem, 1.4vw, 1.25rem);
+  letter-spacing: .14em;
+  opacity: 0;
+  text-shadow: 0 2px 0 #614128, 0 0 10px rgba(246,215,120,.55);
+  transform: translate(-50%, 8px);
+  transition: opacity 550ms ease, transform 550ms ease;
+  white-space: nowrap;
+}
+
+.weddingStars[data-visible="true"] { opacity: 1; }
+.weddingStars[data-visible="true"] span { scale: 1.35; rotate: 45deg; }
+.weddingStars[data-visible="true"] strong { opacity: 1; transform: translate(-50%, 0); }
+
+.foregroundCurtainTop,
+.foregroundCurtainLeft,
+.foregroundCurtainRight {
+  position: absolute;
+  inset: 0;
+  background-image: url("/scene/paper-theatre/scene-entrance-duomo-cromolitografia-v2.jpg");
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.foregroundCurtainTop {
+  clip-path: polygon(0 0,100% 0,100% 7.8%,92% 8.3%,84% 7.4%,75% 8.6%,66% 7.6%,58% 8.8%,50% 7.8%,42% 8.8%,34% 7.6%,25% 8.6%,16% 7.4%,8% 8.3%,0 7.8%);
+}
+
+.foregroundCurtainLeft {
+  clip-path: polygon(0 0,13% 0,9.5% 14%,11.5% 31%,9.4% 49%,11.5% 66%,9.6% 82%,13% 100%,0 100%);
+}
+
+.foregroundCurtainRight {
+  clip-path: polygon(87% 0,100% 0,100% 100%,87% 100%,90.4% 82%,88.5% 66%,90.6% 49%,88.5% 31%,90.5% 14%);
 }
 
 .chapterPropLayer {
@@ -1306,73 +1464,73 @@
 }
 
 @keyframes madonninaBow {
-  0%, 100% { rotate: 0deg; }
-  38% { rotate: 3deg; }
-  68% { rotate: -1deg; }
+  0%, 100% { rotate: 0deg; scale: 1; }
+  34% { rotate: 2deg; scale: 1.03; }
+  68% { rotate: -1deg; scale: 1; }
 }
 
 @keyframes madonninaBlessing {
-  0% { opacity: 0; transform: translate3d(-50%, 0, 0) scale(.5) rotate(0); }
-  18% { opacity: 1; }
-  72% { opacity: 1; transform: translate3d(-900%, 46vh, 0) scale(1.15) rotate(220deg); }
-  100% { opacity: 0; transform: translate3d(-1150%, 65vh, 0) scale(.7) rotate(360deg); }
+  0% { opacity: 0; transform: translateX(-50%) scale(.35) rotate(0); }
+  22% { opacity: 1; transform: translateX(-50%) scale(1) rotate(45deg); }
+  62% { opacity: 1; transform: translateX(-50%) scale(1.35) rotate(135deg); }
+  100% { opacity: 0; transform: translateX(-50%) scale(1.65) rotate(210deg); }
 }
 
 @keyframes flockRouteOne {
   0%,100% { transform:translate3d(0,0,0) rotate(0); }
   18% { transform:translate3d(-24vw,-18vh,0) rotate(-12deg); }
   36% { transform:translate3d(-58vw,-42vh,0) rotate(5deg); }
-  48% { opacity:0; transform:translate3d(-90vw,-30vh,0) rotate(8deg); }
-  57% { opacity:0; transform:translate3d(32vw,-40vh,0) rotate(-7deg); }
-  78% { opacity:1; transform:translate3d(12vw,-14vh,0) rotate(4deg); }
+  48% { transform:translate3d(-90vw,-30vh,0) rotate(8deg); }
+  57% { transform:translate3d(32vw,-40vh,0) rotate(-7deg); }
+  78% { transform:translate3d(12vw,-14vh,0) rotate(4deg); }
 }
 
 @keyframes flockRouteTwo {
   0%,100% { transform:translate3d(0,0,0) rotate(0); }
   20% { transform:translate3d(-12vw,-34vh,0) rotate(-8deg); }
-  39% { opacity:0; transform:translate3d(-25vw,-78vh,0) rotate(6deg); }
-  51% { opacity:0; transform:translate3d(-82vw,18vh,0) rotate(-5deg); }
-  76% { opacity:1; transform:translate3d(-18vw,-10vh,0) rotate(3deg); }
+  39% { transform:translate3d(-25vw,-78vh,0) rotate(6deg); }
+  51% { transform:translate3d(-82vw,18vh,0) rotate(-5deg); }
+  76% { transform:translate3d(-18vw,-10vh,0) rotate(3deg); }
 }
 
 @keyframes flockRouteThree {
   0%,100% { transform:translate3d(0,0,0) rotate(0); }
   22% { transform:translate3d(18vw,-26vh,0) rotate(9deg); }
-  42% { opacity:0; transform:translate3d(48vw,-52vh,0) rotate(-6deg); }
-  55% { opacity:0; transform:translate3d(-88vw,-20vh,0) rotate(7deg); }
-  79% { opacity:1; transform:translate3d(-14vw,-12vh,0) rotate(-3deg); }
+  42% { transform:translate3d(48vw,-52vh,0) rotate(-6deg); }
+  55% { transform:translate3d(-88vw,-20vh,0) rotate(7deg); }
+  79% { transform:translate3d(-14vw,-12vh,0) rotate(-3deg); }
 }
 
 @keyframes flockRouteFour {
   0%,100% { transform:translate3d(0,0,0) rotate(0); }
   20% { transform:translate3d(-36vw,-14vh,0) rotate(-11deg); }
-  40% { opacity:0; transform:translate3d(-86vw,10vh,0) rotate(8deg); }
-  53% { opacity:0; transform:translate3d(38vw,-68vh,0) rotate(-4deg); }
-  78% { opacity:1; transform:translate3d(13vw,-15vh,0) rotate(3deg); }
+  40% { transform:translate3d(-86vw,10vh,0) rotate(8deg); }
+  53% { transform:translate3d(38vw,-68vh,0) rotate(-4deg); }
+  78% { transform:translate3d(13vw,-15vh,0) rotate(3deg); }
 }
 
 @keyframes flockRouteFive {
   0%,100% { transform:translate3d(0,0,0) rotate(0); }
   19% { transform:translate3d(14vw,-40vh,0) rotate(8deg); }
-  38% { opacity:0; transform:translate3d(31vw,-82vh,0) rotate(-5deg); }
-  52% { opacity:0; transform:translate3d(-91vw,-54vh,0) rotate(6deg); }
-  79% { opacity:1; transform:translate3d(-17vw,-16vh,0) rotate(-2deg); }
+  38% { transform:translate3d(31vw,-82vh,0) rotate(-5deg); }
+  52% { transform:translate3d(-91vw,-54vh,0) rotate(6deg); }
+  79% { transform:translate3d(-17vw,-16vh,0) rotate(-2deg); }
 }
 
 @keyframes flockRouteSix {
   0%,100% { transform:translate3d(0,0,0) rotate(0); }
   23% { transform:translate3d(-17vw,-23vh,0) rotate(-9deg); }
-  43% { opacity:0; transform:translate3d(-50vw,-57vh,0) rotate(5deg); }
-  56% { opacity:0; transform:translate3d(44vw,-22vh,0) rotate(-7deg); }
-  80% { opacity:1; transform:translate3d(11vw,-11vh,0) rotate(3deg); }
+  43% { transform:translate3d(-50vw,-57vh,0) rotate(5deg); }
+  56% { transform:translate3d(44vw,-22vh,0) rotate(-7deg); }
+  80% { transform:translate3d(11vw,-11vh,0) rotate(3deg); }
 }
 
 @keyframes flockRouteSeven {
   0%,100% { transform:translate3d(0,0,0) rotate(0); }
   18% { transform:translate3d(-31vw,-37vh,0) rotate(-10deg); }
-  37% { opacity:0; transform:translate3d(-67vw,-81vh,0) rotate(7deg); }
-  54% { opacity:0; transform:translate3d(51vw,7vh,0) rotate(-6deg); }
-  80% { opacity:1; transform:translate3d(15vw,-13vh,0) rotate(2deg); }
+  37% { transform:translate3d(-67vw,-81vh,0) rotate(7deg); }
+  54% { transform:translate3d(51vw,7vh,0) rotate(-6deg); }
+  80% { transform:translate3d(15vw,-13vh,0) rotate(2deg); }
 }
 
 @keyframes perchFlightOne {
@@ -1406,6 +1564,16 @@
   0% { left: -25%; translate: 0 2px; }
   52% { translate: 0 -3px; }
   100% { left: 105%; translate: 0 2px; }
+}
+
+@keyframes openingCurtainLeft {
+  from { transform: translateX(0); }
+  to { transform: translateX(-104%); }
+}
+
+@keyframes openingCurtainRight {
+  from { transform: translateX(0); }
+  to { transform: translateX(104%); }
 }
 
 @keyframes pigeonFlyRight {
@@ -1445,8 +1613,17 @@
   .coupleLayer { left: 5%; width: 25%; height: 48%; }
   .skyLife { right: 3%; left: 3%; }
   .invitation .coupleLayer { left: 8%; width: 16%; height: 31%; }
-  .placeBillboard { top: 34%; left: 5%; }
-  .pigeonPerch { right: 2%; bottom: 3%; }
+  .placeBillboard {
+    top: 13%;
+    left: 3.5%;
+    width: clamp(168px, 32vw, 238px);
+  }
+  .pigeonPerch {
+    right: 7%;
+    bottom: 4%;
+    width: clamp(158px, 27vw, 228px);
+    height: clamp(92px, 19vw, 148px);
+  }
   .map .duomoLayer { right: 15%; width: 65%; height: 55%; }
   .map .tramLayer { width: 31%; height: 20%; }
   .map .coupleLayer { width: 18%; height: 31%; }
