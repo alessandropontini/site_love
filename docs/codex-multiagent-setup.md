@@ -1,5 +1,7 @@
 # Codex Review Setup
 
+Use this setup only for a release or a high-risk change identified in `AGENTS.md` and `docs/ai-workflow.md`. Routine, scoped work does not need this separate review.
+
 ## Prerequisites
 
 - Run commands from the repository root.

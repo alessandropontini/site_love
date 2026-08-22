@@ -1,21 +1,51 @@
-# Visual Direction — Teatro di cartone
+# Visual Direction — Editorial wedding site
 
-This document is the source of truth for the mounted public experience.
+This document is the source of truth for the canonical guest-facing editorial home. Paper-theatre notes are retained below only for the dormant game code and do not describe a guest route.
 
 ## North Star
 
-- Experience concept: **Milano come un piccolo teatro di cartone da attraversare**.
-- Structure: invitation → theatre index → four illustrated book chapters → collected props → final Duomo letter.
-- Visual principle: every screen is a new arrangement of the same tactile cardboard theatre.
+- Experience concept: **una storia matrimoniale editoriale, calda e tattile, con accenti di carta**.
+- Public structure: invitation and story → personal photographic album → Casa Nuova Niviano → informational RSVP → open letter.
+- Visual principle: the root alternates large typographic, photographic, and color scenes while keeping one continuous reading flow.
 - Emotional target: adult, intimate, cinematic, and playful without becoming childish or kitsch.
-- Runtime boundary: local CSS, SVG, and optimized images only; no paid API, remote asset dependency, video, WebGL, or animation library.
+- Runtime boundary: local CSS, SVG, optimized images, and one lazy Three.js scene in the root hero; no paid API, remote asset dependency, video, or general animation library.
 
-The earlier pixel/handheld direction has been retired from the public route. Pixel components and assets remain only inside unmounted legacy implementations.
+The pixel/handheld and paper-theatre game directions are outside the public site. Their components and assets remain only as unmounted retained implementations.
 
-## Implemented system
+## Editorial home system
+
+- Palette: blush `#EAC5C0`, cream `#FAF7F5`, burgundy `#261B20`, dark olive `#242B16`, taupe `#C29983`, muted gold `#9B7948`, and near-black footer.
+- A 12-column desktop grid, fluid Newsreader display type, Instrument Sans controls, large whitespace, irregular image rhythm, and section-scale color changes carry the editorial narrative.
+- The hero combines a low-contrast original Galleria scene, readable DOM copy, a CSS poster fallback, and a thin WebGL invitation. Three.js is dynamically imported only by `HeroInvitation3D`.
+- The invitation uses generated canvas faces rather than copied textures. It responds to pointer drag, hover tilt, buttons, and arrow keys; the renderer sleeps when settled, offscreen, or backgrounded.
+- The story uses semantic editorial scenes. Phones linearize the route vertically with no required gesture.
+- The gallery uses approved local personal photographs with EXIF, GPS, and unnecessary metadata removed. No stock couple photography is mounted.
+- The location section focuses on Casa Nuova Niviano and uses facts and the outbound link from the venue's official website.
+- Authorized Casa Nuova photography is still pending. Until it is supplied, use an intentional editorial placeholder or original project visual, never an unlicensed web image.
+- RSVP is a calm informational section, not a simulated form. It explains that each household will later receive a personal QR code.
+- Letter and colophon use native modal dialogs with Escape, focus containment, and focus return.
+
+### Casa Nuova Niviano scene
+
+- Treat the venue as the physical destination of the page, not another generic story stop.
+- Use the official [Casa Nuova Niviano website](https://www.casanuovaniviano.com/) for factual orientation and the external link label.
+- Keep address, services, timing, and travel guidance out of the design until they are confirmed by the couple or official venue material.
+- Do not download or imitate venue photography from the web. Reserve a strong, clearly intentional frame for authorized imagery still to be supplied.
+- When authorized files arrive, match the editorial crop rhythm, remove metadata, preserve natural color, and avoid filters that misrepresent the place.
+
+### RSVP scene
+
+- RSVP should feel like the practical next chapter of the invitation, with high contrast, short copy, and a direct heading.
+- Today it shows status and explains the future personal QR flow; it contains no fields, fake submit button, or fake confirmation.
+- The future personalized experience belongs at `/rsvp/[token]` with server-side data. Guest names, token values, and real/scannable QR graphics are never decorative page content or static public assets; a current QR motif must stay visibly non-functional and `aria-hidden`.
+- If games return, their visual surface and QR remain separate from RSVP.
+
+## Dormant paper-theatre system
+
+This system is retained in source but is not mounted or reachable from the wedding site. Preserving its palette and mechanics does not authorize a public game route.
 
 - The stage uses one opaque illustrated panorama plus, only where narratively useful, a small number of cardboard performers. Every visible paper object is fully opaque; transparency is reserved for the empty pixels around PNG cut-outs.
-- The public route mounts opaque JPEG panoramas and transparent PNG overlays from `public/scene/paper-theatre/`. The PNG fallback avoids black alpha rectangles in Android browsers and embedded preview viewers.
+- A future separate game surface may mount opaque JPEG panoramas and transparent PNG overlays from `public/scene/paper-theatre/`. The PNG fallback avoids black alpha rectangles in Android browsers and embedded preview viewers.
 - `components/experience/art/PaperArt.tsx` composes the shared scene and renders chapter-specific paper reward symbols.
 - `PaperArt.module.css` owns the proscenium, curtains, lighting, skyline, paper texture, depth, and restrained scene motion.
 - `ExperienceShell.module.css` owns readable UI, map states, game controls, reward, inventory, finale, and responsive behavior.
@@ -48,7 +78,9 @@ Core tokens:
 - Shadows describe the distance between cardboard planes, not glossy cards or floating SaaS panels.
 - Avoid tape, random tears, doodles, pastel craft colors, plastic 3D, and heart confetti.
 
-## Scene grammar
+## Retained game scene grammar
+
+The following invitation, index, acts, rewards, and finale notes apply only to the unmounted paper-theatre source.
 
 ### Invitation
 
@@ -105,18 +137,25 @@ Core tokens:
 
 ## Motion
 
-- Animate only opacity, transform, simple SVG progress, and window-light state.
-- One dominant animation per screen; parallax remains below roughly 12 px.
-- Curtains animate only on the invitation, not on every action.
-- On the invitation, the panorama resolves with a short optical settle and the couple is placed gently. Rigid paper clouds and pigeons move as whole cut-outs; the sun remains still.
-- Only the far-background sky layer may loop: clouds drift on 28–38 second cycles; two pigeons cross on staggered 14–18 second cycles and one smaller silhouette hovers gently. The movement remains visible without competing with the CTA.
+On the editorial home, movement is limited to the invitation entrance/float, pointer tilt, smooth in-page navigation, optional gallery drift, and envelope feedback. Three.js renders on demand rather than maintaining a perpetual loop.
+
+- Animate only opacity and transform for public decoration.
+- One dominant animation per section; parallax remains below roughly 12 px.
+- Scrolling initiated by navigation is smooth unless the visitor prefers reduced motion.
+- Do not animate personal or venue photographs in a way that obscures faces, crops essential detail, or delays reading.
 - No flicker, autoplay audio, vibration, or rapidly repeating light.
-- `prefers-reduced-motion` and the saved user toggle disable scene translation, pulses, and timed visual playback.
+- `prefers-reduced-motion` disables decorative translation, drift, and long transitions while keeping every action immediate.
 
 ## Responsive and performance rules
 
+- Root validation targets: 320, 390, 768, 1024, and 1440 px.
+- Root phone order is copy/actions before the invitation, vertical story, one-column gallery, Casa Nuova location, RSVP, letter, and footer.
+- Every root target is at least 44×44 px. The phone navigation is fixed to the bottom safe area and the language selector remains available in the top bar and footer.
+- Three.js DPR is capped at 1.75 desktop and 1.25 phone; phone textures are smaller and antialiasing is disabled.
+- Local personal images and explicitly selected editorial art use `next/image`; below-fold media remains lazy. The social card is metadata-only.
+
 - `≤ 480px`: one column, copy/CTA before scenery, touch targets at least 44×44 px.
-- `481–899px`: compact scene above content; games stay in a single readable column.
+- `481–899px`: compact scene above content; every public section stays in a single readable flow.
 - `≥ 900px`: split composition with roughly 42% copy and 58% stage.
 - Validate at 320×568, 390×844, and desktop.
 - Maximum one opaque panorama and two transparent overlays per illustrated stage.
@@ -134,21 +173,26 @@ Core tokens:
 
 ## Photography plan
 
-Original photographs are not yet present. When supplied:
+Approved personal photographs are local and replace the earlier abstract gallery placeholders. For every new or replacement image:
 
-- strip EXIF metadata;
-- resize and export as AVIF/WebP for the real display size;
-- reveal one authentic photograph per act and one portrait after the final letter;
+- strip EXIF, GPS, timestamp, and device metadata;
+- apply orientation, then resize and export for the real display size;
+- update the configured slot in `lib/editorialConfig.ts` while retaining a deliberate aspect ratio;
 - do not re-enable placeholder stock metadata from `lib/photos.ts`;
-- keep every caption and narrative detail in HTML.
+- keep every caption and narrative detail in HTML;
+- confirm publication approval for each recognisable person.
 
-## Active asset provenance
+Authorized photographs of Casa Nuova Niviano have not yet been supplied. Do not substitute copies from the official website, search engines, social networks, or booking portals. Keep a deliberate venue placeholder until reusable files arrive.
 
-The mounted full-stage files are the opaque `scene-*.jpg` backgrounds. The invitation mounts `scene-entrance-duomo-cromolitografia-v2.jpg`, the selected proposal 02 recomposed specifically for the tall split-screen stage. It preserves the early-1900s chromolithographic theatre language, gives the upper animations real sky space, grounds the couple on a generous piazza floor and renders the traditional Madonnina in antique gold leaf paper. The approved Galleria scene remains intact as `scene-entrance-galleria-v6.jpg` and is reused for the first story stop. Earlier entrance scenes remain versioned rollback assets.
+See `docs/editorial-home.md` for the replacement steps and asset budget.
 
-Ten alternative Duomo directions are preserved under `public/duomo-proposals/` and presented at `/duomo-proposals` for art-direction voting. They share a lower cathedral scale and generous upper sky so the sun, moon, clouds and location plaque can remain separate interactive HTML layers.
+## Retained paper-theatre asset provenance
 
-The scenes assign one visual role to each setting: Galleria at the entrance and chapter one, Naviglio Grande with spring jasmine in chapter two, Arco della Pace in chapter three, Adelchi in chapter four, and the Duomo only in the finale. Chapter one changes focus from the broad entrance view to a closer ticket-and-signal composition. `tram-cardboard.png` and `couple-cardboard.png` are the only mounted transparent performers and use PNG compatibility fallbacks. The original WebP flats and cutouts remain as editable source or rollback assets, not as Android-facing alpha layers.
+The dormant game source retains opaque `scene-*.jpg` backgrounds and transparent compatibility overlays. The public home loads only the files explicitly referenced by its editorial components. Earlier entrance scenes remain versioned rollback assets.
+
+Ten alternative Duomo directions remain under `public/duomo-proposals/` as internal art-direction references. They are not part of the wedding-site flow.
+
+The retained scenes assign one visual role to each setting: Galleria, Naviglio Grande, Arco della Pace, Adelchi, and the Duomo finale. The original WebP flats and cutouts remain editable source or rollback assets rather than public-home content.
 
 The invitation art direction uses [The Paper Architect](https://www.studiomcguire.com/thepaperarchitect) as the primary paper-architecture and theatre benchmark, [Micropolis](https://www.studiomcguire.com/micropolis) for believable scale, [Paperholm](https://www.paperholm.com/) for mechanical micro-motion, and [Owen Gildersleeve](https://owengildersleeve.com/art) for coherent layers, edges, light, and shadow.
 
@@ -156,4 +200,4 @@ Five original props add a transit ticket, analog tuning radio, jasmine postcard,
 
 The Adelchi flat was generated as an original cardboard composition after checking the venue's address and multiple public open/closed facade references. Research sources: [Birrificio Lambrate official site](https://birrificiolambrate.com/), Andy Mabbett's four 2019 facade photographs on Wikimedia Commons ([view 01](https://commons.wikimedia.org/wiki/File:Birrificio_Lambrate_(Adelchi)_-_2019-06-30_-_Andy_Mabbett_-_01.jpg), [view 02](https://commons.wikimedia.org/wiki/File:Birrificio_Lambrate_(Adelchi)_-_2019-06-30_-_Andy_Mabbett_-_02.jpg), [view 03](https://commons.wikimedia.org/wiki/File:Birrificio_Lambrate_(Adelchi)_-_2019-06-30_-_Andy_Mabbett_-_03.jpg), [view 04](https://commons.wikimedia.org/wiki/File:Birrificio_Lambrate_(Adelchi)_-_2019-06-30_-_Andy_Mabbett_-_04.jpg)), and Bernt Rostad's [2009 open-front view](https://www.flickr.com/photos/brostad/3444030976). Those photographs are references only and are not shipped, traced, or embedded. The final asset omits logos, copied signs, readable graffiti, cars, and people; its generated chroma background was removed locally and the transparent result was converted to WebP.
 
-All mounted landmark designs are original paper-theatre compositions rather than copied photographs. The final JPEG panoramas were flattened from the project's own cardboard layers; they contain no remote runtime assets and no alpha channel. The earlier `milan-windows-cardboard.webp`, `navigli-spring-cardboard.webp`, `navigli-cardboard.webp`, and `*-paper.webp` files remain as rollback assets but are not mounted.
+The retained landmark designs are original paper-theatre compositions rather than copied photographs. Their final JPEG panoramas were flattened from the project's own cardboard layers and contain no remote runtime assets or alpha channel. The earlier `milan-windows-cardboard.webp`, `navigli-spring-cardboard.webp`, `navigli-cardboard.webp`, and `*-paper.webp` files remain rollback assets and are not mounted by the public home.

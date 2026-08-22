@@ -86,9 +86,9 @@ export function PacMazeQuest({
   const [activeDirection, setActiveDirection] = useState<Position | null>(null);
 
   const ghostLagRef = useRef<number>(0);
-  const resetTimeoutRef = useRef<number>();
-  const frameRef = useRef<number>();
-  const lastTimestampRef = useRef<number>();
+  const resetTimeoutRef = useRef<number | undefined>(undefined);
+  const frameRef = useRef<number | undefined>(undefined);
+  const lastTimestampRef = useRef<number | undefined>(undefined);
   const stepAccumulatorRef = useRef<number>(0);
 
   const remaining = hearts.size;

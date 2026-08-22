@@ -21,9 +21,23 @@ const displayFont = Newsreader({
 });
 
 export const metadata: Metadata = {
-  title: "Alessandro & Bridget — La nostra avventura",
+  title: "Alessandro & Bridget — 13 maggio 2028",
   description:
-    "Un teatro di cartone da attraversare insieme: quattro atti, piccoli giochi e un finale da sbloccare."
+    "La nostra storia e le informazioni per il matrimonio a Casa Nuova, Niviano di Rivergaro.",
+  openGraph: {
+    type: "website",
+    locale: "it_IT",
+    siteName: "Alessandro & Bridget",
+    title: "Alessandro & Bridget — 13 maggio 2028",
+    description:
+      "La nostra storia e le informazioni per il matrimonio a Casa Nuova, Niviano di Rivergaro."
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Alessandro & Bridget — 13 maggio 2028",
+    description:
+      "La nostra storia e le informazioni per il matrimonio a Casa Nuova, Niviano di Rivergaro."
+  }
 };
 
 export default function RootLayout({

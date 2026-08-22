@@ -68,8 +68,8 @@ export function FlappyLettersQuest({
   const [cleared, setCleared] = useState<number>(0);
   const [message, setMessage] = useState<string>("Press space or tap to keep the letter aloft.");
 
-  const animationRef = useRef<number>();
-  const lastTimeRef = useRef<number>();
+  const animationRef = useRef<number | undefined>(undefined);
+  const lastTimeRef = useRef<number | undefined>(undefined);
   const runningRef = useRef<boolean>(running);
   const pipesRef = useRef<Pipe[]>([]);
   const clearedRef = useRef<number>(0);

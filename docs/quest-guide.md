@@ -1,8 +1,10 @@
-# Paper-Theatre Experience Guide
+# Retained Paper-Theatre Experience Guide
 
-This guide covers the canonical SITE LOVE narrative mounted by `app/page.tsx`. The public experience is a cardboard-theatre journey through an invitation, a narrative index, four sequential illustrated book chapters, four collected keepsakes, and a gated final letter at the Duomo.
+This guide covers the preserved SITE LOVE paper-theatre source. `ExperienceShell`, its invitation, narrative index, four sequential illustrated book chapters, collected keepsakes, and gated Duomo letter remain in the repository, but no public route mounts or links to them.
 
-## Canonical flow
+Removing the public mount does not delete game code or progress. `localStorage` keys, migrations, and progression rules remain untouched, and ordinary home work must not reset or rewrite them. A future revival requires a separate product decision, route or host, visual review, and distribution QR distinct from RSVP. See `docs/architecture.md` for the current boundary.
+
+## Retained canonical flow
 
 1. `ExperienceShell` restores local progress and shows the invitation.
 2. **Entra nella storia** opens the theatre index in `JourneyMap`.
@@ -11,7 +13,7 @@ This guide covers the canonical SITE LOVE narrative mounted by `app/page.tsx`. T
 5. Returning to the index exposes the next act.
 6. All four configured chapter IDs unlock `FinaleExperience`.
 
-The earlier files under `components/story/`, `components/games/`, `components/quest/`, and `components/pixel/` are not mounted by the public route.
+Neither this paper-theatre tree nor the earlier files under `components/story/`, `components/games/`, `components/quest/`, and `components/pixel/` are mounted by the public route.
 
 ## Configuration and state
 
@@ -34,7 +36,7 @@ Keep chapter order in configuration. Do not duplicate it in UI code. When adding
 - Confirm `html lang`, title, description, and the saved manual preference update.
 - Do not call an external translation service at runtime.
 
-## Active challenges
+## Retained challenges
 
 | Act | File | Interaction | Reward |
 | --- | --- | --- | --- |
@@ -62,9 +64,9 @@ Changing these rules is high risk and requires focused tests plus the independen
 
 - `components/experience/art/PaperArt.tsx` composes the shared stage and reward symbols.
 - `components/experience/art/PaperArt.module.css` owns paper depth, proscenium, scene layers, and restrained motion.
-- `components/experience/ExperienceShell.module.css` owns the active layout, controls, theatre index, hard-cover chapter frame, per-chapter palettes, challenges, inventory, rewards, finale, and responsive behavior. Each chapter scene is rendered once inside the volume; phones linearize narrative, scenery, and challenge into one continuous book sequence.
+- `components/experience/ExperienceShell.module.css` owns the retained layout, controls, theatre index, hard-cover chapter frame, per-chapter palettes, challenges, inventory, rewards, finale, and responsive behavior. Each chapter scene is rendered once inside the volume; phones linearize narrative, scenery, and challenge into one continuous book sequence.
 - Local development renders a clearly labelled **Complete this page now** shortcut after each challenge. It calls the same idempotent completion handler as the game and is removed from production builds through `NODE_ENV`; never make it a production control.
-- `public/scene/paper-theatre/` contains opaque JPEG stage panoramas and the few PNG alpha overlays still mounted. Transparent WebP files are retained as source/rollback assets, not used for Android-facing performers.
+- `public/scene/paper-theatre/` contains retained opaque JPEG stage panoramas and PNG alpha overlays. Transparent WebP files remain source/rollback assets; none of these files implies a public game mount.
 - `docs/visual-direction.md` is the source of truth for palette, materials, typography, motion, responsive behavior, and asset provenance.
 
 Do not edit `public/` assets without explicit approval. Keep text, instructions, state, and controls in semantic HTML rather than baking them into images.
@@ -89,4 +91,4 @@ npm run lint
 npm run build
 ```
 
-Then manually verify the invitation, all four acts, reward transitions, inventory, reset confirmation, persisted reload, finale gating, keyboard-only completion, reduced-motion behavior, and mobile layouts. Before merge, run the real independent Codex-backed review required by `docs/multiagent-workflow.md`.
+If the dormant experience was intentionally edited, manually verify the invitation, all four acts, reward transitions, inventory, reset confirmation, persisted reload, finale gating, keyboard-only completion, reduced-motion behavior, and mobile layouts. For ordinary wedding-home changes, verify instead that no public route or CTA exposes `ExperienceShell` and that saved game keys remain untouched. Run the independent Codex review described in `docs/multiagent-workflow.md` when the change is high risk or part of a release.

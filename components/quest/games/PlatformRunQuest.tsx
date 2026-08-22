@@ -111,8 +111,8 @@ export function PlatformRunQuest({
   const [finished, setFinished] = useState<boolean>(false);
   const [enemies, setEnemies] = useState<Enemy[]>(() => createInitialEnemies());
 
-  const requestRef = useRef<number>();
-  const lastTimeRef = useRef<number>();
+  const requestRef = useRef<number | undefined>(undefined);
+  const lastTimeRef = useRef<number | undefined>(undefined);
   const playerRef = useRef<PlayerState>(player);
   const collectedRef = useRef<Set<number>>(new Set());
   const runningRef = useRef<boolean>(running);

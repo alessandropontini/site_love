@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import styles from "./duomo-proposals.module.css";
 
@@ -39,7 +40,7 @@ export default function DuomoProposalsPage() {
           </article>
         ))}
       </section>
-      <a className={styles.back} href="/">← Torna al sito</a>
+      <Link className={styles.back} href="/">← Torna al sito</Link>
     </main>
   );
 }

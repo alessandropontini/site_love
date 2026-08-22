@@ -6,19 +6,24 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint app components/editorial lib/editorialConfig.ts"
   },
   "dependencies": {
-    "next": "14.2.35",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "next": "^16.3.2",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "three": "^0.185.1"
   },
   "devDependencies": {
-    "@types/node": "20.19.43",
-    "@types/react": "18.3.31",
-    "@types/react-dom": "18.3.7",
-    "eslint": "^8.57.0",
-    "eslint-config-next": "14.2.35",
-    "typescript": "^5.4.5"
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@types/three": "^0.185.4",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.2",
+    "typescript": "^6.0.2"
+  },
+  "allowScripts": {
+    "unrs-resolver@1.12.2": true
   }
 }

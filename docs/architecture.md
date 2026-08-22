@@ -1,186 +1,131 @@
 # Architecture Overview
 
-Alessandro & Bridget is a single-page Next.js 14 App Router experience. The public route is a state-driven journey with an invitation, a paper-theatre index, four lightweight challenges presented as illustrated book chapters, four rewards, a persistent inventory, and a gated Duomo finale.
+Alessandro & Bridget is a Next.js 16 App Router wedding site with one canonical guest-facing route: `/`. The root is a freely readable bilingual editorial experience; games and progression are deliberately outside the mounted product. The unlinked `/duomo-proposals` and `/sun-proposals` routes are internal visual-review surfaces and are not part of the guest flow.
 
-This paper-theatre route is the canonical product architecture and the main narrative line for production. Legacy trees remain in the repository for reference, but changes to them do not change the shipped home unless `app/page.tsx` is deliberately remounted.
-
-## Next.js app structure
-
-- `app/layout.tsx` defines app metadata, loads the Sarah & Matt-inspired `Instrument Sans` UI font and `Newsreader` editorial font through `next/font`, and imports `app/globals.css`.
-- `app/page.tsx` is a minimal Server Component that mounts `ExperienceShell`.
-- `next.config.mjs` contains Next.js configuration for remote image host patterns.
-- `tsconfig.json` enables strict TypeScript settings and the `@/*` path alias.
-
-The app is intended to run through the standard scripts in `package.json`:
-
-```bash
-npm run dev
-npm run build
-npm run start
-npm run lint
-```
-
-## Current experience structure
-
-- `components/experience/ExperienceShell.tsx` mounts exactly one active screen and owns navigation, focus changes, toolbar state, inventory visibility, and live announcements.
-- `components/experience/JourneyMap.tsx` renders the theatre index and its semantic ordered list of chapter nodes over the visual Milan route.
-- `components/experience/ChapterExperience.tsx` provides the responsive hard-cover book frame, its one-time cover opening, the development-only completion shortcut, the chapter palette, and configured challenge selection.
-- `components/experience/challenges/` contains the frequency, pairing, ordering, and window-sequence interactions.
-- `components/experience/art/` contains the shared paper-stage composition, per-chapter Milan landmark selection, and accessible-independent reward iconography.
-- `components/experience/RewardScene.tsx` presents the newly collected object.
-- `components/experience/InventoryPanel.tsx` is the persistent, dismissible memory drawer with a confirmed reset action.
-- `components/experience/FinaleExperience.tsx` assembles the four objects and reveals the final letter.
-- `components/experience/ExperienceShell.module.css` contains the isolated design system, responsive layout, scene art, and reduced-motion behavior.
-- `lib/experienceConfig.ts` is the serializable source of truth for chapter order, copy, tones, instructions, and rewards.
-- `lib/i18n.ts` contains the Italian/English interface dictionaries and the provider-independent locale detection rules.
-- `components/experience/LocaleProvider.tsx` owns the active locale, manual selector, local persistence, `html lang`, and client-side metadata updates.
-- `lib/useExperienceProgress.ts` provides versioned local persistence, sequential gating, legacy migration, reset, and finale guards.
-
-The inventory is derived from completed chapter IDs and is never persisted separately. Stored progress is normalized to a closed prefix of configured chapters, so malformed or out-of-order data cannot skip the journey. The finale uses `every()` across configured IDs rather than trusting a numeric count.
-
-The public screen sequence is:
+The canonical public sequence is:
 
 ```text
-invitation → map → chapter → reward → map → … → finale
+story → personal photographs → Casa Nuova Niviano → RSVP information → letter
 ```
 
-There is no automatic start, timer-authoritative progression, external API, account, database, analytics service, or paid runtime dependency.
+## Public app structure
+
+- `app/layout.tsx` defines shared metadata, loads `Instrument Sans` and `Newsreader` through `next/font`, and imports `app/globals.css`.
+- `app/page.tsx` mounts `EditorialHome` and derives absolute social-image metadata from the incoming request host.
+- `components/editorial/EditorialHome.tsx` composes the complete page inside the locale provider.
+- `components/editorial/EditorialNavigation.tsx` provides desktop/mobile section navigation, the language selector, smooth in-page movement, and active-section state.
+- `components/editorial/HeroInvitation.tsx` owns the opening copy, accessible poster fallback, controls, and lazy Three.js boundary.
+- `components/editorial/HeroInvitation3D.tsx` is the only Three.js consumer. It renders on demand, pauses when hidden, and hands control back to the HTML poster after setup failure or context loss.
+- `components/editorial/EditorialLocaleProvider.tsx` owns public locale detection and the persisted language preference without importing dormant game dictionaries.
+- `RelationshipTimeline`, `PhotoGallery`, `WeddingVenue`, `RsvpSection`, `FinalLetter`, and `EditorialFooter` isolate the remaining public sections.
+- `lib/editorialConfig.ts` is the self-contained source for bilingual public copy, story entries, stable section IDs, accessible labels, local asset paths, and official venue links.
+- `components/editorial/EditorialHome.module.css` owns the editorial grid, palette, paper treatments, responsive layout, focus states, and reduced-motion fallbacks.
+
+No public component may link to or import an interactive game shell.
+
+## Content and section boundaries
+
+### Story
+
+The story is ordinary semantic HTML and remains readable without state, a timer, an account, or an unlock condition. The invitation canvas is enhancement only; its meaningful text and controls have an HTML fallback.
+
+### Personal photographs
+
+Couple photographs are stored locally under `public/photos/` and rendered through `next/image`. Before inclusion they must be resized, optimized, and stripped of EXIF, GPS coordinates, device identifiers, timestamps, and other unnecessary metadata. Captions and meaningful alternative text remain bilingual HTML rather than being baked into an image.
+
+### Casa Nuova Niviano
+
+The venue section identifies [Casa Nuova Niviano](https://www.casanuovaniviano.com/) using facts from the official website or information supplied directly by the couple. The official site may be linked as an external reference; it is not a runtime data API.
+
+Publicly visible venue photographs require reuse permission or files supplied by the venue/couple. Online images are references only until authorization is documented. The current architecture therefore permits an editorial placeholder or existing original graphic while authorized venue photography is still pending.
+
+### RSVP
+
+The mounted RSVP section is informational. It may explain that each invited household will receive a personal QR code, but it must not render a submission form or success state that suggests a response was persisted.
+
+The planned personalized route is `/rsvp/[token]`. It does not exist as a functional public flow until a backend is selected and deployed. Its token must be random, opaque, high entropy, and free of readable personal information. A future server resolves the token to a household, returns only the permitted invitee fields, validates the response, and stores it server-side.
+
+Guest lists, token mappings, responses, and generated QR images must never be placed in `public/`, shipped in client JavaScript, committed to source-controlled data files, or treated as `localStorage` state. See `docs/rsvp.md` for the full contract.
+
+### Letter
+
+The closing letter is public narrative content. It uses semantic HTML and a native dialog with Escape handling and focus return; there is no gated or game-only version on the public site.
+
+## Games retained outside the public app
+
+The following code remains intact for possible extraction into a separate project:
+
+- `components/experience/ExperienceShell.tsx` and `ExperienceShell.module.css`;
+- `components/experience/JourneyMap.tsx`, chapter, reward, inventory, finale, and challenge components;
+- `components/experience/art/` and paper-theatre assets;
+- `lib/experienceConfig.ts`;
+- `lib/useExperienceProgress.ts` and its versioned storage/migration behavior.
+
+None of it is mounted by `/`, exposed by a public game route, or linked from the wedding-site navigation. Removing the mount does not erase browser storage, migrate it, or call the reset action. If the experience is revived, it must use a separate route or distribution channel and a QR distinct from RSVP.
+
+The earlier scrollytelling and arcade trees under `components/story/`, `components/games/`, `components/QuestGame.tsx`, `components/quest/`, and `components/pixel/` are also retained but unmounted.
+
+## Retained progression invariants
+
+These rules document dormant code; they do not authorize remounting it:
+
+- the invitation never auto-starts;
+- only the first incomplete configured chapter is available;
+- completion and rewards are idempotent;
+- persisted chapter IDs are sanitized into configured order;
+- the finale requires every configured chapter ID;
+- reset requires confirmation and removes only SITE LOVE progress keys;
+- language changes never alter language-independent progress IDs;
+- the system reduced-motion preference overrides a saved game preference.
+
+Any future edit to challenge mechanics, progression, migrations, or reset behavior remains high risk and requires focused validation.
 
 ## Localization
 
-The active route is bilingual without a runtime translation service or localization dependency. Chapter structure remains language-independent: `chapterOrder` contains stable IDs, while `getExperienceChapters(locale)` resolves localized copy. Challenge state also stores IDs and phase values rather than translated labels, so a language switch does not reset progress or leave stale messages.
+The mounted home supports Italian and English without a runtime translation service. Initial locale priority is:
 
-Initial locale priority is:
-
-1. A previous manual choice saved under `site-love-locale-v1`.
-2. An Italian geographic time zone (`Europe/Rome`, `Europe/San_Marino`, or `Europe/Vatican`).
-3. An Italian browser language.
+1. a previous manual choice under `site-love-locale-v1`;
+2. an Italian geographic time zone;
+3. an Italian browser language;
 4. English fallback.
 
-The visible `IT / EN` control is available before and after entering the journey. Switching locale updates the mounted copy, accessible names, live messages, `html lang`, document title, and description. Detection is client-side and privacy-preserving; exact IP-country detection can be added later at the hosting edge without changing chapter or challenge state.
-
-## Legacy implementations
-
-The earlier scrollytelling implementation remains under `components/story/`, `components/games/`, `components/finale/`, `lib/storyConfig.ts`, and `lib/useStoryProgress.ts`. It is not mounted by `app/page.tsx`.
-
-The legacy arcade quest remains under `components/QuestGame.tsx`, `components/quest/`, and `components/quest/games/`. It is also not mounted by the public route.
-
-These trees are retained only for reference and possible future extraction; they do not share state with the current experience.
-
-## Experience progression invariants
-
-- The invitation is always readable and never auto-starts.
-- The first configured chapter is available; each later chapter requires every previous chapter.
-- Locked chapters are disabled and never mounted as hidden game panels.
-- A successful challenge is idempotent and cannot duplicate its reward.
-- Returning to a completed chapter offers replay without removing progress.
-- Completion is saved before the reward scene, so a reload cannot lose the newly earned object.
-- The finale opens only when all configured chapter IDs are complete.
-- Reset requires confirmation and removes the current and legacy storage keys.
-- Version 3 keeps the first three completed chapters from version 2 but deliberately reopens the replaced fourth challenge.
-- A visible saved control can reduce motion; the operating-system reduced-motion preference always takes precedence.
+Switching locale updates visible copy, accessible names, `html lang`, title, description, and social metadata. Only the locale preference belongs in browser storage; future RSVP records do not.
 
 ## Accessibility and mobile behavior
 
-- Only the current screen is interactive and present in the main flow.
-- Every change of screen focuses the new `<main>` region and emits a short polite announcement.
-- The map exposes chapter state in text and marks the available step with `aria-current="step"`.
-- All challenges have tap/keyboard paths; none require drag, hover, sound, or a timer.
-- Interactive targets are at least 44 px high in the mobile layouts.
-- Scenes use `100svh` with `100dvh` enhancement and safe-area padding.
-- Motion-off mode and `prefers-reduced-motion` remove decorative transitions.
+The public home provides one `h1`, a skip link, semantic sections, an ordered story, keyboard-operable invitation controls, native dialogs, visible focus, and a vertical phone flow.
 
-## Cost and delivery boundary
+- Navigation state is conveyed by text/shape and `aria-current`, not color alone.
+- Interactive targets remain at least 44×44 px.
+- Dialogs close on Escape and restore focus.
+- Content order stays story → photographs → location → RSVP → letter at every viewport.
+- `prefers-reduced-motion` removes decorative movement without hiding controls or information.
+- The HTML invitation fallback remains usable when WebGL is unavailable or lost.
 
-The runtime uses only Next.js, React, local CSS/SVG, local scene assets, and browser `localStorage`. No new package, paid API, map tile service, image CDN, database, or analytics provider is required. A temporary public preview may use a free Cloudflare quick tunnel; its generated URL is ephemeral and must not be treated as permanent hosting.
+Validate at 320, 390, 768, 1024, and 1440 px.
 
-## Previous component reference
+## Runtime, data, and cost boundary
 
-The following legacy notes remain useful when inspecting old code, but do not describe the mounted route.
+The current public runtime uses Next.js, React, local CSS/SVG, local optimized images, and Three.js dynamically loaded only for the root hero. It does not require an account, database, analytics service, translation API, map tiles, or paid media service.
 
-- `components/story/StoryShell.tsx` is the earlier scrollytelling controller.
-- `components/story/ScrollScene.tsx` renders earlier scroll scenes.
-- `components/story/ProgressIndicator.tsx` renders the earlier compact progress indicator.
-- `components/games/` contains the earlier quiz, memory, puzzle, and hidden-object interactions.
-- `components/finale/FinalReveal.tsx` renders the earlier final reveal.
-- `components/QuestGame.tsx` is the top-level interactive controller. It manages the intro, map, active game, ending screen, selected character, completed chapters, heart totals, attempt counts, leaderboard entries, and game-panel scroll locking.
-- `components/quest/QuestMap.tsx` renders the map/progression layer.
-- `components/quest/QuestEventPanel.tsx` hosts the currently selected chapter game.
-- `components/quest/QuestLeaderboard.tsx` and `components/quest/QuestSummary.tsx` render supporting progress and end-state UI.
-- `components/pixel/PixelCharacter.tsx` and `components/pixel/PixelLandmark.tsx` render custom pixel-style characters and landmark scenery.
+That boundary changes when RSVP becomes functional: a deliberate backend, data-retention policy, access controls, monitoring, and deployment configuration will be required. Do not bridge the gap with a client-only imitation.
 
-## Legacy scrollytelling structure
+## Static assets
 
-Scrollytelling content and state live in:
+- `public/photos/` contains approved, metadata-stripped local photographs.
+- `public/og-turtle-v1.jpg` is the generated 1200×630 social card with the provisional freshwater-turtle mark and is metadata-only.
+- `public/scene/paper-theatre/` contains retained scene and rollback assets. Only assets explicitly referenced by editorial components are loaded by `/`.
+- `data/` is ignored except for `.gitkeep` and may hold local heavyweight working files, never production RSVP data.
 
-- `lib/storyConfig.ts` for chapters, game order, accessible game labels, quiz questions, memory pairs, puzzle tiles, and hidden objects.
-- `lib/useStoryProgress.ts` for session state, `localStorage` persistence, game unlocks, and finale unlocks.
+Do not modify or add files under `public/` without explicit approval and provenance checks.
 
-Story gating applies to both games and later narrative chapters. The first intro chapter is always readable. Future chapters depend on completion of the previous required mini-game or story block. The first game should be derived from `gameOrder` rather than hardcoded in UI code. If a user scrolls to the first game before pressing the intro CTA, `StoryShell` must provide a local start CTA instead of relying on auto-start. Locked chapters should expose one clear locked explanation and avoid duplicate nested locked messages.
+## Documentation and review
 
-Progress indicators must represent three distinct states: `complete`, `available/current`, and `locked`. Do not label an available but incomplete game as locked.
+- `README.md` gives the public product overview and local commands.
+- `docs/editorial-home.md` documents home maintenance and photography handling.
+- `docs/rsvp.md` defines the planned personal-token and backend boundary.
+- `docs/quest-guide.md` documents dormant game code and invariants.
+- `docs/visual-direction.md` records the current visual system and asset provenance.
+- `docs/ai-workflow.md` and `docs/multiagent-workflow.md` define validation and independent review.
 
-The legacy first game is treated as available even before the old story has started. This rule applies to the unmounted scrollytelling tree, not the current map experience.
-
-## Quest and game structure
-
-Quest metadata lives in `components/quest/questSchema.tsx`. It defines:
-
-- The `EventKey` union for the four chapter keys.
-- Shared progress snapshot and event metadata types.
-- `QUEST_EVENTS`, which maps each chapter to title, subtitle, description, location, year, colors, reward hearts, and the React component used to render the game.
-- Unlock/progress helpers used by the quest map flow.
-
-Mini-game implementations live in `components/quest/games/`:
-
-| Chapter key | File | Role |
-| --- | --- | --- |
-| `tetris` | `components/quest/games/TetrisQuest.tsx` | Falling-block heart collection stage. |
-| `pacmaze` | `components/quest/games/PacMazeQuest.tsx` | Maze navigation stage with hearts and a ghost/doubt. |
-| `flappy` | `components/quest/games/FlappyLettersQuest.tsx` | Flappy-style rooftop letter stage. |
-| `platformer` | `components/quest/games/PlatformRunQuest.tsx` | Side-scroller vow-coin runner stage. |
-
-Mini-game mechanics, physics, scoring, collision, and win conditions are high-risk areas. Edit them only with explicit approval and focused validation.
-
-## Styling structure
-
-Legacy global styling remains concentrated in `app/globals.css`, including:
-
-- Theme color custom properties.
-- Player/partner accent color switching through root data attributes.
-- Base layout and typography.
-- Intro/map/game/ending screens.
-- Responsive behavior and game scroll locking.
-- Retro/pixel visual treatments.
-
-The current experience layout and controls are isolated in `components/experience/ExperienceShell.module.css`; the decorative stage layers live in `components/experience/art/PaperArt.module.css`. Use `docs/visual-direction.md` as the design source of truth before changing layout, typography, paper assets, lighting, or motion.
-
-## Content and static assets
-
-- `lib/profile.ts` contains title-screen profile and intro copy.
-- `lib/photos.ts` contains photo metadata.
-- `public/photos/` contains photo documentation/placeholders.
-- `public/scene/paper-theatre/` contains the active opaque JPEG panoramas for the entrance, four chapters, and finale, plus PNG compatibility overlays for the couple, tram, and tuning radio. Source WebP cutouts and older paper/pixel assets remain as rollback or unmounted references. Opaque stage art prevents Android/WebView alpha-compositing rectangles.
-- `data/` is ignored except for `.gitkeep` and can hold heavyweight local concept art or exports.
-
-Do not modify visual assets in `public/` without explicit approval.
-
-## Design documentation references
-
-- `README.md` gives the high-level project overview, local commands, gameplay sequence, customization paths, and production-build notes.
-- `docs/quest-guide.md` documents the active chapter configuration, challenge files, progress invariants, paper art, and regression checks.
-- `docs/visual-direction.md` records the current paper-theatre direction, Milan/Duomo composition guidance, typography, materials, motion, and responsive rules.
-- `docs/ai-workflow.md` documents Codex usage, validation commands, and the manual review process for this repository.
-- `docs/multiagent-workflow.md` documents the lean Codex review policy, combined report contract, and verdict rules.
-
-## AI assistance and review workflow
-
-AI workflow guidance lives in `AGENTS.md`, `docs/ai-workflow.md`, and `docs/multiagent-workflow.md`. Codex is the only active AI development and review tool; CrewAI, OpenClaw, and Ruflo are outside the release path.
-
-- Do not add Ruflo, Claude Flow, MCP servers, WASM agents, Anthropic/Claude managed agents, or provider API keys to the repository.
-- Codex CLI may be installed separately when needed with `npm i -g @openai/codex`.
-- Codex may implement scoped changes, inspect files, run validation, and prepare summaries.
-- One fresh read-only Codex execution performs the combined Code + QA review after implementation.
-- The implementation response is not review evidence; simulated role splitting is invalid.
-- Final approval remains manual/human even after a valid reviewer report.
-- AI tooling must not be required for runtime, build, lint, start, or deployment.
+Codex may implement scoped changes, but a fresh read-only Codex execution must perform the combined Code + QA review. Final approval remains human; no review command may commit, merge, or push.

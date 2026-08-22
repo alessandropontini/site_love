@@ -1,11 +1,11 @@
 # CrewAI Status
 
-CrewAI is retained as an inactive experiment and is not part of the SITE LOVE release path. The operational workflow now uses Codex directly for implementation and one separate combined read-only review.
+CrewAI is retained as an inactive experiment and is not part of the SITE LOVE release path. The operational workflow uses Codex directly; a separate combined read-only review is available only for releases and high-risk work.
 
 ## Current Decision
 
 - Codex is the only active developer and review provider.
-- `scripts/local-review.sh` is the canonical review command.
+- `scripts/local-review.sh` is the on-demand review command.
 - CrewAI output is not required for lint, build, preview, deployment, or merge review.
 - CrewAI does not modify the repository, approve patches, commit, merge, or push.
 - Human approval remains mandatory.

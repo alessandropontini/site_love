@@ -39,7 +39,7 @@ export function JourneyMap({
   onOpenChapter: (chapterId: ChapterId) => void;
   onOpenFinale: () => void;
   onOpenInventory: () => void;
-  inventoryTriggerRef: RefObject<HTMLButtonElement>;
+  inventoryTriggerRef: RefObject<HTMLButtonElement | null>;
 }) {
   const { messages: copy } = useLocale();
 

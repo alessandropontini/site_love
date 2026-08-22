@@ -6,8 +6,8 @@ The active workflow is:
 
 1. Interactive Codex implementation.
 2. Required repository validation.
-3. One fresh read-only combined Codex review through `scripts/local-review.sh`.
-4. Deterministic verdict aggregation.
+3. Documentation and `CHANGELOG.md` update.
+4. A fresh read-only combined Codex review through `scripts/local-review.sh` only for a release or high-risk work.
 5. Human approval.
 
 `scripts/openclaw-orchestrate.sh` remains only as a compatibility experiment. It cannot create valid review evidence by itself, modify the repository, commit, merge, push, or replace the direct Codex command.

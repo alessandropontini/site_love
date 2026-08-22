@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 import styles from "./sun-proposals.module.css";
 
@@ -72,7 +73,7 @@ export default function SunProposalsPage() {
           );
         })}
       </section>
-      <a className={styles.back} href="/">← Torna al sito</a>
+      <Link className={styles.back} href="/">← Torna al sito</Link>
     </main>
   );
 }
