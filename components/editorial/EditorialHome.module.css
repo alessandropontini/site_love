@@ -1714,23 +1714,6 @@
     animation: none;
   }
 
-  .venueCurtainLeft,
-  .venueCurtainRight,
-  .venueTheatreFootlights {
-    transition: none;
-  }
-
-  .venueCurtainLeft {
-    transform: translateX(-100%);
-  }
-
-  .venueCurtainRight {
-    transform: translateX(100%);
-  }
-
-  .venueTheatreFootlights {
-    opacity: 0.9;
-  }
 }
 
 /* Wedding venue */
@@ -1980,109 +1963,6 @@
   pointer-events: none;
 }
 
-.venueTheatre::before {
-  content: "";
-  position: absolute;
-  z-index: 3;
-  top: 0;
-  right: 0;
-  left: 0;
-  height: 15%;
-  pointer-events: none;
-  background:
-    repeating-linear-gradient(90deg, rgba(255, 225, 216, 0.13) 0 2px, transparent 2px 22px),
-    linear-gradient(180deg, #541329, #7b243f);
-  clip-path: ellipse(82% 100% at 50% 0%);
-  box-shadow: 0 8px 18px rgba(25, 4, 13, 0.28);
-}
-
-.venueCurtainLeft,
-.venueCurtainRight {
-  position: absolute;
-  z-index: 2;
-  top: 0;
-  bottom: 0;
-  width: 50%;
-  background:
-    linear-gradient(90deg, rgba(255, 229, 220, 0.22), transparent 7%, rgba(30, 4, 16, 0.24) 14%, transparent 22%, rgba(255, 222, 214, 0.12) 31%, rgba(30, 4, 16, 0.3) 43%, transparent 55%, rgba(255, 225, 216, 0.13) 68%, rgba(30, 4, 16, 0.26) 82%, transparent 94%),
-    linear-gradient(90deg, #3d0e21, #852945 50%, #b1566d 100%);
-  box-shadow:
-    inset -16px 0 20px rgba(25, 4, 13, 0.42),
-    8px 0 14px rgba(25, 4, 13, 0.2);
-  transition: transform 2400ms cubic-bezier(0.16, 0.72, 0.14, 1);
-}
-
-.venueCurtainLeft::before,
-.venueCurtainRight::before {
-  content: "";
-  position: absolute;
-  right: -1px;
-  bottom: -18px;
-  left: -1px;
-  height: 52px;
-  background:
-    radial-gradient(ellipse 44px 28px at 22px 0, transparent 95%, #57172d 97%) 0 0 / 88px 52px repeat-x,
-    linear-gradient(180deg, #8e2f4c, #57172d);
-  filter: drop-shadow(0 7px 5px rgba(25, 4, 13, 0.24));
-}
-
-.venueCurtainLeft::after,
-.venueCurtainRight::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 10px;
-  background: linear-gradient(90deg, rgba(86, 39, 27, 0.72), #c79a5f 45%, rgba(255, 229, 179, 0.86) 55%, rgba(86, 39, 27, 0.72));
-  box-shadow: 0 0 8px rgba(255, 212, 139, 0.18);
-}
-
-.venueCurtainLeft::after {
-  right: -4px;
-}
-
-.venueCurtainRight::after {
-  left: -4px;
-}
-
-.venueCurtainLeft {
-  left: 0;
-  transform-origin: left center;
-}
-
-.venueCurtainRight {
-  right: 0;
-  background:
-    linear-gradient(-90deg, rgba(255, 229, 220, 0.22), transparent 7%, rgba(30, 4, 16, 0.24) 14%, transparent 22%, rgba(255, 222, 214, 0.12) 31%, rgba(30, 4, 16, 0.3) 43%, transparent 55%, rgba(255, 225, 216, 0.13) 68%, rgba(30, 4, 16, 0.26) 82%, transparent 94%),
-    linear-gradient(-90deg, #3d0e21, #852945 50%, #b1566d 100%);
-  transform-origin: right center;
-}
-
-.venueTheatre[data-open="true"] .venueCurtainLeft {
-  transform: translateX(-100%);
-}
-
-.venueTheatre[data-open="true"] .venueCurtainRight {
-  transform: translateX(100%);
-}
-
-.venueTheatreFootlights {
-  position: absolute;
-  z-index: 3;
-  right: 16%;
-  bottom: 4%;
-  left: 16%;
-  height: 8px;
-  border-radius: 999px;
-  opacity: 0;
-  background: repeating-radial-gradient(circle at center, #f6d489 0 3px, transparent 4px 24px);
-  filter: drop-shadow(0 0 6px rgba(246, 212, 137, 0.62));
-  transition: opacity 520ms ease 1500ms;
-}
-
-.venueTheatre[data-open="true"] .venueTheatreFootlights {
-  opacity: 0.9;
-}
 
 .venueSketch {
   position: absolute;

@@ -72,86 +72,36 @@ function drawWaterTurtleMark(
 ) {
   context.save();
   context.translate(x, y);
-  context.strokeStyle = "#7b653f";
-  context.fillStyle = "rgba(36, 43, 22, 0.07)";
-  context.lineWidth = Math.max(2, size * 0.035);
+  const markScale = size / 140;
+  context.scale(markScale, markScale);
+  context.translate(-70, -58);
+  context.strokeStyle = "#8f7042";
+  context.fillStyle = "rgba(155, 121, 72, 0.065)";
+  context.lineWidth = 2.2;
   context.lineCap = "round";
   context.lineJoin = "round";
 
-  context.beginPath();
-  context.moveTo(-size * 0.42, size * 0.05);
-  context.bezierCurveTo(
-    -size * 0.34,
-    -size * 0.3,
-    size * 0.22,
-    -size * 0.38,
-    size * 0.38,
-    -size * 0.02
+  const shell = new Path2D(
+    "M70 24c21 0 34 17 34 38 0 24-15 40-34 40S36 86 36 62c0-21 13-38 34-38Z"
   );
-  context.bezierCurveTo(
-    size * 0.28,
-    size * 0.23,
-    -size * 0.25,
-    size * 0.34,
-    -size * 0.42,
-    size * 0.05
+  const head = new Path2D("M61 26c0-10 4-17 9-17s9 7 9 17");
+  const flippers = new Path2D(
+    "M39 43C29 34 18 35 11 44c11 1 15 10 22 17 1-8 3-14 6-18ZM101 43c10-9 21-8 28 1-11 1-15 10-22 17-1-8-3-14-6-18ZM38 78c-12 1-18 8-20 18 9-2 17 1 25 7 0-9-2-17-5-25ZM102 78c12 1 18 8 20 18-9-2-17 1-25 7 0-9 2-17 5-25Z"
   );
-  context.fill();
-  context.stroke();
-
-  context.beginPath();
-  context.moveTo(size * 0.36, -size * 0.02);
-  context.bezierCurveTo(
-    size * 0.47,
-    -size * 0.16,
-    size * 0.65,
-    -size * 0.17,
-    size * 0.71,
-    -size * 0.06
+  const shellDetails = new Path2D(
+    "M65 100l5 10 5-10M70 31c-9 8-14 19-14 31s5 24 14 32M70 31c9 8 14 19 14 31s-5 24-14 32M44 53c16 7 36 7 52 0M44 72c16-7 36-7 52 0"
   );
-  context.bezierCurveTo(
-    size * 0.75,
-    size * 0.06,
-    size * 0.6,
-    size * 0.13,
-    size * 0.39,
-    size * 0.05
-  );
-  context.stroke();
+  const waterLine = new Path2D("M29 110c13-4 26-4 39 0 14 4 29 4 44 0");
 
-  context.beginPath();
-  context.moveTo(-size * 0.42, size * 0.03);
-  context.lineTo(-size * 0.58, size * 0.1);
-  context.lineTo(-size * 0.4, size * 0.16);
-  context.moveTo(-size * 0.2, size * 0.24);
-  context.quadraticCurveTo(-size * 0.23, size * 0.4, -size * 0.34, size * 0.43);
-  context.moveTo(size * 0.21, size * 0.22);
-  context.quadraticCurveTo(size * 0.26, size * 0.39, size * 0.39, size * 0.39);
-  context.stroke();
-
-  context.beginPath();
-  context.moveTo(-size * 0.31, -size * 0.03);
-  context.quadraticCurveTo(-size * 0.02, size * 0.12, size * 0.29, -size * 0.04);
-  context.moveTo(-size * 0.16, -size * 0.27);
-  context.quadraticCurveTo(-size * 0.14, -size * 0.04, -size * 0.22, size * 0.24);
-  context.moveTo(size * 0.13, -size * 0.28);
-  context.quadraticCurveTo(size * 0.06, -size * 0.04, size * 0.19, size * 0.2);
-  context.stroke();
-
-  context.globalAlpha = 0.78;
-  [0.58, 0.4].forEach((radius, index) => {
-    context.beginPath();
-    context.ellipse(
-      0,
-      size * (0.58 + index * 0.12),
-      size * radius,
-      size * 0.06,
-      0,
-      0,
-      Math.PI
-    );
-    context.stroke();
-  });
+  context.fill(shell);
+  context.stroke(shell);
+  context.fill(head);
+  context.stroke(head);
+  context.fill(flippers);
+  context.stroke(flippers);
+  context.stroke(shellDetails);
+  context.globalAlpha = 0.5;
+  context.stroke(waterLine);
   context.restore();
 }
 

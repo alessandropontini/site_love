@@ -18,9 +18,10 @@ The pixel/handheld and paper-theatre game directions are outside the public site
 - A 12-column desktop grid, fluid Newsreader display type, Instrument Sans controls, large whitespace, irregular image rhythm, and section-scale color changes carry the editorial narrative.
 - The hero combines a low-contrast original Galleria scene, readable DOM copy, a CSS poster fallback, and a thin WebGL invitation. Three.js is dynamically imported only by `HeroInvitation3D`.
 - The invitation uses generated canvas faces rather than copied textures. It responds to pointer drag, hover tilt, buttons, and arrow keys; the renderer sleeps when settled, offscreen, or backgrounded.
+- The freshwater-turtle mark uses a restrained top-down engraving silhouette, fine shell geometry, and one water line so it reads as an adult editorial seal rather than a cartoon mascot. The DOM SVG and generated Three.js canvas face share the same construction.
 - The story uses semantic editorial scenes. Phones linearize the route vertically with no required gesture.
 - The gallery uses approved local personal photographs with EXIF, GPS, and unnecessary metadata removed. No stock couple photography is mounted.
-- The location section focuses on Casa Nuova Niviano and uses facts and the outbound link from the venue's official website. It currently reveals an original paper-theatre interpretation of the venue through animated curtains; it is not a photographic or architectural depiction.
+- The location section focuses on Casa Nuova Niviano and uses facts and the outbound link from the venue's official website. It currently presents an original paper-theatre interpretation of the venue; it is not a photographic or architectural depiction.
 - Authorized Casa Nuova photography is still pending. Until it is supplied, use an intentional editorial placeholder or original project visual, never an unlicensed web image.
 - RSVP is a calm informational home section, not a simulated form. It explains that each household receives a personal QR code; the functional form is isolated at the personalized route.
 - The final letter remains retained but unmounted. The mounted colophon uses native modal behavior with Escape, focus containment, and focus return.

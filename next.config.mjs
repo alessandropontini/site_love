@@ -52,6 +52,7 @@ const privateRouteHeaders = [
 ];
 
 const nextConfig = {
+  allowedDevOrigins: isDevelopment ? ["192.168.1.3"] : [],
   async headers() {
     return [
       {

@@ -4,6 +4,10 @@ Questa guida è il pannello di controllo umano del sito. Spiega dove guardare,
 quali comandi eseguire e cosa fare prima di una pubblicazione o in caso di
 problema. È scritta per essere seguita un comando alla volta.
 
+Per il primo giro personale completo usare `docs/local-test-checklist.md`: separa
+il controllo visivo immediato dal test con Neon e Clerk Development, contiene un
+fixture RSVP fittizio e termina con pulizia e rapporto degli eventuali problemi.
+
 Stato attuale: il codice locale è pronto e il repository GitHub è collegato; il
 dominio definitivo e le istanze Production di Vercel, Neon, Clerk e Turnstile
 devono ancora essere configurati. Aggiornare questa riga al momento del lancio.
@@ -496,6 +500,7 @@ precedente; ripristinare Production soltanto dopo aver verificato il bersaglio.
 
 - `docs/architecture-diagram.md` — disegno completo dei servizi e dei flussi;
 - `docs/architecture.md` — confini tecnici dell'applicazione;
+- `docs/local-test-checklist.md` — checklist personale del giro locale completo;
 - `docs/deployment.md` — attivazione iniziale e variabili Production;
 - `docs/rsvp.md` — token, dati, form e area sposi;
 - `docs/privacy.md` — minimizzazione, accesso e cancellazione;

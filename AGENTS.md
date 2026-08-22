@@ -47,6 +47,7 @@ Ruflo has been removed. CrewAI and OpenClaw are retained only as inactive experi
 - `docs/deployment.md` — low-cost hosting, service configuration, QR generation, and launch checklist.
 - `docs/architecture-diagram.md` — runtime, release, identity, data, rollback, and backup diagram.
 - `docs/operations-guide.md` — Italian operational runbook for dashboards, commands, recurring checks, and incidents.
+- `docs/local-test-checklist.md` — manual local walkthrough for the public home, RSVP fixture, admin access, export, responsive checks, and cleanup.
 - `docs/privacy.md` — data minimization, access, retention, deletion, and incident guidance.
 - `docs/quest-guide.md` — maintenance guide for the retained, unmounted paper-theatre experience.
 - `docs/visual-direction.md` — approved visual/design direction.

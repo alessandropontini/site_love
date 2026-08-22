@@ -93,6 +93,7 @@ La location è [Casa Nuova Niviano](https://www.casanuovaniviano.com/). La home 
 - `docs/deployment.md` — hosting, dominio, servizi e checklist di pubblicazione.
 - `docs/architecture-diagram.md` — diagramma dei flussi runtime, rilascio e backup.
 - `docs/operations-guide.md` — pannelli, comandi, controlli periodici ed emergenze.
+- `docs/local-test-checklist.md` — giro manuale locale completo con risultati attesi e fixture RSVP fittizio.
 - `docs/privacy.md` — minimizzazione, accessi e conservazione dei dati.
 - `docs/quest-guide.md` — manutenzione dell'esperienza a giochi non montata.
 - `docs/visual-direction.md` — direzione visiva.
@@ -101,6 +102,10 @@ La location è [Casa Nuova Niviano](https://www.casanuovaniviano.com/). La home 
 ## Verifica e review
 
 Prima di consegnare una modifica, aggiorna sempre `CHANGELOG.md` nella sezione `Unreleased` e la guida direttamente interessata. La verifica è proporzionata al rischio:
+
+Per percorrere personalmente home, responsive, lingue, stati sicuri, RSVP con
+dati fittizi, login sposi, dashboard, export e pulizia finale, seguire
+`docs/local-test-checklist.md` dall'inizio alla fine.
 
 Per modifiche a documentazione o copy è sufficiente:
 

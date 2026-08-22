@@ -1,7 +1,4 @@
-'use client';
-
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
 
 import type { EditorialContent } from "@/lib/editorialConfig";
 import { editorialSectionIds } from "@/lib/editorialConfig";
@@ -14,23 +11,6 @@ type WeddingVenueProps = {
 
 export function WeddingVenue({ content }: WeddingVenueProps) {
   const venue = content.venue;
-  const theatreRef = useRef<HTMLDivElement>(null);
-  const [theatreOpen, setTheatreOpen] = useState(false);
-
-  useEffect(() => {
-    const theatre = theatreRef.current;
-    if (!theatre) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry?.isIntersecting) return;
-        setTheatreOpen(true);
-        observer.disconnect();
-      },
-      { rootMargin: "-12% 0px" }
-    );
-    observer.observe(theatre);
-    return () => observer.disconnect();
-  }, []);
 
   return (
     <section
@@ -51,21 +31,13 @@ export function WeddingVenue({ content }: WeddingVenueProps) {
 
         <div className={styles.venueComposition}>
           <figure className={styles.venueFigure} data-reveal>
-            <div
-              className={styles.venueTheatre}
-              data-open={theatreOpen}
-              aria-hidden="true"
-              ref={theatreRef}
-            >
+            <div className={styles.venueTheatre} aria-hidden="true">
               <Image
                 src="/venue/casa-nuova-paper-theatre.png"
                 alt=""
                 fill
                 sizes="(max-width: 900px) 100vw, 58vw"
               />
-              <span className={styles.venueCurtainLeft} />
-              <span className={styles.venueCurtainRight} />
-              <span className={styles.venueTheatreFootlights} />
             </div>
             <figcaption>
               <span>{venue.name}</span>
