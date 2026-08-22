@@ -53,13 +53,43 @@ No real guest list or response fixture belongs in the repository. Development fi
 
 `db/migrations/001_rsvp.sql` and `002_admin_audit.sql` distinguish:
 
-- **Household invitation** — opaque ID, token hash, status, locale preference if needed, deadline, revocation state.
-- **Invitee** — household relationship, display name, attendance eligibility, plus-one or child rules where applicable.
+- **Household invitation** — opaque ID, token hash, status, locale preference,
+  deadline, revocation state and private source (`bride`, `groom` or `both`).
+- **Invitee** — appartenenza al nucleo e nome mostrato.
 - **Response** — attendance, structured meal choice, and update timestamp per permitted invitee.
 - **Audit event** — invitation created, response updated, token revoked/reissued, administrative correction.
 - **Admin event** — external administrator ID, export type, row count, and timestamp; never response content.
 
 The form deliberately does not collect free-text allergy, disability, accessibility, email, or phone data. Special requirements are handled directly through the invitation channel. See `docs/privacy.md`.
+
+Due persone con lo stesso `household_id` fanno parte dello stesso nucleo e
+usano lo stesso link/QR; non sono necessariamente una coppia. `invited_by`
+appartiene al nucleo: tutti i componenti ereditano la stessa provenienza e non
+possono essere classificati separatamente. Questa informazione compare soltanto
+in dashboard ed export, non nella pagina personale dell'invitato.
+
+Le opzioni menu restano strutturate. La proposta visibile presenta cucina
+piacentina tradizionale, vegetariana e per bambini; l'opzione vegana resta
+selezionabile e da concordare. Portate e allergeni sono indicati come bozza
+finché location e catering non li confermano.
+
+Ogni portata della proposta apre una finestra accessibile con foto illustrativa,
+spiegazione e ingredienti tipici in italiano o inglese. Le immagini sono asset
+originali locali, non contengono dati degli invitati e non attivano richieste a
+servizi esterni. La finestra usa il dialogo nativo del browser: supporta
+tastiera, chiusura con `Esc` e ritorno del focus al comando che l'ha aperta.
+
+Quando un invitato riapre lo stesso link, presenza e menu salvati vengono
+caricati dal database e riselezionati nel form. Un invio successivo viene
+accettato soltanto dopo una conferma esplicita nel browser; un invio identico
+viene bloccato sia nel browser sia dall'operazione atomica sul server, senza
+incrementare la revisione né scrivere un evento di audit. Il salvataggio
+aggiorna soltanto le persone le cui scelte sono
+cambiate, così la dashboard può evidenziarle come modificate nell'ultimo invio
+senza conservare nel log una copia storica delle preferenze. Dopo un
+salvataggio riuscito la route viene aggiornata e il form viene ricreato usando
+la nuova `response_version`, così i controlli non possono trattenere valori
+precedenti soltanto nello stato React.
 
 ## Public-home behavior
 

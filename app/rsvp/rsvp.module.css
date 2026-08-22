@@ -17,7 +17,7 @@
 
 .formCard,
 .noticeCard {
-  width: min(760px, 100%);
+  width: min(980px, 100%);
   border: 1px solid rgba(38, 27, 32, 0.2);
   border-radius: 28px;
   background: rgba(250, 247, 245, 0.94);
@@ -121,6 +121,222 @@
   margin-top: 34px;
 }
 
+.menuProposal {
+  margin-bottom: 36px;
+  padding: clamp(20px, 4vw, 32px);
+  border: 1px solid rgba(61, 71, 40, 0.2);
+  border-radius: 24px;
+  background:
+    linear-gradient(145deg, rgba(61, 71, 40, 0.09), rgba(255, 255, 255, 0.5));
+}
+
+.menuProposalHeader {
+  max-width: 66ch;
+}
+
+.menuKicker {
+  margin: 0 0 7px;
+  color: var(--rsvp-gold);
+  font-size: 0.72rem;
+  font-weight: 780;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.menuProposalHeader h2 {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 560;
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+.menuProposalHeader > p:last-child {
+  margin: 12px 0 0;
+  color: rgba(38, 27, 32, 0.72);
+  line-height: 1.6;
+}
+
+.menuGrid {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.menuCard {
+  padding: 18px;
+  border: 1px solid rgba(38, 27, 32, 0.13);
+  border-radius: 17px;
+  background: rgba(255, 253, 251, 0.78);
+}
+
+.menuCard h3 {
+  margin: 0;
+  color: var(--rsvp-olive);
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.28rem;
+  line-height: 1.15;
+}
+
+.menuCard ul {
+  margin: 15px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.menuCard li {
+  border-top: 1px solid rgba(38, 27, 32, 0.1);
+}
+
+.dishButton {
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 2px;
+  display: grid;
+  gap: 4px;
+  border: 0;
+  background: transparent;
+  color: rgba(38, 27, 32, 0.8);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.dishButton:hover {
+  color: var(--rsvp-burgundy);
+}
+
+.dishButtonHint {
+  width: fit-content;
+  color: var(--rsvp-gold);
+  font-size: 0.72rem;
+  font-weight: 780;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dishButtonHint::after {
+  content: " ↗";
+}
+
+.dishDialog {
+  width: min(720px, calc(100% - 24px));
+  max-width: none;
+  max-height: calc(100dvh - 24px);
+  padding: 0;
+  border: 1px solid rgba(38, 27, 32, 0.24);
+  border-radius: 24px;
+  background: #fbf7f2;
+  color: var(--rsvp-burgundy);
+  box-shadow: 0 28px 90px rgba(20, 12, 16, 0.32);
+  overflow: auto;
+}
+
+.dishDialog::backdrop {
+  background: rgba(25, 17, 21, 0.72);
+  backdrop-filter: blur(5px);
+}
+
+.dishDialogCard {
+  position: relative;
+}
+
+.dishClose {
+  position: absolute;
+  z-index: 1;
+  top: 14px;
+  right: 14px;
+  min-height: 44px;
+  padding: 8px 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(38, 27, 32, 0.18);
+  border-radius: 999px;
+  background: rgba(250, 247, 245, 0.94);
+  color: var(--rsvp-burgundy);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 760;
+  box-shadow: 0 8px 24px rgba(38, 27, 32, 0.14);
+}
+
+.dishClose span:last-child {
+  font-size: 1.2rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.dishImageFrame {
+  aspect-ratio: 4 / 3;
+  background: #e8ded3;
+  overflow: hidden;
+}
+
+.dishImage {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.dishDialogBody {
+  padding: clamp(22px, 5vw, 38px);
+}
+
+.dishDialogBody h3 {
+  margin: 5px 0 12px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(2rem, 7vw, 3.3rem);
+  font-weight: 560;
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+.dishDialogBody h4 {
+  margin: 24px 0 6px;
+  color: var(--rsvp-olive);
+  font-size: 0.78rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.dishDialogBody > p:not(.menuKicker, .dishImageNote) {
+  margin: 0;
+  color: rgba(38, 27, 32, 0.76);
+  line-height: 1.65;
+}
+
+.dishImageNote {
+  margin: 24px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid rgba(38, 27, 32, 0.12);
+  color: rgba(38, 27, 32, 0.58);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.menuDraft,
+.veganNote {
+  color: rgba(38, 27, 32, 0.64);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.menuDraft {
+  margin: 18px 0 0;
+  font-weight: 700;
+}
+
+.veganNote {
+  margin: 5px 0 0;
+}
+
 .privacyHint {
   margin: 22px auto 0;
   max-width: 62ch;
@@ -128,6 +344,18 @@
   font-size: 0.9rem;
   line-height: 1.6;
   text-align: center;
+}
+
+.savedAnswersNotice {
+  margin: 0 0 22px;
+  padding: 13px 15px;
+  border: 1px solid rgba(155, 121, 72, 0.3);
+  border-radius: 14px;
+  background: rgba(155, 121, 72, 0.09);
+  color: rgba(38, 27, 32, 0.78);
+  font-size: 0.9rem;
+  font-weight: 680;
+  line-height: 1.5;
 }
 
 .privacyHint a {
@@ -209,7 +437,21 @@
 
 .stackedField select {
   min-height: 48px;
-  padding: 0 13px;
+  padding: 0 44px 0 13px;
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--rsvp-olive) 50%),
+    linear-gradient(135deg, var(--rsvp-olive) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 21px,
+    calc(100% - 12px) 21px;
+  background-repeat: no-repeat;
+  background-size: 6px 6px, 6px 6px;
+}
+
+.stackedField select:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .stackedField textarea {
@@ -286,6 +528,8 @@
 .primaryAction:focus-visible,
 .secondaryAction:focus-visible,
 .localeNav a:focus-visible,
+.dishButton:focus-visible,
+.dishClose:focus-visible,
 .choice:focus-within,
 .stackedField select:focus-visible,
 .stackedField textarea:focus-visible {
@@ -316,6 +560,23 @@
   .localeNav a {
     flex: 1;
     justify-content: center;
+  }
+
+  .dishDialog {
+    width: calc(100% - 16px);
+    max-height: calc(100dvh - 16px);
+    border-radius: 18px;
+  }
+
+  .dishClose {
+    top: 10px;
+    right: 10px;
+  }
+}
+
+@media (max-width: 820px) {
+  .menuGrid {
+    grid-template-columns: 1fr;
   }
 }
 

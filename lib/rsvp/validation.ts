@@ -42,5 +42,15 @@ export const rsvpSubmissionSchema = z
           message: "Non-attending invitees cannot submit meal preferences"
         });
       }
+
+      if (
+        answer.attendance === "yes" &&
+        answer.mealPreference === "not_needed"
+      ) {
+        context.addIssue({
+          code: "custom",
+          message: "Attending invitees must choose a meal preference"
+        });
+      }
     }
   });

@@ -3,6 +3,10 @@ import {
   getAdminRsvpExportRows,
   recordAdminEvent
 } from "@/lib/rsvp/db";
+import {
+  invitationSourceLabels,
+  mealPreferenceLabels
+} from "@/lib/rsvp/display";
 
 export const dynamic = "force-dynamic";
 
@@ -33,12 +37,15 @@ export async function GET() {
 
   const header = [
     "Nucleo",
+    "Persone nel nucleo",
     "Lingua",
     "Stato invito",
     "Scadenza",
     "Invitato",
+    "Nucleo invitato da",
     "Presenza",
     "Menu",
+    "Modificata nell’ultimo invio",
     "Ultimo aggiornamento"
   ];
 
@@ -47,12 +54,17 @@ export async function GET() {
     ...rows.map((row) =>
       [
         row.householdName,
+        row.householdSize,
         row.preferredLocale,
         row.householdStatus,
         row.deadline,
         row.inviteeName,
+        invitationSourceLabels.it[row.invitedBy],
         row.attendance,
-        row.mealPreference,
+        row.mealPreference
+          ? mealPreferenceLabels.it[row.mealPreference]
+          : null,
+        row.changedInLatestSubmission ? "Sì" : "No",
         row.responseUpdatedAt
       ]
         .map(csvCell)

@@ -149,6 +149,7 @@ export default async function PersonalRsvpPage({
 
         <RsvpForm
           invitation={lookup.invitation}
+          key={`${lookup.invitation.revision}-${locale}`}
           locale={locale}
           token={token}
           turnstileSiteKey={getTurnstileSiteKey()}

@@ -257,6 +257,9 @@ http://localhost:3000/rsvp/site-love-local-test-only-2026
 
 Superfici visive opzionali di sviluppo:
 
+- [ ] Aprire `http://localhost:3000/proposal`.
+- [ ] Verificare che Alessandro e Bridget siano due burattini riconoscibili che
+  si baciano sotto la Venere Apuana, senza fotografie remote.
 - [ ] Aprire `http://localhost:3000/duomo-proposals`.
 - [ ] Aprire `http://localhost:3000/sun-proposals`.
 - [ ] Annotare eventuali proposte da conservare, ma non considerarle parte della
@@ -290,11 +293,28 @@ Nel SQL Editor eseguire, in ordine, il contenuto completo di:
 
 1. `db/migrations/001_rsvp.sql`;
 2. `db/migrations/002_admin_audit.sql`;
-3. `db/migrations/003_household_rate_limit.sql`.
+3. `db/migrations/003_household_rate_limit.sql`;
+4. `db/migrations/004_invitee_source.sql`;
+5. `db/migrations/005_household_invitation_source.sql`.
 
 - [ ] Migrazione `001` completata senza errori.
 - [ ] Migrazione `002` completata senza errori.
 - [ ] Migrazione `003` completata senza errori.
+- [ ] Migrazione `004` completata senza errori.
+- [ ] Migrazione `005` completata senza errori.
+
+La migrazione `005` consolida la provenienza sul nucleo. Se il fixture Ada/Teo
+esisteva già con provenienze personali diverse, il backfill prudenziale lo
+classifica inizialmente come `both`. Poiché questo fixture rappresenta una
+famiglia invitata da Alessandro, correggere soltanto il branch Development con:
+
+```sql
+update rsvp.households
+set invited_by = 'groom'
+where display_name = 'TEST LOCALE — DA ELIMINARE';
+```
+
+Non eseguire questo aggiornamento nominale sul branch Production.
 
 Verificare le tabelle:
 
@@ -325,7 +345,8 @@ with household as (
     display_name,
     token_hash,
     preferred_locale,
-    deadline
+    deadline,
+    invited_by
   )
   values (
     'TEST LOCALE — DA ELIMINARE',
@@ -334,12 +355,20 @@ with household as (
       'hex'
     ),
     'it',
-    now() + interval '30 days'
+    now() + interval '30 days',
+    'groom'
   )
   returning id
 )
-insert into rsvp.invitees (household_id, display_name, sort_order)
-select household.id, fixture.display_name, fixture.sort_order
+insert into rsvp.invitees (
+  household_id,
+  display_name,
+  sort_order
+)
+select
+  household.id,
+  fixture.display_name,
+  fixture.sort_order
 from household
 cross join (
   values
@@ -355,6 +384,7 @@ commit;
 ```sql
 select
   households.display_name as nucleo,
+  households.invited_by as nucleo_invitato_da,
   invitees.display_name as invitato,
   households.deadline
 from rsvp.households
@@ -363,7 +393,8 @@ where households.display_name = 'TEST LOCALE — DA ELIMINARE'
 order by invitees.sort_order;
 ```
 
-- [ ] Il risultato contiene esattamente Ada Prova e Teo Prova.
+- [ ] Il risultato contiene Ada Prova e Teo Prova nello stesso nucleo, con
+  `nucleo_invitato_da = groom` per entrambe le righe.
 
 ### 6.4 Collegare il branch di test al sito locale
 
@@ -392,6 +423,16 @@ http://localhost:3000/rsvp/site-love-local-test-only-2026
 - [ ] Appare il nucleo “TEST LOCALE — DA ELIMINARE”.
 - [ ] Appaiono Ada Prova e Teo Prova.
 - [ ] La scadenza è visibile e futura.
+- [ ] La proposta menu mostra tradizione piacentina, vegetariano e bambini e
+  la segnala chiaramente come indicativa.
+- [ ] Fare clic su almeno un piatto per ogni percorso: si apre una scheda con
+  foto, descrizione, ingredienti tipici e nota “immagine illustrativa”.
+- [ ] Chiudere la scheda con il pulsante, cliccando sullo sfondo e con `Esc`;
+  verificare che il focus torni al piatto appena selezionato.
+- [ ] Ripetere con `?lang=en`: nomi, spiegazioni, ingredienti, testi dei pulsanti
+  e alternative delle immagini sono tutti in inglese comprensibile.
+- [ ] Su telefono, la scheda resta entro lo schermo, può scorrere verticalmente
+  e il pulsante Chiudi/Close rimane facilmente raggiungibile.
 - [ ] Il cambio Italiano/English modifica correttamente il form.
 - [ ] Premere Salva senza scegliere la presenza: il browser impedisce l'invio.
 - [ ] Non esistono campi liberi per allergie, salute, email o telefono.
@@ -399,7 +440,7 @@ http://localhost:3000/rsvp/site-love-local-test-only-2026
 
 ### 7.2 Primo salvataggio
 
-- [ ] Impostare Ada: presente, menu vegetariano.
+- [ ] Impostare Ada: presente, menu piacentino vegetariano.
 - [ ] Impostare Teo: assente.
 - [ ] Premere “Salva la risposta”.
 - [ ] Appare “Risposta salvata. Grazie!”.
@@ -409,9 +450,14 @@ http://localhost:3000/rsvp/site-love-local-test-only-2026
 
 ### 7.3 Modifica successiva
 
-- [ ] Cambiare Teo in presente con menu standard.
-- [ ] Salvare di nuovo.
-- [ ] Ricaricare e verificare che la nuova risposta sia persistita.
+- [ ] Ricaricare prima la pagina e verificare che le scelte salvate siano già
+  selezionate.
+- [ ] Premere Salva senza modificare nulla: appare l'avviso che non ci sono
+  cambiamenti e il form non viene inviato.
+- [ ] Cambiare Teo in presente con menu tradizionale piacentino.
+- [ ] Premere Salva: appare una richiesta esplicita di conferma.
+- [ ] Annullare una volta e verificare che non venga salvato nulla.
+- [ ] Ripetere, confermare e ricaricare: la nuova risposta è persistita.
 
 ### 7.4 Concorrenza fra due schede
 
@@ -539,13 +585,23 @@ RSVP_ADMIN_EMAILS=la-tua-email@example.com
 - [ ] I conteggi sono coerenti con il fixture: un nucleo e due invitati, oltre a
   eventuali altri fixture deliberatamente presenti nel branch di test.
 - [ ] Ada e Teo mostrano le ultime risposte salvate.
+- [ ] Il nucleo è mostrato una sola volta con l'indicazione “2 persone nello
+  stesso nucleo”.
+- [ ] Il nucleo risulta invitato da Alessandro; la provenienza non cambia tra
+  Ada e Teo.
+- [ ] I tre conteggi indicano quanti nuclei sono stati invitati da Bridget,
+  Alessandro o entrambi.
+- [ ] Il conteggio “Nuclei con modifiche” aumenta dopo il secondo invio.
+- [ ] Soltanto la persona cambiata nell'ultimo invio mostra il badge
+  “Modificata nell’ultimo invio”.
 
 ### 8.4 Export CSV
 
 - [ ] Premere “Esporta CSV”.
 - [ ] Il download ha un nome simile a `rsvp-AAAA-MM-GG.csv`.
 - [ ] Aprire il file con Numbers o Excel.
-- [ ] Controllare nucleo, invitato, presenza, menu e data di aggiornamento.
+- [ ] Controllare nucleo, numero componenti, nucleo invitato da, presenza, menu
+  modifica nell'ultimo invio e data di aggiornamento.
 - [ ] Il CSV non contiene token, hash, email, telefono o note sanitarie.
 - [ ] Chiudere e cancellare il CSV di prova quando non serve più.
 

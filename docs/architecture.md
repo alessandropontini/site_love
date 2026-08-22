@@ -1,6 +1,6 @@
 # Architecture Overview
 
-Alessandro & Bridget is a Next.js 16 App Router wedding site with a canonical public home `/`, a personalized guest route `/rsvp/[token]`, and a separate spouses-only administration area. The root is a freely readable bilingual editorial experience; games and progression are deliberately outside the mounted product. The unlinked `/duomo-proposals` and `/sun-proposals` routes remain available only in development and return 404 in production.
+Alessandro & Bridget is a Next.js 16 App Router wedding site with a canonical public home `/`, a personalized guest route `/rsvp/[token]`, and a separate spouses-only administration area. The root is a freely readable bilingual editorial experience; games and progression are deliberately outside the mounted product. The unlinked `/proposal`, `/duomo-proposals`, and `/sun-proposals` routes remain available only in development and return 404 in production.
 
 ## Diagramma operativo
 

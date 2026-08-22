@@ -1,6 +1,6 @@
 # Alessandro & Bridget — La nostra avventura
 
-Un microsito matrimoniale Next.js mobile-first e bilingue. La home `/` è liberamente leggibile; il flusso personale `/rsvp/[token]` è riservato agli invitati tramite link opaco. Nessun gioco, challenge o percorso a progressione è montato o raggiungibile dal sito. Le route non collegate `/duomo-proposals` e `/sun-proposals` restano superfici interne di revisione visiva e in produzione restituiscono 404.
+Un microsito matrimoniale Next.js mobile-first e bilingue. La home `/` è liberamente leggibile; il flusso personale `/rsvp/[token]` è riservato agli invitati tramite link opaco. Nessun gioco, challenge o percorso a progressione è montato o raggiungibile dal sito. Le route non collegate `/proposal`, `/duomo-proposals` e `/sun-proposals` restano superfici interne di revisione visiva e in produzione restituiscono 404.
 
 La pagina accompagna gli invitati attraverso un unico flusso:
 
@@ -50,8 +50,16 @@ Il flusso implementato prevede:
 - un token casuale, opaco e non riconducibile ai nomi nel suo contenuto;
 - risoluzione dell'invito e salvataggio delle risposte esclusivamente lato server;
 - modifica fino alla scadenza dell’invito, con controllo di concorrenza e limite anti-abuso;
+- ripristino delle scelte salvate quando il link viene riaperto, conferma
+  esplicita prima di una modifica e segnalazione amministrativa dell'invitato
+  cambiato nell'ultimo invio;
 - verifica Cloudflare Turnstile in produzione;
 - dashboard protetta `/admin/rsvp`, allowlist email ed esportazione CSV per gli sposi.
+- appartenenza delle persone al nucleo e provenienza privata unica per l'intero
+  nucleo, visibili soltanto nella dashboard e nell'export;
+- proposta menu piacentina strutturata con percorso tradizionale, vegetariano e
+  bambini, ancora da confermare con location e catering; ogni piatto apre una
+  foto illustrativa e una spiegazione completa in italiano o inglese.
 
 Liste invitati, token, risposte, esportazioni e QR generati non devono entrare in `public/`, nel bundle client, in file versionati o in `localStorage`. `npm run create:rsvp-invitations` genera token e QR soltanto in una cartella privata esterna al repository e rifiuta domini non HTTPS. Va eseguito solo dopo aver stabilizzato dominio e backend. Il contratto completo è in `docs/rsvp.md`.
 
@@ -90,6 +98,8 @@ La location è [Casa Nuova Niviano](https://www.casanuovaniviano.com/). La home 
 - `lib/experienceConfig.ts` e `lib/useExperienceProgress.ts` — configurazione e persistenza conservate; non modificare per lavori ordinari sulla home.
 - `docs/editorial-home.md` — manutenzione della pagina pubblica.
 - `docs/rsvp.md` — confini privacy e architettura RSVP.
+- `docs/menu-proposal.md` — bozza dei percorsi piacentini e fonti territoriali
+  da validare con location e catering.
 - `docs/deployment.md` — hosting, dominio, servizi e checklist di pubblicazione.
 - `docs/architecture-diagram.md` — diagramma dei flussi runtime, rilascio e backup.
 - `docs/operations-guide.md` — pannelli, comandi, controlli periodici ed emergenze.

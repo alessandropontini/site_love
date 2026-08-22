@@ -3,8 +3,12 @@ import Link from "next/link";
 
 import styles from "@/app/admin/admin.module.css";
 import { requireRsvpAdmin } from "@/lib/admin/auth";
+import {
+  invitationSourceLabels,
+  mealPreferenceLabels
+} from "@/lib/rsvp/display";
 import { getAdminRsvpDashboard } from "@/lib/rsvp/db";
-import type { Attendance, MealPreference } from "@/lib/rsvp/types";
+import type { Attendance } from "@/lib/rsvp/types";
 
 export const dynamic = "force-dynamic";
 
@@ -13,13 +17,8 @@ const attendanceLabels: Record<Attendance, string> = {
   no: "Assente"
 };
 
-const mealLabels: Record<MealPreference, string> = {
-  standard: "Menu standard",
-  vegetarian: "Vegetariano",
-  vegan: "Vegano",
-  children: "Menu bambini",
-  not_needed: "Non necessario"
-};
+const mealLabels = mealPreferenceLabels.it;
+const sourceLabels = invitationSourceLabels.it;
 
 function formatDate(value: string | null) {
   if (!value) {
@@ -94,6 +93,34 @@ export default async function AdminRsvpPage() {
             <strong>{dashboard.summary.attending}</strong>
             <span>Presenze confermate</span>
           </article>
+          <article>
+            <strong>{dashboard.summary.householdsWithChanges}</strong>
+            <span>Nuclei con modifiche</span>
+          </article>
+        </section>
+
+        <section
+          aria-labelledby="invitation-source-heading"
+          className={styles.sourceSummary}
+        >
+          <div>
+            <p className={styles.kicker}>Organizzazione privata</p>
+            <h2 id="invitation-source-heading">Provenienza degli inviti</h2>
+          </div>
+          <dl>
+            <div>
+              <dt>Nuclei invitati da Bridget</dt>
+              <dd>{dashboard.summary.householdsInvitedByBride}</dd>
+            </div>
+            <div>
+              <dt>Nuclei invitati da Alessandro</dt>
+              <dd>{dashboard.summary.householdsInvitedByGroom}</dd>
+            </div>
+            <div>
+              <dt>Nuclei invitati da entrambi</dt>
+              <dd>{dashboard.summary.householdsInvitedByBoth}</dd>
+            </div>
+          </dl>
         </section>
 
         <section className={styles.tableCard}>
@@ -117,39 +144,73 @@ export default async function AdminRsvpPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {dashboard.rows.map((row) => (
-                    <tr key={`${row.householdId}-${row.inviteeId ?? "empty"}`}>
-                      <td>
-                        <strong>{row.householdName}</strong>
-                        <br />
-                        <span className={styles.muted}>
-                          {row.preferredLocale.toUpperCase()} · {row.householdStatus}
-                        </span>
-                      </td>
-                      <td>{row.inviteeName ?? "—"}</td>
-                      <td>
-                        {row.attendance ? (
-                          <span
-                            className={
-                              row.attendance === "yes"
-                                ? styles.statusYes
-                                : styles.statusNo
-                            }
-                          >
-                            {attendanceLabels[row.attendance]}
-                          </span>
-                        ) : (
-                          <span className={styles.statusPending}>In attesa</span>
-                        )}
-                      </td>
-                      <td>
-                        {row.mealPreference
-                          ? mealLabels[row.mealPreference]
-                          : "—"}
-                      </td>
-                      <td>{formatDate(row.responseUpdatedAt)}</td>
-                    </tr>
-                  ))}
+                  {dashboard.rows.map((row, index) => {
+                    const firstRowForHousehold =
+                      index === 0 ||
+                      dashboard.rows[index - 1]?.householdId !== row.householdId;
+                    const householdSize = Math.max(row.householdSize, 1);
+
+                    return (
+                      <tr key={`${row.householdId}-${row.inviteeId ?? "empty"}`}>
+                        {firstRowForHousehold ? (
+                          <td rowSpan={householdSize}>
+                            <strong>{row.householdName}</strong>
+                            <br />
+                            <span className={styles.householdMeta}>
+                              {row.householdSize === 0
+                                ? "Nucleo senza componenti"
+                                : row.householdSize === 1
+                                ? "1 persona nel nucleo"
+                                : `${row.householdSize} persone nello stesso nucleo`}
+                            </span>
+                            <br />
+                            <span
+                              className={styles.sourceTag}
+                              data-source={row.invitedBy}
+                            >
+                              {sourceLabels[row.invitedBy]}
+                            </span>
+                            <br />
+                            <span className={styles.muted}>
+                              {row.preferredLocale.toUpperCase()} ·{" "}
+                              {row.householdStatus}
+                            </span>
+                          </td>
+                        ) : null}
+                        <td>
+                          {row.inviteeName ?? "—"}
+                          {row.changedInLatestSubmission ? (
+                            <span className={styles.changeBadge}>
+                              Modificata nell’ultimo invio
+                            </span>
+                          ) : null}
+                        </td>
+                        <td>
+                          {row.attendance ? (
+                            <span
+                              className={
+                                row.attendance === "yes"
+                                  ? styles.statusYes
+                                  : styles.statusNo
+                              }
+                            >
+                              {attendanceLabels[row.attendance]}
+                            </span>
+                          ) : (
+                            <span className={styles.statusPending}>
+                              In attesa
+                            </span>
+                          )}
+                        </td>
+                        <td>
+                          {row.mealPreference
+                            ? mealLabels[row.mealPreference]
+                            : "—"}
+                        </td>
+                        <td>{formatDate(row.responseUpdatedAt)}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

@@ -10,6 +10,7 @@ Non sostituisce una verifica legale della situazione concreta.
 
 - nome mostrato nell'invito;
 - appartenenza al nucleo invitato;
+- provenienza organizzativa del nucleo invitato: sposa, sposo o entrambi;
 - presenza o assenza;
 - scelta strutturata del menu;
 - lingua, scadenza e timestamp tecnici;
@@ -25,6 +26,9 @@ l'informativa, il consenso ove applicabile e gli accessi.
 ## Accessi e condivisione
 
 - Gli invitati vedono soltanto il proprio nucleo tramite token personale.
+- La provenienza del nucleo è visibile soltanto agli sposi nella dashboard e
+  nell'export privato; non viene mostrata nel form dell'invitato e non varia tra
+  i componenti dello stesso nucleo.
 - Il possesso del token consente modifica fino alla scadenza: va trattato come
   una credenziale e può essere revocato/reemesso.
 - Gli sposi accedono tramite Clerk e allowlist email. Ogni pagina, route di
@@ -33,6 +37,12 @@ l'informativa, il consenso ove applicabile e gli accessi.
   canale privato concordato. Non ricevono token, audit o accessi al database.
 - Non sono ammessi analytics, session replay o pixel pubblicitari sulle route
   RSVP.
+
+## Immagini del menu
+
+Le fotografie illustrative dei piatti sono originali, statiche e conservate nel
+repository senza EXIF o GPS. Non raffigurano persone, non incorporano dati RSVP
+e non richiedono servizi fotografici o tracker esterni quando vengono aperte.
 
 ## Conservazione proposta
 

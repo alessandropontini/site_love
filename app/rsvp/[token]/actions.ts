@@ -1,5 +1,7 @@
 "use server";
 
+import { refresh } from "next/cache";
+
 import {
   getRsvpInvitation,
   saveRsvpAnswers
@@ -23,6 +25,7 @@ const actionCopy = {
     conflict:
       "La risposta è stata modificata da un’altra pagina. Ricarica prima di riprovare.",
     rateLimited: "Troppi aggiornamenti ravvicinati. Attendi un’ora e riprova.",
+    unchanged: "Non hai modificato nessuna risposta già salvata.",
     unavailable: "Il servizio RSVP non è disponibile in questo momento.",
     saved: "Risposta salvata. Grazie!"
   },
@@ -33,6 +36,7 @@ const actionCopy = {
     conflict:
       "This RSVP was changed in another page. Refresh before trying again.",
     rateLimited: "Too many updates. Wait one hour and try again.",
+    unchanged: "You have not changed any saved response.",
     unavailable: "The RSVP service is temporarily unavailable.",
     saved: "Your response has been saved. Thank you!"
   }
@@ -67,11 +71,14 @@ function hasUnexpectedAnswerFields(
     }
   }
 
-  return inviteeIds.some(
-    (inviteeId) =>
-      formData.getAll(`attendance:${inviteeId}`).length !== 1 ||
-      formData.getAll(`meal:${inviteeId}`).length !== 1
-  );
+  return inviteeIds.some((inviteeId) => {
+    const attendanceCount = formData.getAll(
+      `attendance:${inviteeId}`
+    ).length;
+    const mealCount = formData.getAll(`meal:${inviteeId}`).length;
+
+    return attendanceCount !== 1 || mealCount > 1;
+  });
 }
 
 export async function submitRsvp(
@@ -169,6 +176,8 @@ export async function submitRsvp(
   );
 
   if (result.status === "saved") {
+    refresh();
+
     return {
       status: "success",
       message: copy.saved,
@@ -180,9 +189,11 @@ export async function submitRsvp(
   const message =
     result.status === "conflict"
       ? copy.conflict
-      : result.status === "rate_limited"
-        ? copy.rateLimited
-        : copy.unavailable;
+      : result.status === "unchanged"
+        ? copy.unchanged
+        : result.status === "rate_limited"
+          ? copy.rateLimited
+          : copy.unavailable;
 
   return {
     ...previousState,

@@ -87,7 +87,7 @@
 .summary {
   margin: 34px 0;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -118,6 +118,52 @@
   line-height: 1.4;
 }
 
+.sourceSummary {
+  margin: 0 0 22px;
+  padding: 20px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border: 1px solid rgba(38, 27, 32, 0.16);
+  border-radius: 22px;
+  background: rgba(251, 248, 244, 0.94);
+  box-shadow: 0 20px 55px rgba(38, 27, 32, 0.06);
+}
+
+.sourceSummary h2 {
+  margin: 6px 0 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.8rem;
+}
+
+.sourceSummary dl {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.sourceSummary dl div {
+  min-width: 142px;
+  padding: 11px 13px;
+  border-radius: 14px;
+  background: rgba(61, 71, 40, 0.07);
+}
+
+.sourceSummary dt {
+  color: rgba(38, 27, 32, 0.65);
+  font-size: 0.78rem;
+}
+
+.sourceSummary dd {
+  margin: 4px 0 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.65rem;
+  font-weight: 650;
+}
+
 .tableCard {
   overflow: hidden;
 }
@@ -144,7 +190,7 @@
 
 .table {
   width: 100%;
-  min-width: 940px;
+  min-width: 1020px;
   border-collapse: collapse;
   text-align: left;
 }
@@ -169,6 +215,50 @@
 
 .muted {
   color: rgba(38, 27, 32, 0.55);
+}
+
+.householdMeta {
+  color: var(--admin-olive);
+  font-size: 0.83rem;
+  font-weight: 700;
+}
+
+.sourceTag {
+  width: fit-content;
+  padding: 4px 8px;
+  display: inline-block;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.sourceTag[data-source="bride"] {
+  background: rgba(159, 87, 112, 0.13);
+  color: #793f54;
+}
+
+.sourceTag[data-source="groom"] {
+  background: rgba(55, 91, 122, 0.12);
+  color: #31536f;
+}
+
+.sourceTag[data-source="both"] {
+  background: rgba(155, 121, 72, 0.14);
+  color: #75582e;
+}
+
+.changeBadge {
+  width: fit-content;
+  margin-top: 6px;
+  padding: 4px 8px;
+  display: block;
+  border-radius: 999px;
+  background: rgba(155, 121, 72, 0.14);
+  color: #75582e;
+  font-size: 0.72rem;
+  font-weight: 760;
+  white-space: nowrap;
 }
 
 .statusYes,
@@ -231,6 +321,16 @@
 
   .summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sourceSummary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .sourceSummary dl {
+    width: 100%;
+    justify-content: flex-start;
   }
 }
 

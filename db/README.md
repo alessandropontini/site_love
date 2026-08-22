@@ -15,7 +15,10 @@ runtime. Grant the runtime role only `USAGE` on the schema and the table and
 sequence privileges required by the application.
 
 Apply migrations in numeric order. `002_admin_audit.sql` records administrative
-exports without copying guest answers into the audit metadata.
+exports without copying guest answers into the audit metadata;
+`004_invitee_source.sql` is the transitional introduction of the private
+bride/groom/both category; `005_household_invitation_source.sql` normalizes it
+onto the household, ensuring every member of one invitation shares its source.
 
 For a local encrypted-disk backup, load `DATABASE_URL` into the shell and run
 `npm run backup:rsvp`. The generated `backups/` directory is ignored by Git and

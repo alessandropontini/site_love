@@ -6,6 +6,7 @@ import type {
   AdminRsvpResult,
   AdminRsvpRow,
   Attendance,
+  InvitationSource,
   MealPreference,
   RsvpAnswer,
   RsvpInvitation,
@@ -33,19 +34,24 @@ type SaveRow = {
   response_version: number | null;
   saved_count: number;
   rate_limited: boolean;
+  unchanged: boolean;
 };
 
 type AdminRow = {
   household_id: string;
   household_name: string;
+  household_size: number;
   preferred_locale: "it" | "en";
   household_status: "active" | "closed" | "disabled";
+  response_version: number;
   deadline: string | null;
   invitee_id: string | null;
   invitee_name: string | null;
+  invited_by: InvitationSource;
   attendance: Attendance | null;
   meal_preference: MealPreference | null;
   response_updated_at: string | null;
+  changed_in_latest_submission: boolean;
 };
 
 export function hasRsvpDatabase() {
@@ -174,6 +180,23 @@ export async function saveRsvpAnswers(
           on invitees.id = incoming.invitee_id
          and invitees.household_id = $1
       ),
+      classified as (
+        select
+          eligible.*,
+          responses.invitee_id is null
+            or responses.attendance is distinct from eligible.attendance
+            or responses.meal_preference is distinct from eligible.meal_preference
+            as should_write,
+          responses.invitee_id is not null
+            and (
+              responses.attendance is distinct from eligible.attendance
+              or responses.meal_preference is distinct from eligible.meal_preference
+            ) as changed
+        from eligible
+        left join rsvp.responses
+          on responses.household_id = $1
+         and responses.invitee_id = eligible.invitee_id
+      ),
       bumped as (
         update rsvp.households
         set response_version = response_version + 1,
@@ -204,6 +227,9 @@ export async function saveRsvpAnswers(
           and (select count(*) from eligible) = (
             select count(*) from rsvp.invitees where household_id = $1
           )
+          and exists (
+            select 1 from classified where should_write
+          )
         returning id, response_version
       ),
       upserted as (
@@ -216,12 +242,13 @@ export async function saveRsvpAnswers(
         )
         select
           bumped.id,
-          eligible.invitee_id,
-          eligible.attendance,
-          eligible.meal_preference,
+          classified.invitee_id,
+          classified.attendance,
+          classified.meal_preference,
           now()
-        from eligible
+        from classified
         join bumped on true
+        where classified.should_write
         on conflict (household_id, invitee_id) do update
           set attendance = excluded.attendance,
               meal_preference = excluded.meal_preference,
@@ -239,14 +266,38 @@ export async function saveRsvpAnswers(
           'response_updated',
           jsonb_build_object(
             'revision', bumped.response_version,
-            'invitee_count', (select count(*) from upserted)
+            'invitee_count', (select count(*) from eligible),
+            'written_invitee_count', (select count(*) from upserted),
+            'changed_invitee_count', (
+              select count(*) from classified where changed
+            )
           )
         from bumped
         returning id
       )
       select
         (select response_version::int from bumped) as response_version,
-        (select count(*)::int from upserted) as saved_count,
+        (
+          select count(*)::int
+          from eligible
+          join bumped on true
+        ) as saved_count,
+        (
+          not exists (select 1 from classified where should_write)
+          and exists (
+            select 1
+            from rsvp.households
+            where id = $1
+              and response_version = $2
+              and status = 'active'
+              and revoked_at is null
+              and (deadline is null or deadline >= now())
+          )
+          and (select count(*) from incoming) = (select count(*) from eligible)
+          and (select count(*) from eligible) = (
+            select count(*) from rsvp.invitees where household_id = $1
+          )
+        ) as unchanged,
         case
           when exists (select 1 from bumped) then false
           else exists (
@@ -261,6 +312,10 @@ export async function saveRsvpAnswers(
     )) as SaveRow[];
 
     const saved = rows[0];
+
+    if (saved?.unchanged) {
+      return { status: "unchanged" };
+    }
 
     if (!saved || Number(saved.saved_count) !== invitation.invitees.length) {
       if (saved?.rate_limited) {
@@ -284,14 +339,23 @@ async function queryAdminRsvpRows(): Promise<AdminRsvpRow[]> {
     `select
       households.id::text as household_id,
       households.display_name as household_name,
+      count(invitees.id) over (
+        partition by households.id
+      )::int as household_size,
       households.preferred_locale,
       households.status as household_status,
+      households.response_version::int,
       households.deadline::text,
       invitees.id::text as invitee_id,
       invitees.display_name as invitee_name,
+      households.invited_by,
       responses.attendance,
       responses.meal_preference,
-      responses.updated_at::text as response_updated_at
+      responses.updated_at::text as response_updated_at,
+      (
+        households.response_version > 1
+        and responses.updated_at = households.updated_at
+      ) as changed_in_latest_submission
     from rsvp.households
     left join rsvp.invitees
       on invitees.household_id = households.id
@@ -305,14 +369,18 @@ async function queryAdminRsvpRows(): Promise<AdminRsvpRow[]> {
   return rows.map((row) => ({
     householdId: row.household_id,
     householdName: row.household_name,
+    householdSize: Number(row.household_size),
     preferredLocale: row.preferred_locale,
     householdStatus: row.household_status,
+    responseVersion: Number(row.response_version),
     deadline: row.deadline,
     inviteeId: row.invitee_id,
     inviteeName: row.invitee_name,
+    invitedBy: row.invited_by,
     attendance: row.attendance,
     mealPreference: row.meal_preference,
-    responseUpdatedAt: row.response_updated_at
+    responseUpdatedAt: row.response_updated_at,
+    changedInLatestSubmission: row.changed_in_latest_submission
   }));
 }
 
@@ -323,13 +391,26 @@ export async function getAdminRsvpDashboard(): Promise<AdminRsvpResult> {
 
   try {
     const rows = await queryAdminRsvpRows();
-    const households = new Map<string, { invitees: number; answered: number }>();
+    const households = new Map<
+      string,
+      {
+        invitees: number;
+        answered: number;
+        invitedBy: InvitationSource;
+        changedInLatestSubmission: boolean;
+      }
+    >();
 
     for (const row of rows) {
       const household = households.get(row.householdId) ?? {
         invitees: 0,
-        answered: 0
+        answered: 0,
+        invitedBy: row.invitedBy,
+        changedInLatestSubmission: false
       };
+
+      household.changedInLatestSubmission ||=
+        row.changedInLatestSubmission;
 
       if (row.inviteeId) {
         household.invitees += 1;
@@ -353,7 +434,19 @@ export async function getAdminRsvpDashboard(): Promise<AdminRsvpResult> {
               household.answered === household.invitees
           ).length,
           invitees: rows.filter((row) => row.inviteeId).length,
-          attending: rows.filter((row) => row.attendance === "yes").length
+          attending: rows.filter((row) => row.attendance === "yes").length,
+          householdsWithChanges: [...households.values()].filter(
+            (household) => household.changedInLatestSubmission
+          ).length,
+          householdsInvitedByBride: [...households.values()].filter(
+            (household) => household.invitedBy === "bride"
+          ).length,
+          householdsInvitedByGroom: [...households.values()].filter(
+            (household) => household.invitedBy === "groom"
+          ).length,
+          householdsInvitedByBoth: [...households.values()].filter(
+            (household) => household.invitedBy === "both"
+          ).length
         },
         rows
       }

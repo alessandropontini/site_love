@@ -17,7 +17,11 @@ const invitationSchema = z
         householdName: z.string().trim().min(1).max(120),
         locale: z.enum(["it", "en"]).default("it"),
         deadline: z.string().datetime({ offset: true }).nullable().optional(),
-        invitees: z.array(z.string().trim().min(1).max(120)).min(1).max(20)
+        invitedBy: z.enum(["bride", "groom", "both"]),
+        invitees: z
+          .array(z.string().trim().min(1).max(120))
+          .min(1)
+          .max(20)
       })
       .strict()
   )
@@ -114,7 +118,11 @@ const databasePayload = JSON.stringify(
     token_hash: invitation.tokenHash,
     preferred_locale: invitation.locale,
     deadline: invitation.deadline,
-    invitees: invitation.invitees
+    invited_by: invitation.invitedBy,
+    invitees: invitation.invitees.map((displayName, index) => ({
+      display_name: displayName,
+      sort_order: index
+    }))
   }))
 );
 
@@ -128,6 +136,7 @@ await sql.query(
       token_hash text,
       preferred_locale text,
       deadline timestamptz,
+      invited_by text,
       invitees jsonb
     )
   ),
@@ -136,22 +145,30 @@ await sql.query(
       display_name,
       token_hash,
       preferred_locale,
-      deadline
+      deadline,
+      invited_by
     )
-    select display_name, token_hash, preferred_locale, deadline
+    select display_name, token_hash, preferred_locale, deadline, invited_by
     from input_households
     returning id, token_hash
   ),
   inserted_invitees as (
-    insert into rsvp.invitees (household_id, display_name, sort_order)
+    insert into rsvp.invitees (
+      household_id,
+      display_name,
+      sort_order
+    )
     select
       inserted_households.id,
       invitee.display_name,
-      (invitee.ordinality - 1)::smallint
+      invitee.sort_order
     from input_households
     join inserted_households using (token_hash)
-    cross join lateral jsonb_array_elements_text(input_households.invitees)
-      with ordinality as invitee(display_name, ordinality)
+    cross join lateral jsonb_to_recordset(input_households.invitees)
+      as invitee(
+        display_name text,
+        sort_order smallint
+      )
     returning id
   )
   select
@@ -169,9 +186,17 @@ await Promise.all(
 );
 
 const manifest = [
-  ["Nucleo", "URL personale", "File QR"].map(csvCell).join(","),
+  ["Nucleo", "Componenti", "Invitati da", "URL personale", "File QR"]
+    .map(csvCell)
+    .join(","),
   ...prepared.map((invitation) =>
-    [invitation.householdName, invitation.invitationUrl, invitation.qrFile]
+    [
+      invitation.householdName,
+      invitation.invitees.join(" | "),
+      invitation.invitedBy,
+      invitation.invitationUrl,
+      invitation.qrFile
+    ]
       .map(csvCell)
       .join(",")
   )

@@ -9,6 +9,7 @@ export default function robots(): MetadataRoute.Robots {
         "/admin/",
         "/api/rsvp/",
         "/duomo-proposals/",
+        "/proposal/",
         "/rsvp/",
         "/sign-in/",
         "/sun-proposals/"

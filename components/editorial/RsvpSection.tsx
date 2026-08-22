@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import type { EditorialContent } from "@/lib/editorialConfig";
 import { editorialSectionIds } from "@/lib/editorialConfig";
 
@@ -31,14 +33,14 @@ export function RsvpSection({ content }: RsvpSectionProps) {
 
         <div className={styles.rsvpCard} data-reveal>
           <div className={styles.rsvpQrColumn}>
-            <div className={styles.qrPlaceholder} aria-hidden="true">
-              <span className={styles.qrFinderTopLeft} />
-              <span className={styles.qrFinderTopRight} />
-              <span className={styles.qrFinderBottomLeft} />
-              <span className={styles.qrTexture} />
-              <span className={styles.qrTurtleBadge}>
-                <WaterTurtleMark className={styles.qrTurtle} />
-              </span>
+            <div className={styles.rsvpArtwork} aria-hidden="true">
+              <Image
+                alt=""
+                fill
+                priority={false}
+                sizes="(max-width: 780px) calc(100vw - 68px), 390px"
+                src="/rsvp/turtle-paper-rsvp.png"
+              />
             </div>
             <WaterTurtleMark className={styles.rsvpTurtle} />
           </div>

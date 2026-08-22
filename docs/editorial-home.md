@@ -1,6 +1,6 @@
 # Editorial Home Guide
 
-The canonical guest-facing route `/` is the complete bilingual, mobile-first wedding experience for **Alessandro & Bridget — La nostra avventura**. It contains no link, import, or unlock path to the retained games. The unlinked proposal routes are internal visual-review surfaces, not part of this flow.
+The canonical guest-facing route `/` is the complete bilingual, mobile-first wedding experience for **Alessandro & Bridget — La nostra avventura**. It contains no link, import, or unlock path to the retained games. The unlinked `/proposal`, `/duomo-proposals`, and `/sun-proposals` routes are internal visual-review surfaces, not part of this flow.
 
 ## Canonical page flow
 
@@ -14,7 +14,7 @@ invitation → personal photographs → Casa Nuova Niviano → RSVP
 - `components/editorial/EditorialHome.tsx` composes the public sections inside the locale provider.
 - `components/editorial/EditorialNavigation.tsx` provides in-page navigation, language selection, active-section state, and motion-aware smooth scrolling.
 - `components/editorial/EditorialLocaleProvider.tsx` keeps public language state independent from the dormant experience dictionaries while preserving the existing locale preference key.
-- `components/editorial/WeddingVenue.tsx` presents verified venue facts, the original curtain-reveal paper scene, and official outbound links.
+- `components/editorial/WeddingVenue.tsx` presents verified venue facts, the original static paper scene, and official outbound links.
 - `components/editorial/RsvpSection.tsx` presents the informational status and a non-functional, non-scannable QR motif without guest data.
 - `components/editorial/EditorialHome.module.css` owns the editorial visual system and responsive behavior.
 - `lib/editorialConfig.ts` is the bilingual content, section-ID, link, and asset source for the home.

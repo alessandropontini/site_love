@@ -26,6 +26,14 @@ The pixel/handheld and paper-theatre game directions are outside the public site
 - RSVP is a calm informational home section, not a simulated form. It explains that each household receives a personal QR code; the functional form is isolated at the personalized route.
 - The final letter remains retained but unmounted. The mounted colophon uses native modal behavior with Escape, focus containment, and focus return.
 
+### Carrara proposal scene
+
+- `/proposal` is a development-only visual draft based on Alessandro's account that the proposal took place in Carrara under the Venere Apuana. It is not linked from the public home and returns 404 in production until the couple approves it.
+- The scene depicts Alessandro and Bridget as original paper puppets leaning into a kiss, with a recognisable but non-photoreal likeness: dark hair for both, Alessandro's glasses and moustache, and restrained cream/burgundy clothing.
+- The Venere Apuana reference is limited to public factual traits: Franco Mauro Franchi's 2023 bardiglio-marble work outside the Accademia di Belle Arti, with a compact pyramidal volume. The SVG is an abstract original construction, not a traced or embedded photograph.
+- The Apuan peaks, warm academy facade, puppet strings, paper joints, and muted marble palette establish Carrara without downloading any remote visual asset.
+- Keep the route private to development while permission and final art direction for the contemporary sculpture are unresolved.
+
 ### Casa Nuova Niviano scene
 
 - Treat the venue as the physical destination of the page, not another generic story stop.
