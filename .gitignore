@@ -1,6 +1,7 @@
 .DS_Store
 .env.local
 .env*
+!.env.example
 .venv/
 .venv-crewai/
 .next/
@@ -11,3 +12,7 @@ data/*
 # Local multi-agent runtime reports
 .agent/reports/*
 !.agent/reports/.gitkeep
+.clerk/
+
+# Local database backups contain personal data and must never be committed.
+backups/

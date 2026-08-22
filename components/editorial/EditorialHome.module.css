@@ -1706,6 +1706,31 @@
     animation: none;
     translate: none;
   }
+
+  .venueGlobeSurface::before,
+  .venueGlobeLandOne,
+  .venueGlobeLandTwo,
+  .venueGlobeLandThree {
+    animation: none;
+  }
+
+  .venueCurtainLeft,
+  .venueCurtainRight,
+  .venueTheatreFootlights {
+    transition: none;
+  }
+
+  .venueCurtainLeft {
+    transform: translateX(-100%);
+  }
+
+  .venueCurtainRight {
+    transform: translateX(100%);
+  }
+
+  .venueTheatreFootlights {
+    opacity: 0.9;
+  }
 }
 
 /* Wedding venue */
@@ -1761,23 +1786,302 @@
   margin: 0;
 }
 
-.venueIllustration {
+.venueGlobeScene {
   position: relative;
   min-height: clamp(450px, 52vw, 760px);
   overflow: hidden;
   border: 1px solid rgba(38, 27, 32, 0.26);
+  display: grid;
+  place-items: center;
+  isolation: isolate;
   background:
-    linear-gradient(148deg, rgba(250, 247, 245, 0.5), transparent 48%),
-    repeating-linear-gradient(0deg, rgba(38, 27, 32, 0.025) 0 1px, transparent 1px 5px),
-    var(--blush);
+    radial-gradient(circle at 50% 39%, rgba(185, 167, 220, 0.3), transparent 29%),
+    linear-gradient(145deg, #f3ede8 0%, #e4ddd9 100%);
 }
 
-.venueIllustration::after {
+.venueGlobeScene::after {
   content: "";
   position: absolute;
   inset: 18px;
   border: 1px solid rgba(38, 27, 32, 0.18);
   pointer-events: none;
+  z-index: 1;
+}
+
+.venueGlobe {
+  position: relative;
+  z-index: 2;
+  width: min(68%, 510px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 28%, #4f528c 0%, #282e63 34%, #121738 74%, #0c112d 100%);
+  box-shadow:
+    inset -42px -28px 56px rgba(3, 5, 25, 0.62),
+    inset 20px 14px 34px rgba(223, 220, 255, 0.15),
+    0 34px 52px rgba(38, 27, 32, 0.28);
+}
+
+.venueGlobeSurface {
+  position: absolute;
+  inset: 3%;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.venueGlobeSurface::before,
+.venueGlobeSurface::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.venueGlobeSurface::before {
+  opacity: 0.28;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 21%, rgba(208, 207, 239, 0.52) 21.4% 22%, transparent 22.4% 48%),
+    repeating-linear-gradient(0deg, transparent 0 24%, rgba(208, 207, 239, 0.35) 24.5% 25%, transparent 25.5% 49%);
+  animation: globeDrift 20s linear infinite;
+}
+
+.venueGlobeSurface::after {
+  background: radial-gradient(ellipse at 50% 48%, transparent 45%, rgba(6, 9, 33, 0.64) 100%);
+}
+
+.venueGlobeLandOne,
+.venueGlobeLandTwo,
+.venueGlobeLandThree {
+  position: absolute;
+  z-index: 1;
+  display: block;
+  background: linear-gradient(135deg, #d1b675, #9b7948);
+  box-shadow: inset -5px -5px 10px rgba(65, 44, 19, 0.2);
+  animation: globeLandDrift 20s linear infinite;
+}
+
+.venueGlobeLandOne {
+  top: 25%;
+  left: 48%;
+  width: 23%;
+  height: 39%;
+  border-radius: 48% 52% 64% 36% / 35% 48% 52% 65%;
+  transform: rotate(-13deg);
+}
+
+.venueGlobeLandTwo {
+  top: 16%;
+  left: 27%;
+  width: 21%;
+  height: 19%;
+  border-radius: 64% 36% 54% 46% / 48% 61% 39% 52%;
+  transform: rotate(19deg);
+}
+
+.venueGlobeLandThree {
+  right: 17%;
+  bottom: 17%;
+  width: 19%;
+  height: 16%;
+  border-radius: 42% 58% 45% 55% / 59% 41% 59% 41%;
+  transform: rotate(-22deg);
+}
+
+.venueGlobeLatitude,
+.venueGlobeLongitude {
+  position: absolute;
+  z-index: 2;
+  display: block;
+  border: 1px solid rgba(224, 221, 255, 0.36);
+}
+
+.venueGlobeLatitude {
+  top: 45%;
+  left: 2%;
+  width: 96%;
+  height: 16%;
+  border-inline: 0;
+  border-radius: 50%;
+}
+
+.venueGlobeLongitude {
+  top: 3%;
+  left: 39%;
+  width: 23%;
+  height: 94%;
+  border-block: 0;
+  border-radius: 50%;
+}
+
+.venueGlobePin {
+  position: absolute;
+  z-index: 4;
+  top: 32%;
+  left: 61%;
+  width: clamp(34px, 5vw, 58px);
+  aspect-ratio: 0.78;
+  border-radius: 55% 55% 55% 0;
+  transform: rotate(-45deg);
+  background: linear-gradient(135deg, #c68da7, #662f58);
+  box-shadow: 6px 8px 12px rgba(25, 15, 39, 0.35);
+}
+
+.venueGlobePin::after {
+  content: "";
+  position: absolute;
+  top: 25%;
+  left: 25%;
+  width: 50%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #f7eadf;
+}
+
+.venueGlobeShadow {
+  position: absolute;
+  z-index: 1;
+  width: min(58%, 440px);
+  height: 10%;
+  border-radius: 50%;
+  transform: translateY(190%);
+  background: radial-gradient(ellipse, rgba(35, 22, 42, 0.38), transparent 70%);
+  filter: blur(8px);
+}
+
+@keyframes globeDrift {
+  to { background-position: 120px 0, 0 0; }
+}
+
+@keyframes globeLandDrift {
+  0%, 100% { margin-left: 0; }
+  50% { margin-left: 6%; }
+}
+
+.venueTheatre {
+  position: relative;
+  min-height: clamp(450px, 52vw, 760px);
+  overflow: hidden;
+  border: 1px solid rgba(38, 27, 32, 0.26);
+  background: #261b20;
+  isolation: isolate;
+}
+
+.venueTheatre :global(img) {
+  object-fit: cover;
+  object-position: center;
+}
+
+.venueTheatre::after {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  z-index: 4;
+  border: 1px solid rgba(250, 247, 245, 0.34);
+  pointer-events: none;
+}
+
+.venueTheatre::before {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 15%;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 225, 216, 0.13) 0 2px, transparent 2px 22px),
+    linear-gradient(180deg, #541329, #7b243f);
+  clip-path: ellipse(82% 100% at 50% 0%);
+  box-shadow: 0 8px 18px rgba(25, 4, 13, 0.28);
+}
+
+.venueCurtainLeft,
+.venueCurtainRight {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  background:
+    linear-gradient(90deg, rgba(255, 229, 220, 0.22), transparent 7%, rgba(30, 4, 16, 0.24) 14%, transparent 22%, rgba(255, 222, 214, 0.12) 31%, rgba(30, 4, 16, 0.3) 43%, transparent 55%, rgba(255, 225, 216, 0.13) 68%, rgba(30, 4, 16, 0.26) 82%, transparent 94%),
+    linear-gradient(90deg, #3d0e21, #852945 50%, #b1566d 100%);
+  box-shadow:
+    inset -16px 0 20px rgba(25, 4, 13, 0.42),
+    8px 0 14px rgba(25, 4, 13, 0.2);
+  transition: transform 2400ms cubic-bezier(0.16, 0.72, 0.14, 1);
+}
+
+.venueCurtainLeft::before,
+.venueCurtainRight::before {
+  content: "";
+  position: absolute;
+  right: -1px;
+  bottom: -18px;
+  left: -1px;
+  height: 52px;
+  background:
+    radial-gradient(ellipse 44px 28px at 22px 0, transparent 95%, #57172d 97%) 0 0 / 88px 52px repeat-x,
+    linear-gradient(180deg, #8e2f4c, #57172d);
+  filter: drop-shadow(0 7px 5px rgba(25, 4, 13, 0.24));
+}
+
+.venueCurtainLeft::after,
+.venueCurtainRight::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 10px;
+  background: linear-gradient(90deg, rgba(86, 39, 27, 0.72), #c79a5f 45%, rgba(255, 229, 179, 0.86) 55%, rgba(86, 39, 27, 0.72));
+  box-shadow: 0 0 8px rgba(255, 212, 139, 0.18);
+}
+
+.venueCurtainLeft::after {
+  right: -4px;
+}
+
+.venueCurtainRight::after {
+  left: -4px;
+}
+
+.venueCurtainLeft {
+  left: 0;
+  transform-origin: left center;
+}
+
+.venueCurtainRight {
+  right: 0;
+  background:
+    linear-gradient(-90deg, rgba(255, 229, 220, 0.22), transparent 7%, rgba(30, 4, 16, 0.24) 14%, transparent 22%, rgba(255, 222, 214, 0.12) 31%, rgba(30, 4, 16, 0.3) 43%, transparent 55%, rgba(255, 225, 216, 0.13) 68%, rgba(30, 4, 16, 0.26) 82%, transparent 94%),
+    linear-gradient(-90deg, #3d0e21, #852945 50%, #b1566d 100%);
+  transform-origin: right center;
+}
+
+.venueTheatre[data-open="true"] .venueCurtainLeft {
+  transform: translateX(-100%);
+}
+
+.venueTheatre[data-open="true"] .venueCurtainRight {
+  transform: translateX(100%);
+}
+
+.venueTheatreFootlights {
+  position: absolute;
+  z-index: 3;
+  right: 16%;
+  bottom: 4%;
+  left: 16%;
+  height: 8px;
+  border-radius: 999px;
+  opacity: 0;
+  background: repeating-radial-gradient(circle at center, #f6d489 0 3px, transparent 4px 24px);
+  filter: drop-shadow(0 0 6px rgba(246, 212, 137, 0.62));
+  transition: opacity 520ms ease 1500ms;
+}
+
+.venueTheatre[data-open="true"] .venueTheatreFootlights {
+  opacity: 0.9;
 }
 
 .venueSketch {
@@ -2287,11 +2591,11 @@
 }
 
 @media (max-width: 560px) {
-  .venueIllustration {
+  .venueTheatre {
     min-height: 104vw;
   }
 
-  .venueIllustration::after {
+  .venueTheatre::after {
     inset: 10px;
   }
 

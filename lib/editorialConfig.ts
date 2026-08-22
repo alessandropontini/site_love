@@ -130,7 +130,6 @@ export type EditorialContent = {
     address: string;
     description: string;
     facts: string[];
-    photoNote: string;
     websiteLabel: string;
     galleryLabel: string;
     mapLabel: string;
@@ -228,8 +227,7 @@ const baseContent: Record<EditorialLocale, EditorialContent> = {
         { id: editorialSectionIds.story, label: "Storia", shortLabel: "Storia" },
         { id: editorialSectionIds.photos, label: "Foto", shortLabel: "Foto" },
         { id: editorialSectionIds.venue, label: "Dove", shortLabel: "Dove" },
-        { id: editorialSectionIds.rsvp, label: "RSVP", shortLabel: "RSVP" },
-        { id: editorialSectionIds.letter, label: "Lettera", shortLabel: "Lettera" }
+        { id: editorialSectionIds.rsvp, label: "RSVP", shortLabel: "RSVP" }
       ]
     },
     hero: {
@@ -352,8 +350,6 @@ const baseContent: Record<EditorialLocale, EditorialContent> = {
         "Giardino, grande portico e sale interne",
         "Sei alloggi matrimoniali indipendenti nella struttura"
       ],
-      photoNote:
-        "Illustrazione provvisoria · fotografie autorizzate della location da aggiungere",
       websiteLabel: "Sito ufficiale",
       galleryLabel: "Guarda la galleria ufficiale",
       mapLabel: "Apri la mappa",
@@ -440,8 +436,7 @@ const baseContent: Record<EditorialLocale, EditorialContent> = {
         { id: editorialSectionIds.story, label: "Story", shortLabel: "Story" },
         { id: editorialSectionIds.photos, label: "Photos", shortLabel: "Photos" },
         { id: editorialSectionIds.venue, label: "Venue", shortLabel: "Venue" },
-        { id: editorialSectionIds.rsvp, label: "RSVP", shortLabel: "RSVP" },
-        { id: editorialSectionIds.letter, label: "Letter", shortLabel: "Letter" }
+        { id: editorialSectionIds.rsvp, label: "RSVP", shortLabel: "RSVP" }
       ]
     },
     hero: {
@@ -564,8 +559,6 @@ const baseContent: Record<EditorialLocale, EditorialContent> = {
         "Garden, large portico, and indoor rooms",
         "Six independent double accommodations at the venue"
       ],
-      photoNote:
-        "Temporary illustration · authorized photographs of the venue to be added",
       websiteLabel: "Official website",
       galleryLabel: "View the official gallery",
       mapLabel: "Open the map",

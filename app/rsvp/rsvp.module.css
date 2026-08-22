@@ -1,0 +1,329 @@
+.page {
+  --rsvp-cream: #faf7f5;
+  --rsvp-burgundy: #261b20;
+  --rsvp-blush: #eac5c0;
+  --rsvp-olive: #3d4728;
+  --rsvp-gold: #9b7948;
+  min-height: 100vh;
+  padding: clamp(24px, 5vw, 72px) clamp(16px, 4vw, 48px);
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at top left, rgba(234, 197, 192, 0.58), transparent 34%),
+    linear-gradient(145deg, #f5eee8, var(--rsvp-cream) 56%, #eee6db);
+  color: var(--rsvp-burgundy);
+  font-family: var(--font-ui), "Helvetica Neue", Arial, sans-serif;
+}
+
+.formCard,
+.noticeCard {
+  width: min(760px, 100%);
+  border: 1px solid rgba(38, 27, 32, 0.2);
+  border-radius: 28px;
+  background: rgba(250, 247, 245, 0.94);
+  box-shadow: 0 24px 70px rgba(38, 27, 32, 0.12);
+}
+
+.formCard {
+  padding: clamp(24px, 5vw, 56px);
+}
+
+.noticeCard {
+  padding: clamp(32px, 6vw, 72px);
+  text-align: center;
+}
+
+.noticeCard h1,
+.formHeader h1 {
+  margin: 12px 0 18px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(2.4rem, 7vw, 4.8rem);
+  font-weight: 520;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+}
+
+.noticeCard > p:not(.kicker),
+.formHeader > p:not(.kicker, .householdName, .deadline) {
+  max-width: 60ch;
+  margin: 0 auto;
+  color: rgba(38, 27, 32, 0.78);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.englishCopy {
+  margin-top: 16px !important;
+  font-style: italic;
+}
+
+.kicker {
+  margin: 0;
+  color: var(--rsvp-gold);
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+}
+
+.headerTopline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.localeNav {
+  display: flex;
+  gap: 6px;
+}
+
+.localeNav a {
+  min-height: 44px;
+  padding: 9px 12px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  color: inherit;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.localeNav a[aria-current="page"] {
+  background: var(--rsvp-burgundy);
+  color: var(--rsvp-cream);
+}
+
+.householdName {
+  margin: 0 0 22px;
+  color: var(--rsvp-olive);
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.3rem, 4vw, 1.9rem);
+  font-style: italic;
+}
+
+.deadline {
+  margin: 26px 0 0;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-block: 1px solid rgba(38, 27, 32, 0.16);
+  color: rgba(38, 27, 32, 0.72);
+}
+
+.deadline strong {
+  color: var(--rsvp-burgundy);
+}
+
+.form {
+  margin-top: 34px;
+}
+
+.privacyHint {
+  margin: 22px auto 0;
+  max-width: 62ch;
+  color: rgba(38, 27, 32, 0.68);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.privacyHint a {
+  color: var(--rsvp-olive);
+  font-weight: 700;
+}
+
+.inviteeList {
+  display: grid;
+  gap: 20px;
+}
+
+.inviteeCard {
+  min-width: 0;
+  margin: 0;
+  padding: clamp(20px, 4vw, 30px);
+  border: 1px solid rgba(38, 27, 32, 0.18);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.48);
+}
+
+.inviteeCard legend {
+  padding: 0 10px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.65rem;
+  font-weight: 600;
+}
+
+.fieldGroup {
+  margin-top: 4px;
+  display: grid;
+  gap: 9px;
+}
+
+.fieldLabel,
+.stackedField > span {
+  margin: 0 0 3px;
+  font-weight: 700;
+}
+
+.choice {
+  min-height: 48px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(38, 27, 32, 0.16);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.choice:has(input:checked) {
+  border-color: var(--rsvp-olive);
+  background: rgba(61, 71, 40, 0.08);
+}
+
+.choice input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--rsvp-olive);
+}
+
+.stackedField {
+  margin-top: 20px;
+  display: grid;
+  gap: 8px;
+}
+
+.stackedField select,
+.stackedField textarea {
+  width: 100%;
+  border: 1px solid rgba(38, 27, 32, 0.28);
+  border-radius: 12px;
+  background: #fffdfb;
+  color: var(--rsvp-burgundy);
+  font: inherit;
+}
+
+.stackedField select {
+  min-height: 48px;
+  padding: 0 13px;
+}
+
+.stackedField textarea {
+  padding: 12px 13px;
+  resize: vertical;
+}
+
+.stackedField small {
+  color: rgba(38, 27, 32, 0.64);
+  line-height: 1.5;
+}
+
+.turnstileWrap {
+  min-height: 66px;
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.formMessage,
+.successMessage {
+  min-height: 26px;
+  margin: 20px 0 8px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.formMessage {
+  color: #8a2f36;
+}
+
+.successMessage {
+  color: #355226;
+  font-weight: 700;
+}
+
+.primaryAction,
+.secondaryAction {
+  min-height: 48px;
+  border-radius: 999px;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.primaryAction {
+  width: 100%;
+  padding: 12px 24px;
+  border: 0;
+  background: var(--rsvp-burgundy);
+  color: var(--rsvp-cream);
+  cursor: pointer;
+}
+
+.primaryAction:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.secondaryAction {
+  width: fit-content;
+  margin: 26px auto 0;
+  padding: 11px 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(38, 27, 32, 0.28);
+  color: inherit;
+}
+
+.formCard > .secondaryAction {
+  display: flex;
+}
+
+.primaryAction:focus-visible,
+.secondaryAction:focus-visible,
+.localeNav a:focus-visible,
+.choice:focus-within,
+.stackedField select:focus-visible,
+.stackedField textarea:focus-visible {
+  outline: 3px solid var(--rsvp-gold);
+  outline-offset: 3px;
+}
+
+@media (max-width: 560px) {
+  .page {
+    padding-inline: 12px;
+  }
+
+  .formCard {
+    padding-inline: 18px;
+    border-radius: 20px;
+  }
+
+  .headerTopline,
+  .deadline {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .localeNav {
+    width: 100%;
+  }
+
+  .localeNav a {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page *,
+  .page *::before,
+  .page *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

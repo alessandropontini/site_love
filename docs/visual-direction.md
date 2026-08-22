@@ -5,7 +5,7 @@ This document is the source of truth for the canonical guest-facing editorial ho
 ## North Star
 
 - Experience concept: **una storia matrimoniale editoriale, calda e tattile, con accenti di carta**.
-- Public structure: invitation and story → personal photographic album → Casa Nuova Niviano → informational RSVP → open letter.
+- Public structure: invitation → personal photographic album → Casa Nuova Niviano → informational RSVP.
 - Visual principle: the root alternates large typographic, photographic, and color scenes while keeping one continuous reading flow.
 - Emotional target: adult, intimate, cinematic, and playful without becoming childish or kitsch.
 - Runtime boundary: local CSS, SVG, optimized images, and one lazy Three.js scene in the root hero; no paid API, remote asset dependency, video, or general animation library.
@@ -20,10 +20,10 @@ The pixel/handheld and paper-theatre game directions are outside the public site
 - The invitation uses generated canvas faces rather than copied textures. It responds to pointer drag, hover tilt, buttons, and arrow keys; the renderer sleeps when settled, offscreen, or backgrounded.
 - The story uses semantic editorial scenes. Phones linearize the route vertically with no required gesture.
 - The gallery uses approved local personal photographs with EXIF, GPS, and unnecessary metadata removed. No stock couple photography is mounted.
-- The location section focuses on Casa Nuova Niviano and uses facts and the outbound link from the venue's official website.
+- The location section focuses on Casa Nuova Niviano and uses facts and the outbound link from the venue's official website. It currently reveals an original paper-theatre interpretation of the venue through animated curtains; it is not a photographic or architectural depiction.
 - Authorized Casa Nuova photography is still pending. Until it is supplied, use an intentional editorial placeholder or original project visual, never an unlicensed web image.
-- RSVP is a calm informational section, not a simulated form. It explains that each household will later receive a personal QR code.
-- Letter and colophon use native modal dialogs with Escape, focus containment, and focus return.
+- RSVP is a calm informational home section, not a simulated form. It explains that each household receives a personal QR code; the functional form is isolated at the personalized route.
+- The final letter remains retained but unmounted. The mounted colophon uses native modal behavior with Escape, focus containment, and focus return.
 
 ### Casa Nuova Niviano scene
 
@@ -36,8 +36,8 @@ The pixel/handheld and paper-theatre game directions are outside the public site
 ### RSVP scene
 
 - RSVP should feel like the practical next chapter of the invitation, with high contrast, short copy, and a direct heading.
-- Today it shows status and explains the future personal QR flow; it contains no fields, fake submit button, or fake confirmation.
-- The future personalized experience belongs at `/rsvp/[token]` with server-side data. Guest names, token values, and real/scannable QR graphics are never decorative page content or static public assets; a current QR motif must stay visibly non-functional and `aria-hidden`.
+- The home shows status and explains the personal QR flow; it contains no fields, fake submit button, or fake confirmation.
+- The functional experience belongs at `/rsvp/[token]` with server-side data. Guest names, token values, and real/scannable QR graphics are never decorative home content or static public assets; the home QR motif stays visibly non-functional and `aria-hidden`.
 - If games return, their visual surface and QR remain separate from RSVP.
 
 ## Dormant paper-theatre system
@@ -149,7 +149,7 @@ On the editorial home, movement is limited to the invitation entrance/float, poi
 ## Responsive and performance rules
 
 - Root validation targets: 320, 390, 768, 1024, and 1440 px.
-- Root phone order is copy/actions before the invitation, vertical story, one-column gallery, Casa Nuova location, RSVP, letter, and footer.
+- Root phone order is copy/actions before the invitation, one-column gallery, Casa Nuova location, RSVP, and footer.
 - Every root target is at least 44×44 px. The phone navigation is fixed to the bottom safe area and the language selector remains available in the top bar and footer.
 - Three.js DPR is capped at 1.75 desktop and 1.25 phone; phone textures are smaller and antialiasing is disabled.
 - Local personal images and explicitly selected editorial art use `next/image`; below-fold media remains lazy. The social card is metadata-only.

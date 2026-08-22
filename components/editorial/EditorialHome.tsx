@@ -2,14 +2,12 @@
 
 import { EditorialNavigation } from "@/components/editorial/EditorialNavigation";
 import { EditorialFooter } from "@/components/editorial/EditorialFooter";
-import { FinalLetter } from "@/components/editorial/FinalLetter";
 import { HeroInvitation } from "@/components/editorial/HeroInvitation";
 import {
   EditorialLocaleProvider,
   useEditorialLocale
 } from "@/components/editorial/EditorialLocaleProvider";
 import { PhotoGallery } from "@/components/editorial/PhotoGallery";
-import { RelationshipTimeline } from "@/components/editorial/RelationshipTimeline";
 import { RsvpSection } from "@/components/editorial/RsvpSection";
 import { WeddingVenue } from "@/components/editorial/WeddingVenue";
 import { getEditorialContent } from "@/lib/editorialConfig";
@@ -61,11 +59,9 @@ function EditorialHomeContent() {
       <EditorialNavigation content={content} />
       <main id="editorial-main" tabIndex={-1}>
         <HeroInvitation content={content} />
-        <RelationshipTimeline content={content} />
         <PhotoGallery content={content} />
         <WeddingVenue content={content} />
         <RsvpSection content={content} />
-        <FinalLetter content={content} />
       </main>
       <EditorialFooter content={content} />
     </div>

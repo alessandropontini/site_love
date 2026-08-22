@@ -2,21 +2,21 @@
 
 ## Current status
 
-RSVP on the public home is informational only. It explains the intended personal invitation flow but does not collect, validate, send, or save a response.
+RSVP on the public home remains informational. The personalized `/rsvp/[token]` route, server action, Postgres migrations, admin dashboard, protected CSV export, local backup, and private QR generator are implemented in the repository.
 
-This is intentional: there is no production backend, guest registry, privacy policy, stable personalized route, or final domain contract yet. The interface must not imply that data has been submitted when it has only changed client state.
+The flow is not production-active until a final domain, Neon database, Turnstile widget, claimed Clerk production instance, admin allowlist, approved privacy notice, and real invitation import exist. Without `DATABASE_URL`, the personalized route returns a neutral unavailable state and never claims a response was saved.
 
 ## Product decision
 
 Each invited household will receive its own RSVP QR code. The QR is separate from any future games and points only to that household's wedding-response flow.
 
-The planned URL shape is:
+The implemented URL shape is:
 
 ```text
 https://<stable-production-domain>/rsvp/<opaque-token>
 ```
 
-In the Next.js App Router this maps conceptually to `/rsvp/[token]`. The route must not become functional until server-side token resolution and response persistence exist.
+In the Next.js App Router this maps to `/rsvp/[token]`. The route is dynamic, marked private/no-store/noindex, and resolves the token only on the server.
 
 ## Token contract
 
@@ -27,21 +27,21 @@ The route token is a bearer credential. Anyone who possesses it may be able to v
 - Store a one-way hash of the token server-side where practical; compare a hash of the presented token rather than keeping the raw value.
 - Never write full tokens to application logs, analytics, error reports, screenshots, support documents, or source control.
 - Allow revocation and replacement if a QR or link is lost or shared accidentally.
-- Decide explicitly whether a household can edit its response until a deadline or requires a separate confirmation step.
+- A household can edit its response until its configured deadline. Optimistic versioning rejects stale concurrent edits.
 
 The token identifies an invitation, not a person account. RSVP must not silently become authentication for games or another application.
 
 ## Backend boundary
 
-A production RSVP requires a real server-side system of record. At minimum it must support:
+The implemented Neon boundary supports:
 
 - household invitation lookup by token hash;
 - the exact invitees and attendance options allowed for that household;
 - validation of all submitted values on the server;
 - idempotent create/update behavior;
-- a trustworthy `updatedAt` timestamp and basic audit history;
+- a trustworthy `updatedAt` timestamp, response version, and metadata-only audit history;
 - token revocation;
-- rate limiting and abuse monitoring;
+- a per-household update limit plus Cloudflare Turnstile in production;
 - encrypted transport, access-controlled administration, backup, and deletion procedures;
 - a defined data-retention period.
 
@@ -51,18 +51,19 @@ No real guest list or response fixture belongs in the repository. Development fi
 
 ## Minimal data model
 
-Exact schema and provider are future decisions, but the boundary should distinguish:
+`db/migrations/001_rsvp.sql` and `002_admin_audit.sql` distinguish:
 
 - **Household invitation** — opaque ID, token hash, status, locale preference if needed, deadline, revocation state.
 - **Invitee** — household relationship, display name, attendance eligibility, plus-one or child rules where applicable.
-- **Response** — attendance per permitted invitee, optional contact channel, dietary/accessibility notes, submission timestamps.
+- **Response** — attendance, structured meal choice, and update timestamp per permitted invitee.
 - **Audit event** — invitation created, response updated, token revoked/reissued, administrative correction.
+- **Admin event** — external administrator ID, export type, row count, and timestamp; never response content.
 
-Collect only what the wedding organization genuinely needs. Avoid free-text fields when a smaller structured choice is sufficient, and define who may access sensitive dietary or accessibility notes.
+The form deliberately does not collect free-text allergy, disability, accessibility, email, or phone data. Special requirements are handled directly through the invitation channel. See `docs/privacy.md`.
 
 ## Public-home behavior
 
-Until the backend exists, the `/` RSVP section may contain:
+The `/` RSVP section contains:
 
 - a heading such as **Conferma la tua presenza** / **Confirm your attendance**;
 - a short explanation that every household will receive a personal QR code;
@@ -70,13 +71,15 @@ Until the backend exists, the `/` RSVP section may contain:
 
 It must not contain active guest fields, a submit control, a generated confirmation number, or copy that says a response was saved.
 
-Once personalized RSVP launches:
+The personalized implementation provides:
 
 - `/rsvp` without a token may show neutral instructions to use the personal invitation link;
 - an invalid, revoked, or expired token receives a privacy-safe error that does not confirm whether a household exists;
 - the valid token page reveals only the minimum data needed for that invitation;
 - the form is bilingual, keyboard accessible, screen-reader usable, and resilient to refresh/retry;
-- success copy states exactly what was stored and how the household can modify it.
+- success copy confirms server persistence; the same link can be used for later edits before the deadline.
+
+The request payload is rebuilt from server-resolved invitees. Client-supplied names, household IDs, or extra invitee IDs are not trusted. Zod validates every value, and the SQL statement requires the incoming invitees to match the household exactly before it increments the revision and upserts responses.
 
 ## QR generation and handling
 
@@ -89,7 +92,9 @@ Generate final QR codes only after all of the following are stable:
 5. mobile and printed-code testing;
 6. the final invitation list.
 
-QR artwork may be exported for the private invitation-production workflow, but generated household QR files must not be committed under `public/` or another served repository directory. Keep the token-to-household mapping in the protected backend or an access-controlled operational system.
+`npm run create:rsvp-invitations -- /private/list.json` reads a JSON file outside the repository, creates 256-bit URL-safe tokens, stores only SHA-256 hashes, inserts a batch atomically, and writes high-error-correction PNG files plus a private manifest outside the repository. The command rejects localhost, non-HTTPS origins, and any input/output path inside the project.
+
+QR artwork and the manifest must not be committed under `public/` or another repository directory. Keep them in an encrypted access-controlled operational location.
 
 Test every printed QR against the intended household before distribution. Use sufficient quiet zone and contrast, and retain a human-readable fallback URL or support path that does not expose the household name.
 
@@ -97,7 +102,7 @@ Test every printed QR against the intended household before distribution. Use su
 
 - Do not place guest names, emails, phone numbers, tokens, responses, or QR codes in `public/`, client bundles, static page source, analytics events, or source control.
 - Do not use `localStorage`, cookies, or URL parameters as the RSVP system of record.
-- Avoid third-party analytics and session replay on personalized RSVP pages unless there is a reviewed, consent-aware need.
+- Do not add third-party analytics or session replay to personalized RSVP pages.
 - Minimize server and CDN logging of token paths; configure redaction before launch.
 - Use an appropriate referrer policy so the personalized URL is not leaked to external links.
 - Define data owner, administrators, retention, export, correction, and deletion procedures before collecting responses.
@@ -106,27 +111,33 @@ Test every printed QR against the intended household before distribution. Use su
 
 Games are not mounted by the wedding site. If they return, they use a separate route or host, separate access/distribution, and a separate QR. Never reuse the RSVP token, household lookup, response record, or guest data to unlock or personalize a game without a new explicit privacy decision.
 
-## Decisions required before implementation
+## Administration and recovery
 
-- Production domain and hosting platform.
-- Backend/database provider and administrator access.
-- RSVP deadline and whether edits remain open afterward.
-- Exact invitee, plus-one, child, meal, dietary, accessibility, transport, and contact fields.
-- Whether confirmation email is needed and which provider may process addresses.
-- Recovery path when a household loses its personal link.
-- Retention and deletion date after the event.
-- Copy owner and operational process for reviewing responses.
+`/admin/rsvp` uses Clerk authentication plus `RSVP_ADMIN_EMAILS`. Registration alone never grants access. The page and CSV route each enforce authorization server-side. CSV cells that could be interpreted as spreadsheet formulas are prefixed safely, and exports are marked private/no-store.
+
+`npm run backup:rsvp` creates a custom-format `pg_dump` of the `rsvp` schema with owner-only permissions. Restore tests must target a separate Neon branch. A lost or shared link requires token rotation/reissue before launch; do not send the same compromised URL again.
+
+## Decisions still required before launch
+
+- Final production domain and registrar.
+- Production Neon/Clerk/Turnstile accounts and owners.
+- Final RSVP deadline and household list.
+- Whether plus-one and child rules require extra structured schema fields.
+- Recovery operator and token rotation procedure.
+- Complete privacy contact, legal basis, provider regions, and deletion date approval.
+- Copy owner and operational process for reviewing and sharing the minimum export.
 
 ## Launch checklist
 
-- [ ] Backend and data model approved.
+- [x] Backend and data model implemented locally.
 - [ ] Privacy/retention decisions documented.
-- [ ] Opaque token generation, hashing, revocation, and rate limiting tested.
+- [ ] Opaque token generation, hashing, revocation, and rate limiting tested against production-like services.
 - [ ] No guest data or token exists in repository/public assets.
 - [ ] Invalid-token behavior does not leak invitation existence.
-- [ ] Italian and English form copy complete.
+- [x] Italian and English form copy implemented.
 - [ ] Keyboard, screen-reader, error, retry, and mobile flows tested.
 - [ ] Response edits and concurrency tested.
 - [ ] Domain and route stable before QR export.
 - [ ] Every printed QR matched to the intended household.
 - [ ] Games remain technically and operationally separate.
+- [ ] Clerk users, admin allowlist, MFA, CSV export, backup, and restore tested.

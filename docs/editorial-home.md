@@ -7,14 +7,14 @@ The canonical guest-facing route `/` is the complete bilingual, mobile-first wed
 The content order is intentional and remains the same on desktop and mobile:
 
 ```text
-story → personal photographs → Casa Nuova Niviano → RSVP → letter
+invitation → personal photographs → Casa Nuova Niviano → RSVP
 ```
 
-- `app/page.tsx` mounts `EditorialHome` and builds request-host-aware social metadata.
+- `app/page.tsx` statically mounts `EditorialHome`; canonical social metadata uses the configured production origin in `app/layout.tsx`.
 - `components/editorial/EditorialHome.tsx` composes the public sections inside the locale provider.
 - `components/editorial/EditorialNavigation.tsx` provides in-page navigation, language selection, active-section state, and motion-aware smooth scrolling.
 - `components/editorial/EditorialLocaleProvider.tsx` keeps public language state independent from the dormant experience dictionaries while preserving the existing locale preference key.
-- `components/editorial/WeddingVenue.tsx` presents verified venue facts, an original placeholder illustration, and official outbound links.
+- `components/editorial/WeddingVenue.tsx` presents verified venue facts, the original curtain-reveal paper scene, and official outbound links.
 - `components/editorial/RsvpSection.tsx` presents the informational status and a non-functional, non-scannable QR motif without guest data.
 - `components/editorial/EditorialHome.module.css` owns the editorial visual system and responsive behavior.
 - `lib/editorialConfig.ts` is the bilingual content, section-ID, link, and asset source for the home.
@@ -33,7 +33,7 @@ The mounted editorial tree must not import `components/experience/`, `lib/experi
 - personal gallery records;
 - Casa Nuova Niviano facts and official outbound link;
 - informational RSVP copy;
-- final letter and dialog copy;
+- retained final-letter copy, currently unmounted;
 - footer and colophon copy.
 
 Every visible string, label, alternative text, status, and link description must exist in both Italian and English. Use an explicit placeholder for missing factual content; do not infer dates, addresses, services, personal anecdotes, venue details, or image permissions.
@@ -87,9 +87,9 @@ The absence of an authorized venue photo is a content dependency, not permission
 
 ## RSVP section
 
-RSVP is currently informational. It may tell guests that each household will receive a personal QR code, but it must not contain a form, fake confirmation number, or client-only success state.
+RSVP on the home is informational. It may tell guests that each household receives a personal QR code, but it must not contain a form, fake confirmation number, or client-only success state.
 
-The future route contract is `/rsvp/[token]`. A production implementation requires an opaque token and server-side lookup/persistence. Do not put guest data, tokens, responses, or generated QR files in `public/`, client configuration, static JSON, or `localStorage`.
+The implemented personalized route is `/rsvp/[token]`, with opaque tokens and server-side lookup/persistence. It becomes operational only when Neon and Turnstile production variables are configured. Do not put guest data, tokens, responses, exports, backups, manifests, or generated QR files in `public/`, client configuration, static JSON, or `localStorage`.
 
 The public home CTA may move the visitor to the informational RSVP section. It must not link to a personalized route until the visitor has received a valid personal URL. See `docs/rsvp.md` before implementing any form or QR generation.
 
@@ -102,9 +102,9 @@ If games return later, treat them as a separate product surface with a separate 
 ## Accessibility and responsive checks
 
 - The page has one `h1`, a skip link, semantic sections, visible focus, and real links/buttons.
-- The public section order is story → photographs → location → RSVP → letter.
+- The public section order is invitation → photographs → location → RSVP.
 - Navigation respects modified clicks, browser history, and reduced-motion preferences.
-- Letter and colophon use native dialogs, Escape close, focus containment, and focus return.
+- The mounted colophon uses native dialog behavior with Escape close, focus containment, and focus return; the final letter remains unmounted.
 - The invitation is keyboard operable and retains a functional non-WebGL fallback.
 - All interactive targets remain at least 44×44 px.
 - The page has no horizontal overflow at 320, 390, 768, 1024, or 1440 px.

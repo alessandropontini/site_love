@@ -1,0 +1,77 @@
+.page {
+  --privacy-ink: #261b20;
+  --privacy-paper: #fbf8f4;
+  --privacy-olive: #3d4728;
+  --privacy-gold: #9b7948;
+  min-height: 100vh;
+  padding: clamp(24px, 5vw, 72px) clamp(16px, 4vw, 48px);
+  background:
+    radial-gradient(circle at top left, rgba(234, 197, 192, 0.55), transparent 32%),
+    linear-gradient(145deg, #f5eee8, #faf7f5 56%, #eee6db);
+  color: var(--privacy-ink);
+  font-family: var(--font-ui), "Helvetica Neue", Arial, sans-serif;
+}
+
+.card {
+  width: min(820px, 100%);
+  margin: 0 auto;
+  padding: clamp(26px, 6vw, 68px);
+  border: 1px solid rgba(38, 27, 32, 0.18);
+  border-radius: 28px;
+  background: rgba(251, 248, 244, 0.95);
+  box-shadow: 0 24px 70px rgba(38, 27, 32, 0.11);
+}
+
+.kicker {
+  margin: 0;
+  color: var(--privacy-gold);
+  font-size: 0.76rem;
+  font-weight: 760;
+  letter-spacing: 0.14em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.card h1 {
+  margin: 14px 0 20px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  font-weight: 520;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+}
+
+.lead {
+  color: rgba(38, 27, 32, 0.78);
+  font-size: 1.12rem;
+  line-height: 1.7;
+}
+
+.card section {
+  margin-top: 34px;
+  padding-top: 28px;
+  border-top: 1px solid rgba(38, 27, 32, 0.13);
+}
+
+.card h2 {
+  margin: 0 0 10px;
+  color: var(--privacy-olive);
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.75rem;
+}
+
+.card section p {
+  margin: 0;
+  color: rgba(38, 27, 32, 0.75);
+  line-height: 1.72;
+}
+
+.legalNote {
+  margin: 34px 0 0;
+  padding: 16px 18px;
+  border-left: 4px solid var(--privacy-gold);
+  background: rgba(155, 121, 72, 0.08);
+  color: rgba(38, 27, 32, 0.72);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}

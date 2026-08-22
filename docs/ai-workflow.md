@@ -53,10 +53,10 @@ The report is evidence for human judgment, not an automatic commit, merge, or de
 
 ## Public-home regression checks
 
-- `/` remains the only canonical guest-facing route and continues to mount `EditorialHome`.
-- The public sequence remains story → photographs → Casa Nuova Niviano → RSVP → letter.
+- `/` remains the canonical public-home route and continues to mount `EditorialHome`; `/rsvp/[token]` remains the separate personalized guest route.
+- The public-home sequence remains invitation → photographs → Casa Nuova Niviano → RSVP.
 - No public CTA, component, or route mounts or links to `ExperienceShell` or another game tree.
-- RSVP remains informational until a backend exists; no guest data, token, response, or functional QR is committed or shipped client-side.
+- The home RSVP remains informational; personalized persistence stays server-side and no guest data, token, response, export, backup, manifest, or functional QR is committed or shipped client-side.
 - Keyboard, touch, focus restoration, mobile reading order, reduced motion, and Italian/English content remain usable when affected.
 
 If dormant game code is deliberately changed, also follow `docs/quest-guide.md`. If imagery changes, follow `docs/editorial-home.md` and preserve the documented privacy and provenance requirements.

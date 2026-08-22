@@ -2,11 +2,11 @@
 
 ## Project summary
 
-This repository is `alessandropontini/site_love`, a private Next.js microsite named `dreamy-couple-gallery`. The shipped experience is **Alessandro & Bridget — La nostra avventura**: one freely readable bilingual editorial wedding home. Its public flow is story → personal photographs → Casa Nuova Niviano location → RSVP information → open letter.
+This repository is `alessandropontini/site_love`, a private Next.js microsite named `dreamy-couple-gallery`. The shipped experience is **Alessandro & Bridget — La nostra avventura**: one freely readable bilingual editorial wedding home. Its public flow is invitation → personal photographs → Casa Nuova Niviano location → RSVP information. The four-stop story timeline and final letter are retained in the codebase but are not currently mounted on the public home.
 
-`app/page.tsx` is the only canonical guest-facing route. The unlinked `/duomo-proposals` and `/sun-proposals` routes remain internal visual-review surfaces, not wedding content or games. The paper-theatre `ExperienceShell`, its four challenges, progression hook, migrations, and saved-state contract remain in the repository for a possible future project, but are not mounted or reachable from this wedding site. No game code or existing browser progress is deleted as part of this separation. Earlier scrollytelling and pixel arcade implementations are likewise unmounted references.
+`app/page.tsx` is the canonical public-home route. `/rsvp/[token]` is the personalized household response route and `/admin/rsvp` is the spouses-only administration route. The unlinked `/duomo-proposals` and `/sun-proposals` routes remain internal visual-review surfaces in development and return 404 in production. The paper-theatre `ExperienceShell`, its four challenges, progression hook, migrations, and saved-state contract remain in the repository for a possible future project, but are not mounted or reachable from this wedding site. No game code or existing browser progress is deleted as part of this separation. Earlier scrollytelling and pixel arcade implementations are likewise unmounted references.
 
-The current RSVP section is deliberately informational. The future invitation flow will use one personal QR code per invited household and an opaque route token at `/rsvp/[token]`, backed by server-side storage. Do not publish guest data, response data, RSVP tokens, or generated QR codes in `public/`, client bundles, source-controlled configuration, or `localStorage`.
+The home RSVP section is deliberately informational. The implemented invitation flow uses one personal QR code per invited household and an opaque route token at `/rsvp/[token]`, backed by server-side Neon storage when production services are configured. Do not publish guest data, response data, RSVP tokens, exports, backups, manifests, or generated QR codes in `public/`, client bundles, source-controlled configuration, or `localStorage`.
 
 Codex is the only active AI development and review tool. Routine, scoped work is validated in the interactive session; an independent read-only Codex review is reserved for releases and high-risk changes. Final approval remains human.
 
@@ -20,6 +20,8 @@ Ruflo has been removed. CrewAI and OpenClaw are retained only as inactive experi
 - CSS Modules for the public home and retained dormant experiences, with shared base styling in `app/globals.css`
 - Next font integration for Instrument Sans UI text and Newsreader editorial titles
 - Three.js isolated to the home hero, plus custom CSS/SVG paper-stage compositions and optimized local scene assets
+- Neon Postgres for server-side RSVP persistence, Zod validation, and Cloudflare Turnstile abuse protection
+- Clerk identity plus an explicit email allowlist for the spouses-only administration area
 
 ## Key files and directories
 
@@ -28,7 +30,7 @@ Ruflo has been removed. CrewAI and OpenClaw are retained only as inactive experi
 - `app/layout.tsx` — metadata, font setup, and global stylesheet import.
 - `app/page.tsx` — editorial home entry point that renders `EditorialHome`.
 - `app/globals.css` — shared reset, base typography, and legacy styling.
-- `components/editorial/` — editorial navigation, hero, story, gallery, `WeddingVenue`, informational `RsvpSection`, letter, and footer.
+- `components/editorial/` — editorial navigation, hero, gallery, `WeddingVenue`, informational `RsvpSection`, footer, and retained unmounted story/letter components.
 - `lib/editorialConfig.ts` — centralized bilingual editorial copy, section IDs, and asset mapping.
 - `components/experience/ExperienceShell.tsx` — retained but unmounted invitation/map/chapter/reward/finale controller.
 - `components/experience/JourneyMap.tsx` — narrative map and chapter availability states.
@@ -42,6 +44,10 @@ Ruflo has been removed. CrewAI and OpenClaw are retained only as inactive experi
 - `public/scene/paper-theatre/` — retained local theatre assets; only explicitly referenced editorial art is loaded by the public home.
 - `components/story/`, `components/games/`, `components/QuestGame.tsx`, `components/quest/`, and `components/pixel/` — unmounted legacy implementations.
 - `docs/rsvp.md` — RSVP privacy, token, QR, and backend contract.
+- `docs/deployment.md` — low-cost hosting, service configuration, QR generation, and launch checklist.
+- `docs/architecture-diagram.md` — runtime, release, identity, data, rollback, and backup diagram.
+- `docs/operations-guide.md` — Italian operational runbook for dashboards, commands, recurring checks, and incidents.
+- `docs/privacy.md` — data minimization, access, retention, deletion, and incident guidance.
 - `docs/quest-guide.md` — maintenance guide for the retained, unmounted paper-theatre experience.
 - `docs/visual-direction.md` — approved visual/design direction.
 - `docs/architecture.md` — architecture overview for maintainers and agents.
@@ -114,7 +120,7 @@ Documentation-only changes describing these files are allowed when they do not m
 - Preserve the warm, tactile, adult editorial love-story tone.
 - Do not modify visual assets in `public/` without explicit approval.
 - Keep Instrument Sans for functional UI and Newsreader for editorial display text.
-- Keep the public sequence on `/` as story → photographs → Casa Nuova Niviano → RSVP → letter unless the user asks to revise it.
+- Keep the public sequence on `/` as invitation → photographs → Casa Nuova Niviano → RSVP unless the user asks to revise it.
 - Use factual venue information and the official Casa Nuova Niviano link. Do not claim that third-party venue photographs are licensed for reuse; authorized venue photography still needs to be supplied.
 - Personal photographs must be stored locally, optimized, and stripped of EXIF, GPS, and other unnecessary metadata before they enter `public/`.
 
@@ -139,12 +145,14 @@ Documentation-only changes describing these files are allowed when they do not m
 
 ## RSVP rules
 
-- Today, RSVP is an informational public section only. Do not add a form that appears to submit when no backend exists.
-- The future canonical personalized URL is `/rsvp/[token]`, where `token` is random, opaque, high entropy, and contains no readable name, email, phone number, household ID, or attendance state.
-- Resolve tokens and persist responses only on a server-side backend with authorization, validation, rate limiting, and an audit trail appropriate to personal data.
+- Keep the home RSVP section informational. The real form belongs only on the personalized route and must show an unavailable state rather than fake success when no backend exists.
+- The canonical personalized URL is `/rsvp/[token]`, where `token` is random, opaque, high entropy, and contains no readable name, email, phone number, household ID, or attendance state.
+- Resolve tokens and persist responses only on the server with validation, Turnstile in production, rate limiting, optimistic concurrency, and a metadata-only audit trail.
+- Keep guest data minimized to invited name, attendance, structured meal preference, and timestamps. Do not add free-text health/accessibility fields without a separate reviewed privacy decision.
+- Protect every admin page, export route, and mutation independently with Clerk authentication plus the explicit admin allowlist. Registration alone never grants authorization.
 - Never commit guest lists, token-to-household mappings, RSVP responses, or generated QR images to the repository.
 - Never use `localStorage` as the RSVP system of record. It is acceptable only for non-sensitive interface preferences such as locale.
-- Generate final QR codes only after the production domain and backend route are stable. The games, if revived later, require a different route or distribution channel and a separate QR.
+- Generate final QR codes only after the production domain and backend route are stable, using the private generator outside the repository. The games, if revived later, require a different route or distribution channel and a separate QR.
 
 ## Retained paper-theatre progression rules
 

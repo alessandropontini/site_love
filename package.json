@@ -6,16 +6,23 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint app components/editorial lib/editorialConfig.ts"
+    "lint": "eslint app components/editorial lib proxy.ts scripts/create-rsvp-invitations.mjs",
+    "backup:rsvp": "./scripts/backup-rsvp.sh",
+    "create:rsvp-invitations": "node scripts/create-rsvp-invitations.mjs"
   },
   "dependencies": {
+    "@clerk/nextjs": "^7.8.0",
+    "@neondatabase/serverless": "^1.1.0",
     "next": "^16.3.2",
+    "qrcode": "^1.5.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "three": "^0.185.1"
+    "three": "^0.185.1",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@types/three": "^0.185.4",
