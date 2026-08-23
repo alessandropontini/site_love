@@ -17,7 +17,7 @@ const pageCopy = {
     kicker: "Alessandro & Bridget",
     title: "Conferma la tua presenza",
     intro:
-      "Rispondi per ogni persona inclusa nel tuo invito. Potrai tornare su questo link per modificare la risposta fino alla scadenza.",
+      "Conferma chi parteciperà, indica un contatto email, un eventuale +1 e se saranno presenti figli. Il menu verrà richiesto più avanti attraverso lo stesso link.",
     deadline: "Risposte entro",
     invalidTitle: "Invito non disponibile",
     invalidBody:
@@ -33,7 +33,7 @@ const pageCopy = {
     kicker: "Alessandro & Bridget",
     title: "Confirm your attendance",
     intro:
-      "Reply for every person included in your invitation. You can return to this link to update the response until the deadline.",
+      "Confirm who will attend, provide a contact email, add an optional +1, and indicate whether children will attend. Menu choices will be requested later through this same link.",
     deadline: "Please reply by",
     invalidTitle: "Invitation unavailable",
     invalidBody:

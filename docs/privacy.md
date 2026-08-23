@@ -10,18 +10,60 @@ Non sostituisce una verifica legale della situazione concreta.
 
 - nome mostrato nell'invito;
 - appartenenza al nucleo invitato;
+- email di contatto del nucleo, usata soltanto per conferme e promemoria;
 - provenienza organizzativa del nucleo invitato: sposa, sposo o entrambi;
 - presenza o assenza;
-- scelta strutturata del menu;
+- autorizzazione per nucleo e nome/cognome dell'eventuale +1 non già nominato;
+- sola indicazione sì/no sulla presenza di figli, senza dati anagrafici;
+- scelta strutturata del menu, soltanto nella seconda fase;
 - lingua, scadenza e timestamp tecnici;
 - token casuale soltanto come hash server-side;
 - audit tecnico privo del contenuto della risposta.
 
-Il form non raccoglie email, telefono, indirizzo, documento, data di nascita,
-testo libero su allergie, disabilità o salute. Le esigenze particolari vengono
+Il form non raccoglie telefono, indirizzo, documento, data di nascita o testo
+libero su allergie, disabilità o salute. Le esigenze particolari vengono
 gestite direttamente fuori dal sito. Se in futuro si volesse raccoglierle
 online, servono una decisione separata sulla necessità, la base giuridica,
 l'informativa, il consenso ove applicabile e gli accessi.
+
+Chi compila per un +1 deve essere autorizzato a comunicarne nome e cognome e
+rendere disponibile l'informativa anche a quella persona. Il sito non raccoglie
+nomi, età o date di nascita dei figli, non è offerto direttamente ai minori e
+non crea account per loro.
+
+Una coppia con entrambi i nomi già presenti nell'invito non usa il campo +1.
+Il campo compare esclusivamente per i nuclei con `allow_plus_one = true`.
+
+## Inquadramento GDPR da confermare
+
+L'articolo 2, paragrafo 2, lettera c) e il considerando 18 GDPR escludono le
+attività esclusivamente personali o domestiche senza connessione commerciale o
+professionale. Un matrimonio privato può rientrare in questo ambito, mentre i
+fornitori che mettono a disposizione i mezzi tecnici restano soggetti ai propri
+obblighi. Poiché l'applicazione concreta dell'esenzione dipende dalle modalità
+reali di utilizzo e condivisione, prima della raccolta reale va confermata con
+una persona competente. In via prudenziale il progetto applica comunque
+minimizzazione, trasparenza, sicurezza, diritti e cancellazione programmata.
+
+Se il GDPR risulta applicabile al trattamento della coppia, l'informativa deve
+indicare almeno: identità e contatto dei titolari; finalità e base giuridica;
+eventuale interesse legittimo; dati obbligatori e conseguenze del mancato
+conferimento; destinatari e responsabili; trasferimenti extra SEE e garanzie;
+conservazione; diritti e reclamo al Garante; origine dei dati ricevuti da un
+altro componente del nucleo; assenza di profilazione o decisioni automatizzate.
+Il semplice checkbox “ho letto” documenta la presa visione e non viene descritto
+come consenso.
+
+Le informazioni su allergie o salute rientrano nelle categorie particolari
+dell'articolo 9 GDPR. Per questo non vengono raccolte dal form. Se diventassero
+necessarie, servirebbero una base dell'articolo 6, una condizione dell'articolo
+9 (spesso consenso esplicito nel contesto concreto), accessi più ristretti e
+un'informativa specifica.
+
+Riferimenti ufficiali: [GDPR su EUR-Lex](https://eur-lex.europa.eu/legal-content/IT/TXT/?uri=CELEX%3A32016R0679),
+[principi del Garante](https://www.garanteprivacy.it/home/principi-fondamentali-del-trattamento),
+[minori secondo EDPB](https://www.edpb.europa.eu/topics/key-gdpr-concepts/children_en)
+e [linee guida cookie del Garante](https://www.garanteprivacy.it/web/guest/home/docweb/-/docweb-display/docweb/9677876).
 
 ## Accessi e condivisione
 
@@ -44,12 +86,12 @@ Le fotografie illustrative dei piatti sono originali, statiche e conservate nel
 repository senza EXIF o GPS. Non raffigurano persone, non incorporano dati RSVP
 e non richiedono servizi fotografici o tracker esterni quando vengono aperte.
 
-## Conservazione proposta
+## Conservazione approvata
 
-Data matrimonio: 13 maggio 2028. Regola proposta: cancellare database RSVP,
-audit, manifest, QR operativi, export e backup entro l'11 agosto 2028, 90 giorni
-dopo l'evento. Confermare questa data prima del lancio e impostare un promemoria
-operativo; il codice non deve fingere che la cancellazione sia automatica.
+Data matrimonio: 13 maggio 2028. Tutti i dati personali RSVP, email, audit,
+manifest, QR operativi, export e backup saranno cancellati entro l'11 agosto
+2028, 90 giorni dopo l'evento. Impostare un promemoria operativo: il codice non
+deve fingere che la cancellazione sia automatica.
 
 Prima della cancellazione:
 
@@ -65,6 +107,8 @@ Prima della cancellazione:
 - identità completa e contatto del titolare o dei titolari;
 - base giuridica applicabile al caso concreto;
 - destinatari effettivi e responsabili del trattamento;
+- contratto, regione e conservazione effettiva di Resend prima di attivare le
+  email automatiche, mantenendo disabilitati open e click tracking;
 - regioni scelte, eventuali trasferimenti extra SEE e relative garanzie;
 - data/criterio definitivo di conservazione;
 - modalità per accesso, rettifica, cancellazione e reclamo;

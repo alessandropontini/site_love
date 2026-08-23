@@ -6,7 +6,9 @@ import {
   getRsvpInvitation,
   saveRsvpAnswers
 } from "@/lib/rsvp/db";
-import type { MealPreference, RsvpLocale } from "@/lib/rsvp/types";
+import { sendRsvpConfirmationEmail } from "@/lib/rsvp/email";
+import { RSVP_PRIVACY_NOTICE_VERSION } from "@/lib/rsvp/privacy";
+import type { RsvpLocale } from "@/lib/rsvp/types";
 import { verifyRsvpTurnstile } from "@/lib/rsvp/turnstile";
 import { rsvpSubmissionSchema } from "@/lib/rsvp/validation";
 
@@ -27,7 +29,11 @@ const actionCopy = {
     rateLimited: "Troppi aggiornamenti ravvicinati. Attendi un’ora e riprova.",
     unchanged: "Non hai modificato nessuna risposta già salvata.",
     unavailable: "Il servizio RSVP non è disponibile in questo momento.",
-    saved: "Risposta salvata. Grazie!"
+    saved: "Presenza salvata e conferma inviata via email. Grazie!",
+    savedEmailPending:
+      "Presenza salvata. L’email automatica non è ancora attiva nella versione di prova.",
+    savedEmailFailed:
+      "Presenza salvata, ma non siamo riusciti a inviare l’email di conferma. Non serve reinviare il modulo."
   },
   en: {
     invalid: "This link is invalid or no longer active.",
@@ -38,7 +44,11 @@ const actionCopy = {
     rateLimited: "Too many updates. Wait one hour and try again.",
     unchanged: "You have not changed any saved response.",
     unavailable: "The RSVP service is temporarily unavailable.",
-    saved: "Your response has been saved. Thank you!"
+    saved: "Attendance saved and confirmation email sent. Thank you!",
+    savedEmailPending:
+      "Attendance saved. Automatic email is not active yet in this trial version.",
+    savedEmailFailed:
+      "Attendance was saved, but we could not send the confirmation email. You do not need to submit the form again."
   }
 } as const;
 
@@ -58,13 +68,12 @@ function hasUnexpectedAnswerFields(
   const allowedAnswerKeys = new Set(
     inviteeIds.flatMap((inviteeId) => [
       `attendance:${inviteeId}`,
-      `meal:${inviteeId}`
     ])
   );
 
   for (const key of formData.keys()) {
     if (
-      (key.startsWith("attendance:") || key.startsWith("meal:")) &&
+      key.startsWith("attendance:") &&
       !allowedAnswerKeys.has(key)
     ) {
       return true;
@@ -75,9 +84,7 @@ function hasUnexpectedAnswerFields(
     const attendanceCount = formData.getAll(
       `attendance:${inviteeId}`
     ).length;
-    const mealCount = formData.getAll(`meal:${inviteeId}`).length;
-
-    return attendanceCount !== 1 || mealCount > 1;
+    return attendanceCount !== 1;
   });
 }
 
@@ -132,19 +139,59 @@ export async function submitRsvp(
     return {
       inviteeId: invitee.id,
       attendance,
-      mealPreference: isAttending
-        ? (readString(
-            formData,
-            `meal:${invitee.id}`
-          ) as MealPreference)
-        : "not_needed"
+      mealPreference: isAttending ? null : "not_needed"
     };
   });
+
+  const contactEmail = readString(formData, "contactEmail")
+    .trim()
+    .toLowerCase();
+  const confirmedEmail = readString(formData, "contactEmailConfirm")
+    .trim()
+    .toLowerCase();
+  const plusOneRequested = readString(formData, "plusOneEnabled") === "yes";
+
+  if (plusOneRequested && !lookup.invitation.allowPlusOne) {
+    return {
+      ...previousState,
+      status: "error",
+      message: copy.validation,
+      attempt: previousState.attempt + 1
+    };
+  }
+
+  const plusOneEnabled =
+    lookup.invitation.allowPlusOne && plusOneRequested;
+  const plusOne = plusOneEnabled
+    ? {
+        id: readString(formData, "plusOneId") || null,
+        firstName: readString(formData, "plusOneFirstName"),
+        lastName: readString(formData, "plusOneLastName"),
+        mealPreference: null
+      }
+    : null;
+  const hasChildren = readString(formData, "hasChildren") === "yes";
+
+  if (
+    contactEmail !== confirmedEmail ||
+    readString(formData, "privacyAcknowledgement") !== "yes"
+  ) {
+    return {
+      ...previousState,
+      status: "error",
+      message: copy.validation,
+      attempt: previousState.attempt + 1
+    };
+  }
 
   const submission = rsvpSubmissionSchema.safeParse({
     revision: readString(formData, "revision"),
     locale,
-    answers
+    contactEmail,
+    answers,
+    plusOne,
+    hasChildren,
+    privacyNoticeVersion: RSVP_PRIVACY_NOTICE_VERSION
   });
 
   if (!submission.success) {
@@ -172,15 +219,26 @@ export async function submitRsvp(
   const result = await saveRsvpAnswers(
     lookup.invitation,
     submission.data.revision,
-    submission.data.answers
+    submission.data
   );
 
   if (result.status === "saved") {
+    const emailResult = await sendRsvpConfirmationEmail({
+      to: submission.data.contactEmail,
+      householdId: lookup.invitation.id,
+      revision: result.revision,
+      locale
+    });
     refresh();
 
     return {
       status: "success",
-      message: copy.saved,
+      message:
+        emailResult === "sent"
+          ? copy.saved
+          : emailResult === "failed"
+            ? copy.savedEmailFailed
+            : copy.savedEmailPending,
       revision: result.revision,
       attempt: previousState.attempt + 1
     };

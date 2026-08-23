@@ -57,9 +57,10 @@ Il flusso implementato prevede:
 - dashboard protetta `/admin/rsvp`, allowlist email ed esportazione CSV per gli sposi.
 - appartenenza delle persone al nucleo e provenienza privata unica per l'intero
   nucleo, visibili soltanto nella dashboard e nell'export;
-- proposta menu piacentina strutturata con percorso tradizionale, vegetariano e
-  bambini, ancora da confermare con location e catering; ogni piatto apre una
-  foto illustrativa e una spiegazione completa in italiano o inglese.
+- prima fase dedicata a email di contatto, presenza, un eventuale +1 nominativo
+  e una sola indicazione sì/no sulla presenza di figli, senza loro dati anagrafici;
+- scelta menu rinviata a una seconda fase sullo stesso link personale, dopo la
+  conferma definitiva di location e catering.
 
 Liste invitati, token, risposte, esportazioni e QR generati non devono entrare in `public/`, nel bundle client, in file versionati o in `localStorage`. `npm run create:rsvp-invitations` genera token e QR soltanto in una cartella privata esterna al repository e rifiuta domini non HTTPS. Va eseguito solo dopo aver stabilizzato dominio e backend. Il contratto completo è in `docs/rsvp.md`.
 

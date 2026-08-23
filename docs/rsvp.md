@@ -54,13 +54,28 @@ No real guest list or response fixture belongs in the repository. Development fi
 `db/migrations/001_rsvp.sql` and `002_admin_audit.sql` distinguish:
 
 - **Household invitation** — opaque ID, token hash, status, locale preference,
-  deadline, revocation state and private source (`bride`, `groom` or `both`).
+  contact email, deadline, revocation state and private source (`bride`, `groom`
+  or `both`).
 - **Invitee** — appartenenza al nucleo e nome mostrato.
-- **Response** — attendance, structured meal choice, and update timestamp per permitted invitee.
+- **Response** — attendance, later structured meal choice, and update timestamp
+  per permitted invitee.
+- **Additional guest** — one optional named +1, available only when the
+  household has been explicitly authorised. Children are represented only by a
+  household-level yes/no flag, without names, ages or dates of birth.
 - **Audit event** — invitation created, response updated, token revoked/reissued, administrative correction.
 - **Admin event** — external administrator ID, export type, row count, and timestamp; never response content.
 
-The form deliberately does not collect free-text allergy, disability, accessibility, email, or phone data. Special requirements are handled directly through the invitation channel. See `docs/privacy.md`.
+The attendance phase collects one confirmed household email for transactional
+wedding confirmations and reminders. It deliberately does not collect phone
+numbers, dates of birth, or free-text allergy, disability, accessibility, or
+health data. Special requirements are handled directly through the invitation
+channel. See `docs/privacy.md`.
+
+Transactional confirmation email is provider-gated. It is sent through Resend
+only when `RSVP_EMAIL_ENABLED=1`, `RESEND_API_KEY`, and `RSVP_EMAIL_FROM` are all
+configured. The message contains no personal RSVP link or response details, and
+uses an idempotency key based on household ID and revision. Open and click
+tracking must remain disabled.
 
 Due persone con lo stesso `household_id` fanno parte dello stesso nucleo e
 usano lo stesso link/QR; non sono necessariamente una coppia. `invited_by`
@@ -68,10 +83,14 @@ appartiene al nucleo: tutti i componenti ereditano la stessa provenienza e non
 possono essere classificati separatamente. Questa informazione compare soltanto
 in dashboard ed export, non nella pagina personale dell'invitato.
 
-Le opzioni menu restano strutturate. La proposta visibile presenta cucina
-piacentina tradizionale, vegetariana e per bambini; l'opzione vegana resta
-selezionabile e da concordare. Portate e allergeni sono indicati come bozza
-finché location e catering non li confermano.
+Il +1 non è una regola globale. `allow_plus_one` è disattivato per impostazione
+predefinita e viene abilitato soltanto per i nuclei autorizzati ad aggiungere un
+accompagnatore non già nominato. Se entrambi i componenti di una coppia sono
+già presenti tra gli `invitees`, non sono +1 e il campo resta nascosto.
+
+Le opzioni menu restano strutturate ma non compaiono nella prima fase. Verranno
+attivate sullo stesso link personale soltanto dopo la conferma di location e
+catering; fino ad allora una presenza confermata può avere menu nullo.
 
 Ogni portata della proposta apre una finestra accessibile con foto illustrativa,
 spiegazione e ingredienti tipici in italiano o inglese. Le immagini sono asset
@@ -79,8 +98,8 @@ originali locali, non contengono dati degli invitati e non attivano richieste a
 servizi esterni. La finestra usa il dialogo nativo del browser: supporta
 tastiera, chiusura con `Esc` e ritorno del focus al comando che l'ha aperta.
 
-Quando un invitato riapre lo stesso link, presenza e menu salvati vengono
-caricati dal database e riselezionati nel form. Un invio successivo viene
+Quando un invitato riapre lo stesso link, email, presenza, +1 e indicazione
+sì/no sui figli vengono caricati dal database e riselezionati nel form. Un invio successivo viene
 accettato soltanto dopo una conferma esplicita nel browser; un invio identico
 viene bloccato sia nel browser sia dall'operazione atomica sul server, senza
 incrementare la revisione né scrivere un evento di audit. Il salvataggio
@@ -152,7 +171,8 @@ Games are not mounted by the wedding site. If they return, they use a separate r
 - Final production domain and registrar.
 - Production Neon/Clerk/Turnstile accounts and owners.
 - Final RSVP deadline and household list.
-- Whether plus-one and child rules require extra structured schema fields.
+- Mark `allowPlusOne` only for households genuinely authorised to add an
+  unnamed companion.
 - Recovery operator and token rotation procedure.
 - Complete privacy contact, legal basis, provider regions, and deletion date approval.
 - Copy owner and operational process for reviewing and sharing the minimum export.

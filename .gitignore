@@ -16,3 +16,4 @@ data/*
 
 # Local database backups contain personal data and must never be committed.
 backups/
+.vercel

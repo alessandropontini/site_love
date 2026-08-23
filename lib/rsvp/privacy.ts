@@ -1,0 +1,2 @@
+export const RSVP_PRIVACY_NOTICE_VERSION = "2026-08-23.1";
+

@@ -223,6 +223,32 @@
   font-weight: 700;
 }
 
+.emailLink {
+  color: var(--admin-olive);
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+
+.guestTypeBadge,
+.guestDetail {
+  width: fit-content;
+  margin-top: 5px;
+  display: block;
+  font-size: 0.74rem;
+}
+
+.guestTypeBadge {
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(61, 71, 40, 0.09);
+  color: var(--admin-olive);
+  font-weight: 750;
+}
+
+.guestDetail {
+  color: rgba(38, 27, 32, 0.62);
+}
+
 .sourceTag {
   width: fit-content;
   padding: 4px 8px;

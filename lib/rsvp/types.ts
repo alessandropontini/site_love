@@ -11,7 +11,14 @@ export type MealPreference =
 export type RsvpAnswer = {
   inviteeId: string;
   attendance: Attendance;
-  mealPreference: MealPreference;
+  mealPreference: MealPreference | null;
+};
+
+export type RsvpPlusOne = {
+  id: string | null;
+  firstName: string;
+  lastName: string;
+  mealPreference: Exclude<MealPreference, "not_needed"> | null;
 };
 
 export type RsvpInvitee = {
@@ -24,10 +31,22 @@ export type RsvpInvitee = {
 export type RsvpInvitation = {
   id: string;
   householdName: string;
+  contactEmail: string | null;
+  allowPlusOne: boolean;
   locale: RsvpLocale;
   deadline: string | null;
   revision: number;
   invitees: RsvpInvitee[];
+  plusOne: RsvpPlusOne | null;
+  hasChildren: boolean;
+};
+
+export type RsvpSubmission = {
+  contactEmail: string;
+  answers: RsvpAnswer[];
+  plusOne: RsvpPlusOne | null;
+  hasChildren: boolean;
+  privacyNoticeVersion: string;
 };
 
 export type RsvpLookupResult =
@@ -50,8 +69,12 @@ export type AdminRsvpRow = {
   householdStatus: "active" | "closed" | "disabled";
   responseVersion: number;
   deadline: string | null;
+  contactEmail: string | null;
+  allowPlusOne: boolean;
   inviteeId: string | null;
   inviteeName: string | null;
+  guestType: "named" | "plus_one" | null;
+  hasChildren: boolean;
   invitedBy: InvitationSource;
   attendance: Attendance | null;
   mealPreference: MealPreference | null;

@@ -18,7 +18,11 @@ Apply migrations in numeric order. `002_admin_audit.sql` records administrative
 exports without copying guest answers into the audit metadata;
 `004_invitee_source.sql` is the transitional introduction of the private
 bride/groom/both category; `005_household_invitation_source.sql` normalizes it
-onto the household, ensuring every member of one invitation shares its source.
+onto the household, ensuring every member of one invitation shares its source;
+`006_attendance_phase.sql` adds the household contact email, one optional +1,
+a minimal children yes/no flag and nullable meal choices for the
+attendance-first phase. `007_household_plus_one_permission.sql` makes the +1 an
+explicit per-household permission that is disabled by default.
 
 For a local encrypted-disk backup, load `DATABASE_URL` into the shell and run
 `npm run backup:rsvp`. The generated `backups/` directory is ignored by Git and

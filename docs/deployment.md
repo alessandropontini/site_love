@@ -60,6 +60,9 @@ attivare upgrade automatici o componenti a consumo senza una nuova decisione.
 | Variabile | Visibilità | Uso |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | pubblica | origine HTTPS canonica, senza slash finale |
+| `NEXT_PUBLIC_PRIVACY_CONTROLLER_NAMES` | pubblica | nomi completi degli organizzatori mostrati nell’informativa |
+| `NEXT_PUBLIC_PRIVACY_CONTACT_EMAIL` | pubblica | recapito diretto per richieste sui dati |
+| `NEXT_PUBLIC_RSVP_TRIAL_MODE` | pubblica | `1` finché il sito non è approvato per invitati reali |
 | `DATABASE_URL` | segreta | ruolo Neon runtime, non proprietario |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | pubblica | widget anti-abuso |
 | `TURNSTILE_SECRET_KEY` | segreta | verifica server Turnstile |
@@ -70,10 +73,16 @@ attivare upgrade automatici o componenti a consumo senza una nuova decisione.
 | `CLERK_TELEMETRY_DISABLED` | non sensibile | `1`, disattiva telemetria SDK server in sviluppo |
 | `NEXT_PUBLIC_CLERK_TELEMETRY_DISABLED` | pubblica | `1`, disattiva telemetria SDK client in sviluppo |
 | `RSVP_ADMIN_EMAILS` | segreta | email ammesse, separate da virgola |
+| `RSVP_EMAIL_ENABLED` | non sensibile | `1` solo dopo verifica del dominio mittente |
+| `RESEND_API_KEY` | segreta | invio delle conferme RSVP tramite Resend |
+| `RSVP_EMAIL_FROM` | non sensibile | mittente verificato, ad es. `RSVP <rsvp@example.it>` |
+| `RSVP_EMAIL_REPLY_TO` | non sensibile | indirizzo privato per le risposte, facoltativo |
 
 Non copiare segreti in chat, commit, screenshot, ticket o file sotto `public/`.
 Le variabili Preview devono usare database e istanza auth separati dalla
-produzione.
+produzione. Non impostare `RSVP_EMAIL_ENABLED=1` in Preview. Prima di abilitarlo
+in Production verificare SPF e DKIM del dominio mittente, regione e DPA di
+Resend, destinatario di prova, idempotenza e open/click tracking disabilitati.
 
 ## Ruolo Neon runtime
 
@@ -123,6 +132,8 @@ grant usage on schema rsvp to site_love_app;
 
 grant select on rsvp.households to site_love_app;
 grant update (
+  contact_email,
+  has_children,
   response_version,
   updated_at,
   submission_window_started_at,
@@ -130,6 +141,9 @@ grant update (
 ) on rsvp.households to site_love_app;
 
 grant select on rsvp.invitees to site_love_app;
+
+grant select, insert, update, delete
+  on rsvp.additional_guests to site_love_app;
 
 grant select on rsvp.responses to site_love_app;
 grant insert (
@@ -208,8 +222,9 @@ Il file JSON deve stare fuori dalla cartella del progetto:
   {
     "householdName": "Famiglia Esempio",
     "locale": "it",
-    "deadline": "2028-03-31T23:59:59+02:00",
+    "deadline": "2028-03-01T23:59:59+01:00",
     "invitedBy": "groom",
+    "allowPlusOne": false,
     "invitees": ["Ada Esempio", "Teo Esempio"]
   }
 ]
@@ -217,7 +232,9 @@ Il file JSON deve stare fuori dalla cartella del progetto:
 
 `invitedBy` è obbligatorio per ogni nucleo e accetta `bride`, `groom` oppure
 `both`. Tutte le persone dello stesso oggetto condividono nucleo, provenienza,
-link e QR.
+link e QR. `allowPlusOne` deve essere `true` soltanto quando lo specifico invito
+consente un accompagnatore non già nominato; una coppia con entrambi i nomi
+nell’array `invitees` usa `false`.
 
 Con il dominio definitivo e la connessione operativa caricati nella shell:
 

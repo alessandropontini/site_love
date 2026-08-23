@@ -20,6 +20,7 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ### Changed
 
+- Ridisegnata la galleria come un mazzo fotografico circolare: le otto immagini salgono dal basso, si raccolgono e si aprono su traiettorie curve con tempi sfalsati, poi restano vive con un movimento lento e continuo; si aprono al centro con tocco o clic e si sfogliano con swipe, frecce e tastiera, preservando i formati naturali e senza barra inferiore sovrapposta.
 - Forzato l'aggiornamento del form RSVP dopo ogni salvataggio, evitando che i controlli React mostrino valori precedenti nonostante Neon contenga già la nuova risposta.
 - Rifiutati anche lato server gli invii RSVP identici e allineato il conteggio dei nuclei modificati alle sole persone cambiate nell'ultimo invio.
 - Rafforzata la guida Neon con un ruolo runtime creato via SQL, privilegi per colonna, password separate per branch e verifica esplicita dell'assenza di `neon_superuser`.

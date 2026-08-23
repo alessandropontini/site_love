@@ -295,13 +295,17 @@ Nel SQL Editor eseguire, in ordine, il contenuto completo di:
 2. `db/migrations/002_admin_audit.sql`;
 3. `db/migrations/003_household_rate_limit.sql`;
 4. `db/migrations/004_invitee_source.sql`;
-5. `db/migrations/005_household_invitation_source.sql`.
+5. `db/migrations/005_household_invitation_source.sql`;
+6. `db/migrations/006_attendance_phase.sql`;
+7. `db/migrations/007_household_plus_one_permission.sql`.
 
 - [ ] Migrazione `001` completata senza errori.
 - [ ] Migrazione `002` completata senza errori.
 - [ ] Migrazione `003` completata senza errori.
 - [ ] Migrazione `004` completata senza errori.
 - [ ] Migrazione `005` completata senza errori.
+- [ ] Migrazione `006` completata senza errori.
+- [ ] Migrazione `007` completata senza errori.
 
 La migrazione `005` consolida la provenienza sul nucleo. Se il fixture Ada/Teo
 esisteva già con provenienze personali diverse, il backfill prudenziale lo
@@ -423,38 +427,32 @@ http://localhost:3000/rsvp/site-love-local-test-only-2026
 - [ ] Appare il nucleo “TEST LOCALE — DA ELIMINARE”.
 - [ ] Appaiono Ada Prova e Teo Prova.
 - [ ] La scadenza è visibile e futura.
-- [ ] La proposta menu mostra tradizione piacentina, vegetariano e bambini e
-  la segnala chiaramente come indicativa.
-- [ ] Fare clic su almeno un piatto per ogni percorso: si apre una scheda con
-  foto, descrizione, ingredienti tipici e nota “immagine illustrativa”.
-- [ ] Chiudere la scheda con il pulsante, cliccando sullo sfondo e con `Esc`;
-  verificare che il focus torni al piatto appena selezionato.
-- [ ] Ripetere con `?lang=en`: nomi, spiegazioni, ingredienti, testi dei pulsanti
-  e alternative delle immagini sono tutti in inglese comprensibile.
-- [ ] Su telefono, la scheda resta entro lo schermo, può scorrere verticalmente
-  e il pulsante Chiudi/Close rimane facilmente raggiungibile.
+- [ ] Il form spiega che il menu verrà richiesto più avanti sullo stesso link.
+- [ ] Email e conferma email sono obbligatorie e devono coincidere.
+- [ ] È possibile aggiungere un solo +1 con nome e cognome.
+- [ ] È possibile indicare soltanto sì/no per la presenza di figli, senza nomi,
+  età o date di nascita.
 - [ ] Il cambio Italiano/English modifica correttamente il form.
 - [ ] Premere Salva senza scegliere la presenza: il browser impedisce l'invio.
-- [ ] Non esistono campi liberi per allergie, salute, email o telefono.
+- [ ] Non esistono campi liberi per allergie, salute o telefono.
 - [ ] Il collegamento privacy funziona.
 
 ### 7.2 Primo salvataggio
 
-- [ ] Impostare Ada: presente, menu piacentino vegetariano.
+- [ ] Inserire e confermare un'email fittizia.
+- [ ] Impostare Ada: presente.
 - [ ] Impostare Teo: assente.
-- [ ] Premere “Salva la risposta”.
-- [ ] Appare “Risposta salvata. Grazie!”.
+- [ ] Aggiungere un +1 fittizio e selezionare la presenza di figli.
+- [ ] Premere “Conferma la presenza”.
+- [ ] Appare il messaggio di presenza salvata.
 - [ ] Ricaricare la pagina.
-- [ ] Ada resta presente con menu vegetariano.
-- [ ] Teo resta assente; lato server il menu viene salvato come non necessario.
+- [ ] Email, presenze, +1 e indicazione figli restano visibili.
 
 ### 7.3 Modifica successiva
 
 - [ ] Ricaricare prima la pagina e verificare che le scelte salvate siano già
   selezionate.
-- [ ] Premere Salva senza modificare nulla: appare l'avviso che non ci sono
-  cambiamenti e il form non viene inviato.
-- [ ] Cambiare Teo in presente con menu tradizionale piacentino.
+- [ ] Cambiare Teo in presente e modificare l'indicazione relativa ai figli.
 - [ ] Premere Salva: appare una richiesta esplicita di conferma.
 - [ ] Annullare una volta e verificare che non venga salvato nulla.
 - [ ] Ripetere, confermare e ricaricare: la nuova risposta è persistita.
@@ -600,9 +598,10 @@ RSVP_ADMIN_EMAILS=la-tua-email@example.com
 - [ ] Premere “Esporta CSV”.
 - [ ] Il download ha un nome simile a `rsvp-AAAA-MM-GG.csv`.
 - [ ] Aprire il file con Numbers o Excel.
-- [ ] Controllare nucleo, numero componenti, nucleo invitato da, presenza, menu
-  modifica nell'ultimo invio e data di aggiornamento.
-- [ ] Il CSV non contiene token, hash, email, telefono o note sanitarie.
+- [ ] Controllare nucleo, email di contatto, indicazione figli, numero
+  componenti, tipo invitato, presenza, menu futuro, modifica nell'ultimo invio e
+  data di aggiornamento.
+- [ ] Il CSV non contiene token, hash, telefono o note sanitarie.
 - [ ] Chiudere e cancellare il CSV di prova quando non serve più.
 
 Verificare l'audit dal SQL Editor:

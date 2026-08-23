@@ -18,6 +18,7 @@ const invitationSchema = z
         locale: z.enum(["it", "en"]).default("it"),
         deadline: z.string().datetime({ offset: true }).nullable().optional(),
         invitedBy: z.enum(["bride", "groom", "both"]),
+        allowPlusOne: z.boolean().default(false),
         invitees: z
           .array(z.string().trim().min(1).max(120))
           .min(1)
@@ -119,6 +120,7 @@ const databasePayload = JSON.stringify(
     preferred_locale: invitation.locale,
     deadline: invitation.deadline,
     invited_by: invitation.invitedBy,
+    allow_plus_one: invitation.allowPlusOne,
     invitees: invitation.invitees.map((displayName, index) => ({
       display_name: displayName,
       sort_order: index
@@ -137,6 +139,7 @@ await sql.query(
       preferred_locale text,
       deadline timestamptz,
       invited_by text,
+      allow_plus_one boolean,
       invitees jsonb
     )
   ),
@@ -146,9 +149,16 @@ await sql.query(
       token_hash,
       preferred_locale,
       deadline,
-      invited_by
+      invited_by,
+      allow_plus_one
     )
-    select display_name, token_hash, preferred_locale, deadline, invited_by
+    select
+      display_name,
+      token_hash,
+      preferred_locale,
+      deadline,
+      invited_by,
+      allow_plus_one
     from input_households
     returning id, token_hash
   ),

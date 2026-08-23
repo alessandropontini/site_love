@@ -19,6 +19,10 @@ const attendanceLabels: Record<Attendance, string> = {
 
 const mealLabels = mealPreferenceLabels.it;
 const sourceLabels = invitationSourceLabels.it;
+const guestTypeLabels = {
+  named: "Invitato nominale",
+  plus_one: "+1"
+} as const;
 
 function formatDate(value: string | null) {
   if (!value) {
@@ -175,10 +179,36 @@ export default async function AdminRsvpPage() {
                               {row.preferredLocale.toUpperCase()} ·{" "}
                               {row.householdStatus}
                             </span>
+                            {row.contactEmail ? (
+                              <>
+                                <br />
+                                <a
+                                  className={styles.emailLink}
+                                  href={`mailto:${row.contactEmail}`}
+                                >
+                                  {row.contactEmail}
+                                </a>
+                              </>
+                            ) : null}
+                            {row.hasChildren ? (
+                              <span className={styles.guestDetail}>
+                                Figli presenti · nessun dato anagrafico raccolto
+                              </span>
+                            ) : null}
+                            {row.allowPlusOne ? (
+                              <span className={styles.guestDetail}>
+                                Un +1 non nominato è autorizzato
+                              </span>
+                            ) : null}
                           </td>
                         ) : null}
                         <td>
                           {row.inviteeName ?? "—"}
+                          {row.guestType ? (
+                            <span className={styles.guestTypeBadge}>
+                              {guestTypeLabels[row.guestType]}
+                            </span>
+                          ) : null}
                           {row.changedInLatestSubmission ? (
                             <span className={styles.changeBadge}>
                               Modificata nell’ultimo invio
@@ -205,7 +235,9 @@ export default async function AdminRsvpPage() {
                         <td>
                           {row.mealPreference
                             ? mealLabels[row.mealPreference]
-                            : "—"}
+                            : row.attendance === "yes"
+                              ? "Da scegliere più avanti"
+                              : "—"}
                         </td>
                         <td>{formatDate(row.responseUpdatedAt)}</td>
                       </tr>

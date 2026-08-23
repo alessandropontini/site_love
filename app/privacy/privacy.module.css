@@ -66,6 +66,23 @@
   line-height: 1.72;
 }
 
+.card section p + p {
+  margin-top: 14px;
+}
+
+.card ul {
+  margin: 12px 0 0;
+  padding-left: 1.25rem;
+  color: rgba(38, 27, 32, 0.75);
+  line-height: 1.72;
+}
+
+.card a {
+  color: var(--privacy-olive);
+  font-weight: 700;
+  text-underline-offset: 0.16em;
+}
+
 .legalNote {
   margin: 34px 0 0;
   padding: 16px 18px;

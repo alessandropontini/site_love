@@ -60,6 +60,8 @@ With `prefers-reduced-motion: reduce`, entrance, floating, tilt, gallery drift, 
 
 The gallery uses approved local couple photographs rather than stock imagery. Files belong under `public/photos/` and are rendered through `next/image`.
 
+The photographs form a circular editorial stack around central typography on desktop, tablet, and phone. When the stack enters the viewport, the photographs rise as a staggered deck, gather at the centre, and open along curved paths before settling into a very slow collective sway and individual drift. The sequence is implemented with the native Web Animations API, is inspired by the MIT-licensed [Codrops circular image-stack demo](https://tympanus.net/Development/EntranceAnimationForImages/), runs only once, and is skipped entirely when reduced motion is requested. Selecting a photograph straightens and enlarges it at the center while the other seven remain visible as a subdued orbit. Previous/next controls, touch swipes, arrow keys, and Escape provide equivalent navigation without slide autoplay or a carousel dependency. The fixed bottom navigation is removed on narrow screens so it cannot obscure a photograph.
+
 Before adding or replacing any photograph:
 
 1. Confirm that the couple is comfortable publishing it.
@@ -104,6 +106,7 @@ If games return later, treat them as a separate product surface with a separate 
 - The page has one `h1`, a skip link, semantic sections, visible focus, and real links/buttons.
 - The public section order is invitation → photographs → location → RSVP.
 - Navigation respects modified clicks, browser history, and reduced-motion preferences.
+- Phone photography preserves vertical page scrolling, supports direct thumbnail selection and swipe navigation after opening a photograph, and does not sit beneath a fixed bottom control.
 - The mounted colophon uses native dialog behavior with Escape close, focus containment, and focus return; the final letter remains unmounted.
 - The invitation is keyboard operable and retains a functional non-WebGL fallback.
 - All interactive targets remain at least 44×44 px.

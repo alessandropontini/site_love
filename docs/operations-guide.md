@@ -90,12 +90,20 @@ cp .env.example .env.local
 I nomi richiesti sono:
 
 - `NEXT_PUBLIC_SITE_URL` — dominio pubblico definitivo;
+- `NEXT_PUBLIC_PRIVACY_CONTROLLER_NAMES` e
+  `NEXT_PUBLIC_PRIVACY_CONTACT_EMAIL` — identità e recapito pubblici
+  dell’informativa, obbligatori prima degli invitati reali;
+- `NEXT_PUBLIC_RSVP_TRIAL_MODE=1` — mantiene visibile l’avviso di prova fino al
+  completamento dell’intera checklist di lancio;
 - `DATABASE_URL` — connessione Neon del ruolo runtime;
 - `NEXT_PUBLIC_TURNSTILE_SITE_KEY` e `TURNSTILE_SECRET_KEY`;
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` e `CLERK_SECRET_KEY`;
 - `NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in`;
 - `NEXT_PUBLIC_CLERK_FRONTEND_API_URL` — dominio FAPI di produzione;
 - `RSVP_ADMIN_EMAILS` — soltanto le email degli sposi;
+- `RSVP_EMAIL_ENABLED`, `RESEND_API_KEY`, `RSVP_EMAIL_FROM` e l'eventuale
+  `RSVP_EMAIL_REPLY_TO` — conferme automatiche, da attivare soltanto dopo la
+  verifica del dominio mittente e dell'informativa;
 - le due variabili `CLERK_TELEMETRY_DISABLED` impostate a `1`.
 
 Le variabili che iniziano con `NEXT_PUBLIC_` sono visibili al browser e non
@@ -256,6 +264,22 @@ psql "$DATABASE_OWNER_URL" -v ON_ERROR_STOP=1 -f db/migrations/002_admin_audit.s
 
 ```bash
 psql "$DATABASE_OWNER_URL" -v ON_ERROR_STOP=1 -f db/migrations/003_household_rate_limit.sql
+```
+
+```bash
+psql "$DATABASE_OWNER_URL" -v ON_ERROR_STOP=1 -f db/migrations/004_invitee_source.sql
+```
+
+```bash
+psql "$DATABASE_OWNER_URL" -v ON_ERROR_STOP=1 -f db/migrations/005_household_invitation_source.sql
+```
+
+```bash
+psql "$DATABASE_OWNER_URL" -v ON_ERROR_STOP=1 -f db/migrations/006_attendance_phase.sql
+```
+
+```bash
+psql "$DATABASE_OWNER_URL" -v ON_ERROR_STOP=1 -f db/migrations/007_household_plus_one_permission.sql
 ```
 
 ```bash

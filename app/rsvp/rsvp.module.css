@@ -368,6 +368,81 @@
   gap: 20px;
 }
 
+.detailsSection {
+  margin-bottom: 24px;
+  padding: clamp(20px, 4vw, 30px);
+  border: 1px solid rgba(38, 27, 32, 0.18);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.48);
+}
+
+.inviteeList + .detailsSection,
+.detailsSection + .detailsSection {
+  margin-top: 24px;
+}
+
+.sectionHeading {
+  margin-bottom: 18px;
+}
+
+.sectionHeading h2 {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.55rem, 4vw, 2.1rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.sectionHeading p {
+  margin: 8px 0 0;
+  max-width: 66ch;
+  color: rgba(38, 27, 32, 0.7);
+  line-height: 1.55;
+}
+
+.twoColumnFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.formNotes {
+  margin-top: 24px;
+  padding: 18px;
+  border-radius: 16px;
+  background: rgba(155, 121, 72, 0.09);
+  color: rgba(38, 27, 32, 0.76);
+  line-height: 1.55;
+}
+
+.formNotes p {
+  margin: 0;
+}
+
+.formNotes p + p {
+  margin-top: 8px;
+}
+
+.privacyChoice {
+  min-height: 48px;
+  margin-top: 20px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1px solid rgba(38, 27, 32, 0.16);
+  border-radius: 12px;
+  line-height: 1.5;
+}
+
+.privacyChoice input {
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  flex: 0 0 auto;
+  accent-color: var(--rsvp-olive);
+}
+
 .inviteeCard {
   min-width: 0;
   margin: 0;
@@ -425,6 +500,7 @@
   gap: 8px;
 }
 
+.stackedField input,
 .stackedField select,
 .stackedField textarea {
   width: 100%;
@@ -433,6 +509,11 @@
   background: #fffdfb;
   color: var(--rsvp-burgundy);
   font: inherit;
+}
+
+.stackedField input {
+  min-height: 48px;
+  padding: 0 13px;
 }
 
 .stackedField select {
@@ -531,6 +612,8 @@
 .dishButton:focus-visible,
 .dishClose:focus-visible,
 .choice:focus-within,
+.privacyChoice:focus-within,
+.stackedField input:focus-visible,
 .stackedField select:focus-visible,
 .stackedField textarea:focus-visible {
   outline: 3px solid var(--rsvp-gold);
@@ -560,6 +643,11 @@
   .localeNav a {
     flex: 1;
     justify-content: center;
+  }
+
+  .twoColumnFields {
+    grid-template-columns: 1fr;
+    gap: 0;
   }
 
   .dishDialog {

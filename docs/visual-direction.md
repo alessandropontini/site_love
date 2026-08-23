@@ -20,7 +20,7 @@ The pixel/handheld and paper-theatre game directions are outside the public site
 - The invitation uses generated canvas faces rather than copied textures. It responds to pointer drag, hover tilt, buttons, and arrow keys; the renderer sleeps when settled, offscreen, or backgrounded.
 - The freshwater-turtle mark uses a restrained top-down engraving silhouette, fine shell geometry, and one water line so it reads as an adult editorial seal rather than a cartoon mascot. The DOM SVG and generated Three.js canvas face share the same construction.
 - The story uses semantic editorial scenes. Phones linearize the route vertically with no required gesture.
-- The gallery uses approved local personal photographs with EXIF, GPS, and unnecessary metadata removed. No stock couple photography is mounted.
+- The gallery uses approved local personal photographs with EXIF, GPS, and unnecessary metadata removed. No stock couple photography is mounted. Every viewport presents the eight images as a circular editorial stack around central typography. Its single viewport-triggered entrance rises from a staggered deck and opens through curved paths; once settled, only a very slow collective sway and a few pixels of independent drift remain. Selecting one photograph straightens and enlarges it in the center while the remaining photographs stay visible as a subdued orbit.
 - The location section focuses on Casa Nuova Niviano and uses facts and the outbound link from the venue's official website. It currently presents an original paper-theatre interpretation of the venue; it is not a photographic or architectural depiction.
 - Authorized Casa Nuova photography is still pending. Until it is supplied, use an intentional editorial placeholder or original project visual, never an unlicensed web image.
 - RSVP is a calm informational home section, not a simulated form. It explains that each household receives a personal QR code; the functional form is isolated at the personalized route.
@@ -146,7 +146,7 @@ The following invitation, index, acts, rewards, and finale notes apply only to t
 
 ## Motion
 
-On the editorial home, movement is limited to the invitation entrance/float, pointer tilt, smooth in-page navigation, optional gallery drift, and envelope feedback. Three.js renders on demand rather than maintaining a perpetual loop.
+On the editorial home, movement is limited to the invitation entrance/float, pointer tilt, smooth in-page navigation, the gallery's one-shot entrance and restrained idle drift, and envelope feedback. Three.js renders on demand rather than maintaining a perpetual loop.
 
 - Animate only opacity and transform for public decoration.
 - One dominant animation per section; parallax remains below roughly 12 px.
@@ -158,12 +158,12 @@ On the editorial home, movement is limited to the invitation entrance/float, poi
 ## Responsive and performance rules
 
 - Root validation targets: 320, 390, 768, 1024, and 1440 px.
-- Root phone order is copy/actions before the invitation, one-column gallery, Casa Nuova location, RSVP, and footer.
-- Every root target is at least 44×44 px. The phone navigation is fixed to the bottom safe area and the language selector remains available in the top bar and footer.
+- Root phone order is copy/actions before the invitation, circular photograph stack, Casa Nuova location, RSVP, and footer.
+- Every root target is at least 44×44 px. Phones keep one compact fixed top bar for identity, language, and RSVP; the former fixed bottom navigation is omitted so it cannot cover photography or form content.
 - Three.js DPR is capped at 1.75 desktop and 1.25 phone; phone textures are smaller and antialiasing is disabled.
 - Local personal images and explicitly selected editorial art use `next/image`; below-fold media remains lazy. The social card is metadata-only.
 
-- `≤ 480px`: one column, copy/CTA before scenery, touch targets at least 44×44 px.
+- `≤ 480px`: one column, copy/CTA before scenery, a touch-native circular photo stack with a centered selected image, and touch targets at least 44×44 px.
 - `481–899px`: compact scene above content; every public section stays in a single readable flow.
 - `≥ 900px`: split composition with roughly 42% copy and 58% stage.
 - Validate at 320×568, 390×844, and desktop.
