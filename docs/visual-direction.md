@@ -158,12 +158,12 @@ On the editorial home, movement is limited to the invitation entrance/float, poi
 ## Responsive and performance rules
 
 - Root validation targets: 320, 390, 768, 1024, and 1440 px.
-- Root phone order is copy/actions before the invitation, circular photograph stack, Casa Nuova location, RSVP, and footer.
+- Root phone order is copy/actions before the invitation, editorial photograph stack, Casa Nuova location, RSVP, and footer.
 - Every root target is at least 44×44 px. Phones keep one compact fixed top bar for identity, language, and RSVP; the former fixed bottom navigation is omitted so it cannot cover photography or form content.
 - Three.js DPR is capped at 1.75 desktop and 1.25 phone; phone textures are smaller and antialiasing is disabled.
 - Local personal images and explicitly selected editorial art use `next/image`; below-fold media remains lazy. The social card is metadata-only.
 
-- `≤ 480px`: one column, copy/CTA before scenery, a touch-native circular photo stack with a centered selected image, and touch targets at least 44×44 px.
+- `≤ 480px`: one column, copy/CTA before scenery, a straight equal-width photo stack with no rotation or overlap, its title in a separate header band, a centred selected image, and touch targets at least 44×44 px.
 - `481–899px`: compact scene above content; every public section stays in a single readable flow.
 - `≥ 900px`: split composition with roughly 42% copy and 58% stage.
 - Validate at 320×568, 390×844, and desktop.

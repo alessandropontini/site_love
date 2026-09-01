@@ -52,6 +52,7 @@ export type GalleryItem = {
   caption: string;
   src?: string;
   alt?: string;
+  stackPosition?: string;
   position?: string;
 };
 
@@ -333,14 +334,14 @@ const baseContent: Record<EditorialLocale, EditorialContent> = {
       nextLabel: "Successiva",
       closeLabel: "Torna al mazzo",
       items: [
-        { id: "photo-01", aspect: "portrait", tone: "cream", placeholder: "Noi in giardino", caption: "Noi, in una giornata elegante", src: "/photos/editorial/photo-01.jpg", alt: "Alessandro e Bridget in abiti eleganti in un giardino, con ortensie alle spalle.", position: "55% 55%" },
-        { id: "photo-02", aspect: "landscape", tone: "olive", placeholder: "Noi al mare", caption: "Una giornata al mare", src: "/photos/editorial/photo-02.jpg", alt: "Alessandro e Bridget sorridono con gli occhiali da sole su una spiaggia; Alessandro alza una mano verso l’obiettivo.", position: "50% 55%" },
-        { id: "photo-03", aspect: "landscape", tone: "taupe", placeholder: "Noi vicini", caption: "Sempre più vicini", src: "/photos/editorial/photo-03.jpg", alt: "Alessandro e Bridget sorridono vicini in un selfie al chiuso.", position: "72% 54%" },
-        { id: "photo-04", aspect: "landscape", tone: "blush", placeholder: "Bridget e l’arte", caption: "Tra le cose che ci incuriosiscono", src: "/photos/editorial/photo-04.jpg", alt: "Bridget posa accanto a un dipinto incorniciato in una galleria.", position: "35% 58%" },
-        { id: "photo-05", aspect: "portrait", tone: "cream", placeholder: "Dentro una cornice", caption: "Dentro una cornice rosa", src: "/photos/editorial/photo-05.jpg", alt: "Alessandro e Bridget si fotografano in uno specchio dalla cornice rosa ondulata.", position: "50% 55%" },
-        { id: "photo-06", aspect: "portrait", tone: "olive", placeholder: "Una risata", caption: "Una risata da tenere", src: "/photos/editorial/photo-06.jpg", alt: "Alessandro e Bridget ridono insieme in giardino, vestiti per un’occasione.", position: "50% 75%" },
-        { id: "photo-07", aspect: "portrait", tone: "taupe", placeholder: "Una passeggiata", caption: "Una passeggiata in buona compagnia", src: "/photos/editorial/photo-07.jpg", alt: "Bridget porta al guinzaglio un cane bianco e nero lungo una strada alberata.", position: "72% 72%" },
-        { id: "photo-08", aspect: "landscape", tone: "blush", placeholder: "Bridget e un’opera", caption: "Nuove immagini da scoprire", src: "/photos/editorial/photo-08.jpg", alt: "Bridget posa accanto a una grande opera murale.", position: "78% 50%" }
+        { id: "photo-01", aspect: "portrait", tone: "cream", placeholder: "Noi in giardino", caption: "Noi, in una giornata elegante", src: "/photos/editorial/photo-01.jpg", alt: "Alessandro e Bridget in abiti eleganti in un giardino, con ortensie alle spalle.", stackPosition: "52% 27%", position: "52% 35%" },
+        { id: "photo-02", aspect: "landscape", tone: "olive", placeholder: "Noi al mare", caption: "Una giornata al mare", src: "/photos/editorial/photo-02.jpg", alt: "Alessandro e Bridget sorridono con gli occhiali da sole su una spiaggia; Alessandro alza una mano verso l’obiettivo.", stackPosition: "60% 34%", position: "60% 42%" },
+        { id: "photo-03", aspect: "landscape", tone: "taupe", placeholder: "Noi vicini", caption: "Sempre più vicini", src: "/photos/editorial/photo-03.jpg", alt: "Alessandro e Bridget sorridono vicini in un selfie al chiuso.", stackPosition: "65% 36%", position: "64% 48%" },
+        { id: "photo-04", aspect: "landscape", tone: "blush", placeholder: "Bridget e l’arte", caption: "Tra le cose che ci incuriosiscono", src: "/photos/editorial/photo-04.jpg", alt: "Bridget posa accanto a un dipinto incorniciato in una galleria.", stackPosition: "35% 38%", position: "45% 50%" },
+        { id: "photo-05", aspect: "portrait", tone: "cream", placeholder: "Dentro una cornice", caption: "Dentro una cornice rosa", src: "/photos/editorial/photo-05.jpg", alt: "Alessandro e Bridget si fotografano in uno specchio dalla cornice rosa ondulata.", stackPosition: "50% 40%", position: "50% 45%" },
+        { id: "photo-06", aspect: "portrait", tone: "olive", placeholder: "Una risata", caption: "Una risata da tenere", src: "/photos/editorial/photo-06.jpg", alt: "Alessandro e Bridget ridono insieme in giardino, vestiti per un’occasione.", stackPosition: "52% 37%", position: "52% 45%" },
+        { id: "photo-07", aspect: "portrait", tone: "taupe", placeholder: "Una passeggiata", caption: "Una passeggiata in buona compagnia", src: "/photos/editorial/photo-07.jpg", alt: "Bridget porta al guinzaglio un cane bianco e nero lungo una strada alberata.", stackPosition: "60% 34%", position: "60% 45%" },
+        { id: "photo-08", aspect: "landscape", tone: "blush", placeholder: "Bridget e un’opera", caption: "Nuove immagini da scoprire", src: "/photos/editorial/photo-08.jpg", alt: "Bridget posa accanto a una grande opera murale.", stackPosition: "72% 40%", position: "70% 50%" }
       ]
     },
     venue: {
@@ -546,14 +547,14 @@ const baseContent: Record<EditorialLocale, EditorialContent> = {
       nextLabel: "Next",
       closeLabel: "Return to the stack",
       items: [
-        { id: "photo-01", aspect: "portrait", tone: "cream", placeholder: "Us in a garden", caption: "The two of us, dressed for the day", src: "/photos/editorial/photo-01.jpg", alt: "Alessandro and Bridget dressed for an occasion in a garden, with hydrangeas behind them.", position: "55% 55%" },
-        { id: "photo-02", aspect: "landscape", tone: "olive", placeholder: "Us by the sea", caption: "A day by the sea", src: "/photos/editorial/photo-02.jpg", alt: "Alessandro and Bridget smile in sunglasses on a beach as Alessandro raises a hand toward the camera.", position: "50% 55%" },
-        { id: "photo-03", aspect: "landscape", tone: "taupe", placeholder: "Close together", caption: "Always a little closer", src: "/photos/editorial/photo-03.jpg", alt: "Alessandro and Bridget smile close together in an indoor selfie.", position: "72% 54%" },
-        { id: "photo-04", aspect: "landscape", tone: "blush", placeholder: "Bridget and art", caption: "Among the things that make us curious", src: "/photos/editorial/photo-04.jpg", alt: "Bridget poses beside a framed painting in a gallery.", position: "35% 58%" },
-        { id: "photo-05", aspect: "portrait", tone: "cream", placeholder: "Inside a frame", caption: "Inside a pink frame", src: "/photos/editorial/photo-05.jpg", alt: "Alessandro and Bridget take a mirror photo framed by rippled pink curves.", position: "50% 55%" },
-        { id: "photo-06", aspect: "portrait", tone: "olive", placeholder: "A laugh", caption: "A laugh worth keeping", src: "/photos/editorial/photo-06.jpg", alt: "Alessandro and Bridget laugh together in a garden, dressed for an occasion.", position: "50% 75%" },
-        { id: "photo-07", aspect: "portrait", tone: "taupe", placeholder: "A walk", caption: "A walk in good company", src: "/photos/editorial/photo-07.jpg", alt: "Bridget walks a black-and-white dog along a tree-lined street.", position: "72% 72%" },
-        { id: "photo-08", aspect: "landscape", tone: "blush", placeholder: "Bridget and an artwork", caption: "New images to discover", src: "/photos/editorial/photo-08.jpg", alt: "Bridget poses beside a large wall artwork.", position: "78% 50%" }
+        { id: "photo-01", aspect: "portrait", tone: "cream", placeholder: "Us in a garden", caption: "The two of us, dressed for the day", src: "/photos/editorial/photo-01.jpg", alt: "Alessandro and Bridget dressed for an occasion in a garden, with hydrangeas behind them.", stackPosition: "52% 27%", position: "52% 35%" },
+        { id: "photo-02", aspect: "landscape", tone: "olive", placeholder: "Us by the sea", caption: "A day by the sea", src: "/photos/editorial/photo-02.jpg", alt: "Alessandro and Bridget smile in sunglasses on a beach as Alessandro raises a hand toward the camera.", stackPosition: "60% 34%", position: "60% 42%" },
+        { id: "photo-03", aspect: "landscape", tone: "taupe", placeholder: "Close together", caption: "Always a little closer", src: "/photos/editorial/photo-03.jpg", alt: "Alessandro and Bridget smile close together in an indoor selfie.", stackPosition: "65% 36%", position: "64% 48%" },
+        { id: "photo-04", aspect: "landscape", tone: "blush", placeholder: "Bridget and art", caption: "Among the things that make us curious", src: "/photos/editorial/photo-04.jpg", alt: "Bridget poses beside a framed painting in a gallery.", stackPosition: "35% 38%", position: "45% 50%" },
+        { id: "photo-05", aspect: "portrait", tone: "cream", placeholder: "Inside a frame", caption: "Inside a pink frame", src: "/photos/editorial/photo-05.jpg", alt: "Alessandro and Bridget take a mirror photo framed by rippled pink curves.", stackPosition: "50% 40%", position: "50% 45%" },
+        { id: "photo-06", aspect: "portrait", tone: "olive", placeholder: "A laugh", caption: "A laugh worth keeping", src: "/photos/editorial/photo-06.jpg", alt: "Alessandro and Bridget laugh together in a garden, dressed for an occasion.", stackPosition: "52% 37%", position: "52% 45%" },
+        { id: "photo-07", aspect: "portrait", tone: "taupe", placeholder: "A walk", caption: "A walk in good company", src: "/photos/editorial/photo-07.jpg", alt: "Bridget walks a black-and-white dog along a tree-lined street.", stackPosition: "60% 34%", position: "60% 45%" },
+        { id: "photo-08", aspect: "landscape", tone: "blush", placeholder: "Bridget and an artwork", caption: "New images to discover", src: "/photos/editorial/photo-08.jpg", alt: "Bridget poses beside a large wall artwork.", stackPosition: "72% 40%", position: "70% 50%" }
       ]
     },
     venue: {
