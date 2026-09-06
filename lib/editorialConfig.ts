@@ -134,6 +134,11 @@ export type EditorialContent = {
     date: string;
     address: string;
     description: string;
+    photos: {
+      gardenAlt: string;
+      porticoGardenAlt: string;
+      porticoDiningAlt: string;
+    };
     facts: string[];
     websiteLabel: string;
     galleryLabel: string;
@@ -354,6 +359,14 @@ const baseContent: Record<EditorialLocale, EditorialContent> = {
       address: "Via Casa Nuova 31 · 29029 Niviano di Rivergaro (PC)",
       description:
         "Festeggeremo tra il giardino, il grande portico e le sale interne. La struttura dispone anche di sei alloggi matrimoniali indipendenti; disponibilità e assegnazioni verranno comunicate più avanti.",
+      photos: {
+        gardenAlt:
+          "Il giardino di Casa Nuova allestito per una cerimonia, con una passerella bianca tra gli alberi.",
+        porticoGardenAlt:
+          "Il portico di Casa Nuova apparecchiato, con le grandi vetrate aperte sul giardino.",
+        porticoDiningAlt:
+          "La sala nel portico di Casa Nuova apparecchiata per un ricevimento."
+      },
       facts: [
         "Campagna piacentina, ai piedi delle colline della Val Trebbia",
         "Giardino, grande portico e sale interne",
@@ -567,6 +580,14 @@ const baseContent: Record<EditorialLocale, EditorialContent> = {
       address: "Via Casa Nuova 31 · 29029 Niviano di Rivergaro (PC), Italy",
       description:
         "We’ll celebrate across the garden, large portico, and indoor rooms. The venue also has six independent double accommodations; availability and room arrangements will be shared later.",
+      photos: {
+        gardenAlt:
+          "The Casa Nuova garden prepared for a ceremony, with a white aisle running between the trees.",
+        porticoGardenAlt:
+          "The Casa Nuova portico set for a reception, with its large windows opening onto the garden.",
+        porticoDiningAlt:
+          "The dining area in the Casa Nuova portico prepared for a reception."
+      },
       facts: [
         "Piacenza countryside, at the foot of the Trebbia Valley hills",
         "Garden, large portico, and indoor rooms",

@@ -31,13 +31,35 @@ export function WeddingVenue({ content }: WeddingVenueProps) {
 
         <div className={styles.venueComposition}>
           <figure className={styles.venueFigure} data-reveal>
-            <div className={styles.venueTheatre} aria-hidden="true">
-              <Image
-                src="/venue/casa-nuova-paper-theatre.png"
-                alt=""
-                fill
-                sizes="(max-width: 900px) 100vw, 58vw"
-              />
+            <div className={styles.venuePhotography}>
+              <div className={`${styles.venuePhoto} ${styles.venuePhotoMain}`}>
+                <Image
+                  src="/venue/casa-nuova-garden-ceremony.jpg"
+                  alt={venue.photos.gardenAlt}
+                  fill
+                  sizes="(max-width: 900px) 100vw, 58vw"
+                />
+              </div>
+              <div
+                className={`${styles.venuePhoto} ${styles.venuePhotoPorticoGarden}`}
+              >
+                <Image
+                  src="/venue/casa-nuova-portico-garden.jpg"
+                  alt={venue.photos.porticoGardenAlt}
+                  fill
+                  sizes="(max-width: 560px) 50vw, 29vw"
+                />
+              </div>
+              <div
+                className={`${styles.venuePhoto} ${styles.venuePhotoPorticoDining}`}
+              >
+                <Image
+                  src="/venue/casa-nuova-portico-dining.jpg"
+                  alt={venue.photos.porticoDiningAlt}
+                  fill
+                  sizes="(max-width: 560px) 50vw, 29vw"
+                />
+              </div>
             </div>
             <figcaption>
               <span>{venue.name}</span>

@@ -21,8 +21,8 @@ The pixel/handheld and paper-theatre game directions are outside the public site
 - The paired freshwater-turtle mark is inspired by the couple's two Trachemys scripta. It uses restrained top-down engraving silhouettes, fine shell geometry, and one water line so it reads as an adult editorial seal rather than a cartoon mascot. The DOM SVG and generated Three.js canvas face share the same construction.
 - The story uses semantic editorial scenes. Phones linearize the route vertically with no required gesture.
 - The gallery uses approved local personal photographs with EXIF, GPS, and unnecessary metadata removed. No stock couple photography is mounted. Every viewport presents the eight images as a circular editorial stack around central typography. Its single viewport-triggered entrance rises from a staggered deck and opens through curved paths; once settled, only a very slow collective sway and a few pixels of independent drift remain. Selecting one photograph straightens and enlarges it in the center while the remaining photographs stay visible as a subdued orbit.
-- The location section focuses on Casa Nuova Niviano and uses facts and the outbound link from the venue's official website. It currently presents an original paper-theatre interpretation of the venue; it is not a photographic or architectural depiction.
-- Authorized Casa Nuova photography is still pending. Until it is supplied, use an intentional editorial placeholder or original project visual, never an unlicensed web image.
+- The location section focuses on Casa Nuova Niviano and uses facts, real venue photography, and outbound links from the venue's official website.
+- The venue section uses three real Casa Nuova photographs selected from the venue's official reception gallery: garden ceremony, portico-to-garden view, and portico dining setup. The earlier paper-theatre illustration remains available only as a rollback asset.
 - RSVP is a calm informational home section, not a simulated form. It explains that each household receives a personal QR code; the functional form is isolated at the personalized route.
 - The final letter remains retained but unmounted. The mounted colophon uses native modal behavior with Escape, focus containment, and focus return.
 
@@ -191,7 +191,14 @@ Approved personal photographs are local and replace the earlier abstract gallery
 - keep every caption and narrative detail in HTML;
 - confirm publication approval for each recognisable person.
 
-Authorized photographs of Casa Nuova Niviano have not yet been supplied. Do not substitute copies from the official website, search engines, social networks, or booking portals. Keep a deliberate venue placeholder until reusable files arrive.
+The mounted Casa Nuova photographs come from the official venue reception gallery and are stored locally. Keep their source URLs documented, do not replace them with search-engine, social-network, or booking-portal copies, and obtain written reuse confirmation from the venue before the public launch.
+
+- Source page: `https://www.casanuovaniviano.com/ricevimenti/`
+- `casa-nuova-garden-ceremony.jpg`: `https://www.casanuovaniviano.com/wp-content/uploads/2018/11/11.jpg`
+- `casa-nuova-portico-garden.jpg`: `https://www.casanuovaniviano.com/wp-content/uploads/2018/11/13.jpg`
+- `casa-nuova-portico-dining.jpg`: `https://www.casanuovaniviano.com/wp-content/uploads/2018/11/3.jpg`
+
+The local copies are progressive JPEGs with the source EXIF, XMP, GPS, timestamps, device data, and editing metadata removed.
 
 See `docs/editorial-home.md` for the replacement steps and asset budget.
 

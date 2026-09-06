@@ -2310,29 +2310,64 @@
   50% { margin-left: 6%; }
 }
 
-.venueTheatre {
+.venuePhotography {
   position: relative;
   min-height: clamp(420px, 46vw, 680px);
+  padding: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 2fr) minmax(132px, 0.82fr);
+  gap: 10px;
   overflow: hidden;
   border: 1px solid rgba(38, 27, 32, 0.26);
   background: #261b20;
   isolation: isolate;
 }
 
-.venueTheatre :global(img) {
-  object-fit: cover;
-  object-position: center;
+.venuePhoto {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  background: #d8c7bc;
 }
 
-.venueTheatre::after {
+.venuePhoto::after {
   content: "";
   position: absolute;
-  inset: 18px;
-  z-index: 4;
+  z-index: 2;
+  inset: 0;
   border: 1px solid rgba(250, 247, 245, 0.34);
+  box-shadow: inset 0 0 46px rgba(38, 27, 32, 0.1);
   pointer-events: none;
 }
 
+.venuePhotoMain {
+  grid-column: 1 / -1;
+}
+
+.venuePhoto :global(img) {
+  object-fit: cover;
+  filter: saturate(0.88) contrast(1.04);
+  transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.venuePhotoMain :global(img) {
+  object-position: 50% 50%;
+}
+
+.venuePhotoPorticoGarden :global(img) {
+  object-position: 50% 46%;
+}
+
+.venuePhotoPorticoDining :global(img) {
+  object-position: 50% 42%;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .venuePhotography:hover .venuePhoto :global(img) {
+    transform: scale(1.018);
+  }
+}
 
 .venueSketch {
   position: absolute;
@@ -2793,12 +2828,15 @@
     gap: 42px;
   }
 
-  .venueTheatre {
-    min-height: clamp(300px, 82vw, 400px);
+  .venuePhotography {
+    min-height: clamp(360px, 110vw, 480px);
+    padding: 8px;
+    grid-template-rows: minmax(0, 1.65fr) minmax(118px, 0.9fr);
+    gap: 8px;
   }
 
-  .venueTheatre::after {
-    inset: 10px;
+  .venuePhotoMain :global(img) {
+    object-position: 50% 48%;
   }
 
   .venueSketch {

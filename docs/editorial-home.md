@@ -84,7 +84,7 @@ The wedding location is [Casa Nuova Niviano](https://www.casanuovaniviano.com/).
 - Link to the official website using a clearly named external link.
 - Do not scrape or mirror the official website at runtime.
 - Do not copy photographs from search results, social profiles, booking portals, or the official website without documented reuse permission.
-- Keep an intentional editorial placeholder or existing original graphic until authorized venue photographs are supplied.
+- Use the locally stored real Casa Nuova photographs selected from the venue's official reception gallery. The earlier original illustration remains a rollback asset.
 - When authorized files arrive, process them with the same metadata-removal and optimization workflow used for personal photographs.
 
 The absence of an authorized venue photo is a content dependency, not permission to invent a visual or ship a third-party image.
