@@ -126,7 +126,7 @@ The personalized boundary uses Neon Postgres, Cloudflare Turnstile and Next.js S
 ## Static assets
 
 - `public/photos/` contains approved, metadata-stripped local photographs.
-- `public/og-turtle-v1.jpg` is the generated 1200×630 social card with the provisional freshwater-turtle mark and is metadata-only.
+- `public/og-turtle-v2.jpg` is the generated 1200×630 social card with the paired Trachemys scripta-inspired mark and is metadata-only.
 - `public/scene/paper-theatre/` contains retained scene and rollback assets. Only assets explicitly referenced by editorial components are loaded by `/`.
 - `data/` is ignored except for `.gitkeep` and may hold local heavyweight working files, never production RSVP data.
 

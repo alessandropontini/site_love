@@ -42,7 +42,7 @@ Every visible string, label, alternative text, status, and link description must
 
 `HeroInvitation.tsx` always renders an HTML/CSS poster. `HeroInvitation3D.tsx` is a client-only dynamic import, so Three.js stays outside the server render and the rest of the site bundle.
 
-When WebGL succeeds, the invitation uses generated canvas faces, paper materials, restrained lighting, pointer input, buttons, and arrow keys. Important copy remains normal HTML. The provisional freshwater-turtle mark is decorative and replaceable when the couple chooses a final symbol.
+When WebGL succeeds, the invitation uses generated canvas faces, paper materials, restrained lighting, pointer input, buttons, and arrow keys. Important copy remains normal HTML. The paired freshwater-turtle mark is inspired by the couple's two Trachemys scripta and remains decorative.
 
 The renderer:
 
@@ -122,7 +122,7 @@ If games return later, treat them as a separate product surface with a separate 
 - Reserve `priority` for above-the-fold imagery.
 - Keep below-fold personal and venue images lazy.
 - Three.js remains isolated to the invitation and renders on demand.
-- `public/og-turtle-v1.jpg` is metadata-only and not page content.
+- `public/og-turtle-v2.jpg` is metadata-only and not page content.
 - No external image CDN or runtime venue API is required.
 
 After image changes, inspect dimensions, metadata, file size, crop, alternative text, and the production build output.

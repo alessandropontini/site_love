@@ -72,9 +72,9 @@ function drawWaterTurtleMark(
 ) {
   context.save();
   context.translate(x, y);
-  const markScale = size / 140;
+  const markScale = size / 176;
   context.scale(markScale, markScale);
-  context.translate(-70, -58);
+  context.translate(-88, -58);
   context.strokeStyle = "#8f7042";
   context.fillStyle = "rgba(155, 121, 72, 0.065)";
   context.lineWidth = 2.2;
@@ -91,15 +91,37 @@ function drawWaterTurtleMark(
   const shellDetails = new Path2D(
     "M65 100l5 10 5-10M70 31c-9 8-14 19-14 31s5 24 14 32M70 31c9 8 14 19 14 31s-5 24-14 32M44 53c16 7 36 7 52 0M44 72c16-7 36-7 52 0"
   );
-  const waterLine = new Path2D("M29 110c13-4 26-4 39 0 14 4 29 4 44 0");
+  const headStripes = new Path2D("M64 16c4 2 8 2 12 0M63 20c5 2 9 2 14 0");
+  const waterLine = new Path2D(
+    "M24 108c18-4 36-4 54 0 19 4 38 4 57 0 8-2 16-2 24 0"
+  );
 
-  context.fill(shell);
-  context.stroke(shell);
-  context.fill(head);
-  context.stroke(head);
-  context.fill(flippers);
-  context.stroke(flippers);
-  context.stroke(shellDetails);
+  const drawTurtle = (
+    offsetX: number,
+    offsetY: number,
+    scale: number,
+    rotation: number
+  ) => {
+    context.save();
+    context.translate(offsetX, offsetY);
+    context.rotate(rotation);
+    context.scale(scale, scale);
+    context.fill(shell);
+    context.stroke(shell);
+    context.fill(head);
+    context.stroke(head);
+    context.fill(flippers);
+    context.stroke(flippers);
+    context.stroke(shellDetails);
+    context.save();
+    context.lineWidth = 1.5;
+    context.stroke(headStripes);
+    context.restore();
+    context.restore();
+  };
+
+  drawTurtle(-2, 27, 0.68, -0.14);
+  drawTurtle(79, 3, 0.7, 0.12);
   context.globalAlpha = 0.5;
   context.stroke(waterLine);
   context.restore();
@@ -173,7 +195,7 @@ function createInvitationTexture(
   } else {
     context.font = `italic 400 ${Math.round(width * 0.19)}px Georgia, serif`;
     context.fillText(content.title, width / 2, height * 0.52);
-    drawWaterTurtleMark(context, width / 2, height * 0.33, width * 0.18);
+    drawWaterTurtleMark(context, width / 2, height * 0.33, width * 0.22);
   }
 
   context.font = `700 ${Math.round(width * 0.029)}px Arial, sans-serif`;
