@@ -22,7 +22,21 @@ function TurtleGlyph({ transform }: { transform: string }) {
       />
       <path d="M65 100l5 10 5-10" />
       <path d="M70 31c-9 8-14 19-14 31s5 24 14 32M70 31c9 8 14 19 14 31s-5 24-14 32M44 53c16 7 36 7 52 0M44 72c16-7 36-7 52 0" />
-      <path d="M64 16c4 2 8 2 12 0M63 20c5 2 9 2 14 0" strokeWidth="1.5" />
+      <path
+        d="M47 42l10 6M93 42l-10 6M44 63l12-1M96 63l-12-1M47 82l10-7M93 82l-10-7"
+        strokeWidth="3"
+        strokeOpacity="0.78"
+      />
+      <path
+        d="M62 13c-3 3-4 7-3 11M78 13c3 3 4 7 3 11"
+        strokeWidth="3.4"
+      />
+      <path d="M65 15c3 1 7 1 10 0M64 20c4 2 8 2 12 0" strokeWidth="1.35" />
+      <path
+        d="M27 41l9 7M113 41l-9 7M27 90l10 4M113 90l-10 4"
+        strokeWidth="1.6"
+        strokeOpacity="0.82"
+      />
     </g>
   );
 }

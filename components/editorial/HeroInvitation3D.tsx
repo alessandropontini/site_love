@@ -91,7 +91,16 @@ function drawWaterTurtleMark(
   const shellDetails = new Path2D(
     "M65 100l5 10 5-10M70 31c-9 8-14 19-14 31s5 24 14 32M70 31c9 8 14 19 14 31s-5 24-14 32M44 53c16 7 36 7 52 0M44 72c16-7 36-7 52 0"
   );
-  const headStripes = new Path2D("M64 16c4 2 8 2 12 0M63 20c5 2 9 2 14 0");
+  const shellBands = new Path2D(
+    "M47 42l10 6M93 42l-10 6M44 63l12-1M96 63l-12-1M47 82l10-7M93 82l-10-7"
+  );
+  const postorbitalPatches = new Path2D(
+    "M62 13c-3 3-4 7-3 11M78 13c3 3 4 7 3 11"
+  );
+  const headStripes = new Path2D("M65 15c3 1 7 1 10 0M64 20c4 2 8 2 12 0");
+  const limbStripes = new Path2D(
+    "M27 41l9 7M113 41l-9 7M27 90l10 4M113 90l-10 4"
+  );
   const waterLine = new Path2D(
     "M24 108c18-4 36-4 54 0 19 4 38 4 57 0 8-2 16-2 24 0"
   );
@@ -114,8 +123,22 @@ function drawWaterTurtleMark(
     context.stroke(flippers);
     context.stroke(shellDetails);
     context.save();
-    context.lineWidth = 1.5;
+    context.globalAlpha = 0.78;
+    context.lineWidth = 3;
+    context.stroke(shellBands);
+    context.restore();
+    context.save();
+    context.lineWidth = 3.4;
+    context.stroke(postorbitalPatches);
+    context.restore();
+    context.save();
+    context.lineWidth = 1.35;
     context.stroke(headStripes);
+    context.restore();
+    context.save();
+    context.globalAlpha = 0.82;
+    context.lineWidth = 1.6;
+    context.stroke(limbStripes);
     context.restore();
     context.restore();
   };

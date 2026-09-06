@@ -39,7 +39,7 @@ export function RsvpSection({ content }: RsvpSectionProps) {
                 fill
                 priority={false}
                 sizes="(max-width: 780px) calc(100vw - 68px), 390px"
-                src="/rsvp/turtle-paper-rsvp-v2.png"
+                src="/rsvp/turtle-paper-rsvp-v3.png"
               />
             </div>
             <WaterTurtleMark className={styles.rsvpTurtle} />

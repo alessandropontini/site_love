@@ -428,7 +428,7 @@ const baseContent: Record<EditorialLocale, EditorialContent> = {
         "Instrument Sans per l’interfaccia, Newsreader per la voce editoriale. Nessun servizio esterno è necessario durante la visita.",
       close: "Chiudi il colophon",
       languageLabel: "Lingua del sito",
-      note: "Fatto con cura, carta digitale e due Trachemys scripta.",
+      note: "Fatto con cura, carta digitale e due Trachemys scripta scripta.",
       decorative: "A & B"
     }
   },
@@ -649,7 +649,8 @@ const baseContent: Record<EditorialLocale, EditorialContent> = {
         "Instrument Sans for the interface, Newsreader for the editorial voice. No external service is required during the visit.",
       close: "Close the colophon",
       languageLabel: "Site language",
-      note: "Made with care, digital paper, and two Trachemys scripta turtles.",
+      note:
+        "Made with care, digital paper, and two Trachemys scripta scripta turtles.",
       decorative: "A & B"
     }
   }

@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     url: "/",
     images: [
       {
-        url: "/og-turtle-v2.jpg",
+        url: "/og-turtle-v3.jpg",
         width: 1200,
         height: 630,
         alt: "Alessandro e Bridget — 13 maggio 2028"
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
       "La nostra storia e le informazioni per il matrimonio a Casa Nuova, Niviano di Rivergaro.",
     images: [
       {
-        url: "/og-turtle-v2.jpg",
+        url: "/og-turtle-v3.jpg",
         alt: "Alessandro e Bridget — 13 maggio 2028"
       }
     ]
