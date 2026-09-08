@@ -21,12 +21,14 @@ export function WeddingVenue({ content }: WeddingVenueProps) {
     >
       <div className={styles.venueInner}>
         <header
-          className={`${styles.sectionHeader} ${styles.venueHeader}`}
+          className={`${styles.sectionHeaderWide} ${styles.venueHeader}`}
           data-reveal
         >
-          <p className={styles.sectionKicker}>{venue.kicker}</p>
-          <h2 id="venue-title">{venue.title}</h2>
-          <p>{venue.intro}</p>
+          <div>
+            <p className={styles.sectionKicker}>{venue.kicker}</p>
+            <h2 id="venue-title">{venue.title}</h2>
+          </div>
+          <div><p>{venue.intro}</p></div>
         </header>
 
         <div className={styles.venueComposition}>
@@ -47,17 +49,7 @@ export function WeddingVenue({ content }: WeddingVenueProps) {
                   src="/venue/casa-nuova-portico-garden.jpg"
                   alt={venue.photos.porticoGardenAlt}
                   fill
-                  sizes="(max-width: 560px) 50vw, 29vw"
-                />
-              </div>
-              <div
-                className={`${styles.venuePhoto} ${styles.venuePhotoPorticoDining}`}
-              >
-                <Image
-                  src="/venue/casa-nuova-portico-dining.jpg"
-                  alt={venue.photos.porticoDiningAlt}
-                  fill
-                  sizes="(max-width: 560px) 50vw, 29vw"
+                  sizes="(max-width: 900px) 100vw, 58vw"
                 />
               </div>
             </div>

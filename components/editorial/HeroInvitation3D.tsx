@@ -11,6 +11,8 @@ import {
 
 import type { EditorialContent } from "@/lib/editorialConfig";
 
+import { turtlePalette, turtlePlacements, turtleShapes } from "@/lib/waterTurtleArtwork";
+
 import styles from "./EditorialHome.module.css";
 
 export type HeroInvitation3DProps = {
@@ -72,81 +74,29 @@ function drawWaterTurtleMark(
 ) {
   context.save();
   context.translate(x, y);
-  const markScale = size / 176;
-  context.scale(markScale, markScale);
-  context.translate(-88, -58);
-  context.strokeStyle = "#8f7042";
-  context.fillStyle = "rgba(155, 121, 72, 0.065)";
-  context.lineWidth = 2.2;
+  context.scale(size / 210, size / 210);
+  context.translate(-105, -70);
   context.lineCap = "round";
   context.lineJoin = "round";
-
-  const shell = new Path2D(
-    "M70 24c21 0 34 17 34 38 0 24-15 40-34 40S36 86 36 62c0-21 13-38 34-38Z"
-  );
-  const head = new Path2D("M61 26c0-10 4-17 9-17s9 7 9 17");
-  const flippers = new Path2D(
-    "M39 43C29 34 18 35 11 44c11 1 15 10 22 17 1-8 3-14 6-18ZM101 43c10-9 21-8 28 1-11 1-15 10-22 17-1-8-3-14-6-18ZM38 78c-12 1-18 8-20 18 9-2 17 1 25 7 0-9-2-17-5-25ZM102 78c12 1 18 8 20 18-9-2-17 1-25 7 0-9 2-17 5-25Z"
-  );
-  const shellDetails = new Path2D(
-    "M65 100l5 10 5-10M70 31c-9 8-14 19-14 31s5 24 14 32M70 31c9 8 14 19 14 31s-5 24-14 32M44 53c16 7 36 7 52 0M44 72c16-7 36-7 52 0"
-  );
-  const shellBands = new Path2D(
-    "M47 42l10 6M93 42l-10 6M44 63l12-1M96 63l-12-1M47 82l10-7M93 82l-10-7"
-  );
-  const postorbitalPatches = new Path2D(
-    "M62 13c-3 3-4 7-3 11M78 13c3 3 4 7 3 11"
-  );
-  const headStripes = new Path2D("M65 15c3 1 7 1 10 0M64 20c4 2 8 2 12 0");
-  const limbStripes = new Path2D(
-    "M27 41l9 7M113 41l-9 7M27 90l10 4M113 90l-10 4"
-  );
-  const waterLine = new Path2D(
-    "M24 108c18-4 36-4 54 0 19 4 38 4 57 0 8-2 16-2 24 0"
-  );
-
-  const drawTurtle = (
-    offsetX: number,
-    offsetY: number,
-    scale: number,
-    rotation: number
-  ) => {
+  for (const { x: dx, y: dy, angle, scale } of turtlePlacements) {
     context.save();
-    context.translate(offsetX, offsetY);
-    context.rotate(rotation);
+    context.translate(dx, dy);
     context.scale(scale, scale);
-    context.fill(shell);
-    context.stroke(shell);
-    context.fill(head);
-    context.stroke(head);
-    context.fill(flippers);
-    context.stroke(flippers);
-    context.stroke(shellDetails);
-    context.save();
-    context.globalAlpha = 0.78;
-    context.lineWidth = 3;
-    context.stroke(shellBands);
+    context.translate(70, 65);
+    context.rotate(angle * Math.PI / 180);
+    context.translate(-70, -65);
+    for (const shape of turtleShapes) {
+      const path = new Path2D(shape.d);
+      if ("fill" in shape) {
+        context.fillStyle = turtlePalette[shape.fill];
+        context.fill(path);
+      }
+      context.strokeStyle = turtlePalette[shape.stroke];
+      context.lineWidth = shape.width;
+      context.stroke(path);
+    }
     context.restore();
-    context.save();
-    context.lineWidth = 3.4;
-    context.stroke(postorbitalPatches);
-    context.restore();
-    context.save();
-    context.lineWidth = 1.35;
-    context.stroke(headStripes);
-    context.restore();
-    context.save();
-    context.globalAlpha = 0.82;
-    context.lineWidth = 1.6;
-    context.stroke(limbStripes);
-    context.restore();
-    context.restore();
-  };
-
-  drawTurtle(-2, 27, 0.68, -0.14);
-  drawTurtle(79, 3, 0.7, 0.12);
-  context.globalAlpha = 0.5;
-  context.stroke(waterLine);
+  }
   context.restore();
 }
 

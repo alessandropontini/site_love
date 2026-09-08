@@ -4,6 +4,13 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Rifinitura album e sezioni — 8 settembre 2026
+
+- Ripristinata la colonna fotografica con apertura animata ispirata a Codrops, crop dedicati e foto aperte intere; rimossa la disposizione a due colonne.
+- Separati identità, immagini, didascalie e comandi su telefono, con margini anchor adattati alla navbar e navigazione da tastiera conservata.
+- Preservati giardino principale, vista dal portico e colori naturali di Casa Nuova; uniformati titoli, spaziature, cornici e pulsanti con album e RSVP.
+- Uniformate le tartarughe SVG/canvas e la stampa RSVP con un disegno condiviso; somiglianza individuale da verificare quando saranno disponibili le fotografie reali, non trovate nel progetto.
+
 ### Added
 
 - Aggiunte al menu RSVP schede cliccabili bilingui con fotografie gastronomiche originali, descrizioni, ingredienti tipici e interazione accessibile da tastiera e telefono.
@@ -20,6 +27,7 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ### Changed
 
+- Casa Nuova privilegia il giardino e la vista dal portico verso l’esterno, con colori naturali. La precedente prova dell’album a due colonne è stata sostituita dal ripristino a colonna singola descritto sopra.
 - Ridisegnata la galleria come transizione editoriale da stack a contenuto, ispirata all'esperimento MIT di Codrops: le otto fotografie formano una colonna regolare di strisce dritte, identiche e separate, senza rotazioni, cornici o numeri sovrapposti. Alla selezione tutte le strisce si espandono con la stessa curva fluida, la fotografia scelta resta al centro e le altre scorrono sopra e sotto. Ogni ritaglio usa un punto focale dedicato ai volti, mentre la vista aperta recupera un'inquadratura naturale. Su tablet e telefono l'identità dell'album occupa una fascia autonoma sopra lo stack, eliminando ogni collisione con le ultime fotografie. L'adattamento evita blocco dello scroll e gesture verticali intercettate, aggiungendo swipe orizzontale, tastiera, focus di ritorno e movimento ridotto.
 - Forzato l'aggiornamento del form RSVP dopo ogni salvataggio, evitando che i controlli React mostrino valori precedenti nonostante Neon contenga già la nuova risposta.
 - Rifiutati anche lato server gli invii RSVP identici e allineato il conteggio dei nuclei modificati alle sole persone cambiate nell'ultimo invio.

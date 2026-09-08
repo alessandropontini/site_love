@@ -23,6 +23,7 @@ type GalleryItemStyle = CSSProperties & {
   "--gallery-open-y-compact": string;
   "--gallery-stack-position": string;
   "--gallery-open-position": string;
+  "--gallery-index": number;
 };
 
 function getGalleryItemStyle(
@@ -36,6 +37,7 @@ function getGalleryItemStyle(
   const stackPosition = item.stackPosition ?? item.position ?? "50% 50%";
 
   return {
+    "--gallery-index": index,
     "--gallery-stack-y": `${(stackOffset * 11).toFixed(2)}%`,
     "--gallery-stack-y-compact": `${(stackOffset * 8.5).toFixed(2)}%`,
     "--gallery-open-y": `${openOffset * 58}%`,
@@ -70,6 +72,7 @@ function GalleryStackItem({
       className={styles.galleryTransitionItem}
       data-active={isActive}
       data-tone={item.tone}
+      aria-hidden={isOpen && !isActive}
       role="listitem"
       aria-posinset={index + 1}
       aria-setsize={total}
@@ -82,17 +85,29 @@ function GalleryStackItem({
         onClick={onSelect}
         aria-label={`${currentNumber}. ${item.caption}`}
         aria-pressed={isActive}
-        tabIndex={isOpen && !isActive ? -1 : 0}
+        tabIndex={isOpen ? -1 : 0}
       >
         <span className={styles.galleryTransitionMedia}>
           {item.src ? (
-            <Image
-              src={item.src}
-              alt={item.alt ?? ""}
-              fill
-              loading="lazy"
-              sizes="(max-width: 560px) 100vw, (max-width: 900px) 88vw, 46vw"
-            />
+            <>
+              <Image
+                className={styles.galleryCropImage}
+                src={item.src}
+                alt={item.alt ?? ""}
+                fill
+                loading="lazy"
+                sizes="(max-width: 900px) 90vw, 48vw"
+              />
+              <Image
+                className={styles.galleryFullImage}
+                src={item.src}
+                alt=""
+                aria-hidden="true"
+                fill
+                loading="lazy"
+                sizes="(max-width: 900px) 90vw, 48vw"
+              />
+            </>
           ) : (
             <span
               className={styles.photoPlaceholder}
@@ -147,13 +162,23 @@ export function PhotoGallery({ content }: { content: EditorialContent }) {
   const openGallery = useCallback((index: number) => {
     if (suppressClick.current) return;
     setActiveIndex(index);
+    // Measure after React applies the compact open layout.
+    window.requestAnimationFrame(() => {
+      stageRef.current?.focus({ preventScroll: true });
+      stageRef.current?.scrollIntoView({
+        block: "start",
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth"
+      });
+    });
   }, []);
 
   const closeGallery = useCallback(() => {
     if (activeIndex === null) return;
     const returnIndex = activeIndex;
     setActiveIndex(null);
-    window.setTimeout(() => itemRefs.current[returnIndex]?.focus(), 0);
+    window.setTimeout(() => itemRefs.current[returnIndex]?.focus({ preventScroll: true }), 0);
   }, [activeIndex]);
 
   const showRelative = useCallback(
@@ -227,20 +252,18 @@ export function PhotoGallery({ content }: { content: EditorialContent }) {
         </div>
         <div>
           <p>{content.gallery.intro}</p>
-          <small>{content.gallery.note}</small>
         </div>
       </header>
 
       <div
         ref={stageRef}
+        tabIndex={-1}
         className={styles.galleryStage}
         data-open={isOpen}
         data-ready={isReady}
         role="group"
         aria-label={content.gallery.browseHint}
         onKeyDown={handleKeyDown}
-        onPointerDown={handlePointerDown}
-        onPointerUp={handlePointerUp}
       >
         <div className={styles.galleryStageIntro} aria-hidden="true">
           <span>A &amp; B</span>
@@ -248,7 +271,13 @@ export function PhotoGallery({ content }: { content: EditorialContent }) {
           <small>{content.gallery.browseHint}</small>
         </div>
 
-        <div className={styles.galleryTransitionList} role="list">
+        <div
+          className={styles.galleryTransitionList}
+          role="list"
+          onPointerDown={handlePointerDown}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={() => { pointerStart.current = null; }}
+        >
           {content.gallery.items.map((item, index) => (
             <GalleryStackItem
               item={item}
@@ -283,7 +312,6 @@ export function PhotoGallery({ content }: { content: EditorialContent }) {
                   {String(total).padStart(2, "0")}
                 </span>
                 <h3>{activeItem.caption}</h3>
-                <p>{content.gallery.intro}</p>
               </>
             ) : null}
           </div>

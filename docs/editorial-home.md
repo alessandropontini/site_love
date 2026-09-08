@@ -15,7 +15,7 @@ invitation → personal photographs → Casa Nuova Niviano → RSVP
 - `components/editorial/EditorialNavigation.tsx` provides in-page navigation, language selection, active-section state, and motion-aware smooth scrolling.
 - `components/editorial/EditorialLocaleProvider.tsx` keeps public language state independent from the dormant experience dictionaries while preserving the existing locale preference key.
 - `components/editorial/WeddingVenue.tsx` presents verified venue facts, the original static paper scene, and official outbound links.
-- `components/editorial/RsvpSection.tsx` presents the informational status and a non-functional, non-scannable QR motif without guest data.
+- `components/editorial/RsvpSection.tsx` presents the informational status and a decorative turtle print without guest data.
 - `components/editorial/EditorialHome.module.css` owns the editorial visual system and responsive behavior.
 - `lib/editorialConfig.ts` is the bilingual content, section-ID, link, and asset source for the home.
 
@@ -60,9 +60,11 @@ With `prefers-reduced-motion: reduce`, entrance, floating, tilt, gallery drift, 
 
 The gallery uses approved local couple photographs rather than stock imagery. Files belong under `public/photos/` and are rendered through `next/image`.
 
-The photographs begin as a straight vertical column of equal-width, equal-height, face-focused strips. Their closed height and spacing follow the compact rhythm of the reference instead of simulating a crop inside a large rotated card. Selecting an item expands every strip to the same content height with one shared easing curve: the chosen photograph remains centred while its neighbours move above and below the stage. The image composition interpolates from its dedicated face crop to a more natural open view, and the caption and controls enter in the opposite column. The direction is adapted from the MIT-licensed [Codrops stack-to-content experiment](https://tympanus.net/codrops/2022/05/11/stack-to-content-layout-transition/), but the implementation deliberately avoids its global scroll reset, DOM reparenting and gesture-blocking observer. React state and CSS transitions keep the page scroll stable and make the interaction resilient inside the wedding homepage.
+The photographs begin in a single vertical column, restoring the stack-to-content composition inspired by Codrops. Per-photo focal points center the preview crops; opening crossfades to the complete photograph with `object-fit: contain`. No personal image files or metadata are changed.
 
-Desktop keeps the album identity beside the stack and the expanded photograph beside the editorial copy. Tablet and phone move the album identity into a dedicated header band above the closed stack, then switch to a single-column open stage with the photograph above the caption and controls. This prevents the title from covering any row—especially photographs seven and eight—and preserves horizontal swipe navigation, vertical page scrolling, and controls that do not overlap the image. Previous/next controls, arrow keys, Home, End, Escape and a focus return to the selected stack item provide equivalent navigation. Reduced-motion mode removes the long layout transitions while preserving both stack and content states.
+Desktop keeps the album identity beside the column. Phones use a separate identity band above all eight images, including photos 7 and 8. The open layout reserves separate areas for close, photograph, caption and previous/next; its height follows the viewport. The fixed navigation measures its own height and provides a shared anchor offset. Horizontal swipe, arrow keys, Home, End, Escape, focus return and reduced motion remain supported.
+
+The shared turtle paths and olive/brown/gold colors live in `lib/waterTurtleArtwork.ts`, used by `WaterTurtleMark` and the retained canvas invitation. RSVP now uses that same vector pair on a framed print, replacing the inconsistent raster illustration. **Reference limitation:** the actual turtle photographs were not found in the project or synced sources during this task. The drawing is a provisional correction of the existing motif, not a verified likeness. Legacy raster/social assets are retained unchanged.
 
 Before adding or replacing any photograph:
 
@@ -85,6 +87,7 @@ The wedding location is [Casa Nuova Niviano](https://www.casanuovaniviano.com/).
 - Do not scrape or mirror the official website at runtime.
 - Do not copy photographs from search results, social profiles, booking portals, or the official website without documented reuse permission.
 - Use the locally stored real Casa Nuova photographs selected from the venue's official reception gallery. The earlier original illustration remains a rollback asset.
+- The mounted composition prioritizes the garden ceremony and the portico view toward the garden. The indoor dining photograph remains stored but is not mounted. No new venue files are introduced by this layout change.
 - When authorized files arrive, process them with the same metadata-removal and optimization workflow used for personal photographs.
 
 The absence of an authorized venue photo is a content dependency, not permission to invent a visual or ship a third-party image.

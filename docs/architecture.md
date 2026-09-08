@@ -126,7 +126,7 @@ The personalized boundary uses Neon Postgres, Cloudflare Turnstile and Next.js S
 ## Static assets
 
 - `public/photos/` contains approved, metadata-stripped local photographs.
-- `public/venue/` contains the mounted Casa Nuova photo triptych sourced from the venue's official reception gallery plus the retained paper-theatre rollback asset.
+- `public/venue/` contains the mounted Casa Nuova garden and portico-to-garden photographs, plus the retained indoor dining photograph and paper-theatre rollback asset.
 - `public/og-turtle-v3.jpg` is the generated 1200×630 social card with the paired *Trachemys scripta scripta*-inspired mark and is metadata-only.
 - `public/scene/paper-theatre/` contains retained scene and rollback assets. Only assets explicitly referenced by editorial components are loaded by `/`.
 - `data/` is ignored except for `.gitkeep` and may hold local heavyweight working files, never production RSVP data.
@@ -147,3 +147,7 @@ Do not modify or add files under `public/` without explicit approval and provena
 - `docs/ai-workflow.md` and `docs/multiagent-workflow.md` define validation and independent review.
 
 Codex may implement scoped changes, but a fresh read-only Codex execution must perform the combined Code + QA review. Final approval remains human; no review command may commit, merge, or push.
+
+### September 2026 visual refinement
+
+The gallery restores the vertical stack and full-image opening. Navigation measures its height for anchor clearance; phone controls have dedicated space. Turtle vectors and colors share `lib/waterTurtleArtwork.ts` across SVG and retained canvas, with the shared pair used in RSVP. Individual likeness is pending the unavailable reference photographs. Casa Nuova keeps the existing natural-color garden and portico imagery; no venue/personal assets or RSVP data paths changed.

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 
 import { EditorialLanguageSelector } from "@/components/editorial/EditorialLocaleProvider";
 import { scrollToEditorialSection } from "@/components/editorial/editorialScroll";
@@ -17,6 +17,21 @@ export function EditorialNavigation({
 }: {
   content: EditorialContent;
 }) {
+  const shellRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const shell = shellRef.current;
+    const home = shell?.closest<HTMLElement>("[data-locale]");
+    if (!shell || !home) return;
+    const measure = () => {
+      home.style.setProperty("--navigation-clearance", `${Math.ceil(shell.getBoundingClientRect().bottom) + 16}px`);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(shell);
+    return () => observer.disconnect();
+  }, []);
+
   const [activeSection, setActiveSection] = useState<EditorialSectionId>(
     editorialSectionIds.story
   );
@@ -85,7 +100,7 @@ export function EditorialNavigation({
 
   return (
     <>
-      <header className={styles.navigationShell}>
+      <header ref={shellRef} className={styles.navigationShell}>
         <nav
           className={styles.navigation}
           aria-label={content.accessibility.navigation}
