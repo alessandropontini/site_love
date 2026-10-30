@@ -191,3 +191,23 @@ Games are not mounted by the wedding site. If they return, they use a separate r
 - [ ] Every printed QR matched to the intended household.
 - [ ] Games remain technically and operationally separate.
 - [ ] Clerk users, admin allowlist, MFA, CSV export, backup, and restore tested.
+
+## Manual planning synchronization
+
+`/admin/guests` (linked from `/admin/rsvp`) implements a manual Sheets → Neon
+Preview/Apply flow. See [guest-list-sync.md](guest-list-sync.md) for setup,
+permissions, mapping and recovery. Administration now uses English UI and a
+verified Clerk email matching the existing allowlist.
+
+Migration 008 introduces permanent external UUID mappings and metadata-only
+batch history. Imported households have null token hashes and disabled status;
+there is no token generation or invitation issuance in sync. Named adult invitees
+reuse the current household model. Child names and dietary/notes text are never
+imported; child places do not set the RSVP `has_children` answer. Unnamed +1 places
+only control explicitly validated permission on unissued households.
+
+Sync preserves all replies, contact email, response version/timestamps, RSVP
+audit, tokens, deadlines and existing household relationships. Replied household
+changes and issued-roster changes conflict; absent source records are retained.
+Do not run the current invitation generator for imported households: activation
+of existing UUIDs needs a separately reviewed issuance workflow.

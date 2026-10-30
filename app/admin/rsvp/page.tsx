@@ -13,14 +13,14 @@ import type { Attendance } from "@/lib/rsvp/types";
 export const dynamic = "force-dynamic";
 
 const attendanceLabels: Record<Attendance, string> = {
-  yes: "Presente",
-  no: "Assente"
+  yes: "Attending",
+  no: "Not attending"
 };
 
-const mealLabels = mealPreferenceLabels.it;
-const sourceLabels = invitationSourceLabels.it;
+const mealLabels = mealPreferenceLabels.en;
+const sourceLabels = invitationSourceLabels.en;
 const guestTypeLabels = {
-  named: "Invitato nominale",
+  named: "Named guest",
   plus_one: "+1"
 } as const;
 
@@ -29,7 +29,7 @@ function formatDate(value: string | null) {
     return "—";
   }
 
-  return new Intl.DateTimeFormat("it-IT", {
+  return new Intl.DateTimeFormat("en-GB", {
     dateStyle: "medium",
     timeStyle: "short"
   }).format(new Date(value));
@@ -43,11 +43,11 @@ export default async function AdminRsvpPage() {
     return (
       <main className={styles.page}>
         <section className={styles.noticeCard}>
-          <p className={styles.kicker}>Gestione RSVP</p>
-          <h1>Database non collegato</h1>
+          <p className={styles.kicker}>RSVP Administration</p>
+          <Link href="/admin/guests">Sync Guests</Link>
+          <h1>Database not connected</h1>
           <p>
-            L’accesso è protetto, ma per vedere le risposte devi ancora impostare
-            DATABASE_URL e applicare le migrazioni Neon.
+            Access is protected. Configure DATABASE_URL and apply the Neon migrations to view responses.
           </p>
         </section>
       </main>
@@ -61,45 +61,46 @@ export default async function AdminRsvpPage() {
       <div className={styles.shell}>
         <header className={styles.header}>
           <div>
-            <p className={styles.kicker}>Ciao {admin.displayName}</p>
-            <h1>Risposte RSVP</h1>
+            <p className={styles.kicker}>Hello {admin.displayName}</p>
+            <h1>RSVP Responses</h1>
           </div>
           <div className={styles.actions}>
+            <Link className={styles.secondaryAction} href="/admin/guests">Sync Guests</Link>
             <Link
               className={styles.primaryAction}
               href="/admin/rsvp/export"
               prefetch={false}
             >
-              Esporta CSV
+              Export CSV
             </Link>
             <SignOutButton>
               <button className={styles.secondaryAction} type="button">
-                Esci
+                Sign out
               </button>
             </SignOutButton>
           </div>
         </header>
 
-        <section aria-label="Riepilogo risposte" className={styles.summary}>
+        <section aria-label="Response summary" className={styles.summary}>
           <article>
             <strong>{dashboard.summary.households}</strong>
-            <span>Nuclei invitati</span>
+            <span>Invited households</span>
           </article>
           <article>
             <strong>{dashboard.summary.householdsResponded}</strong>
-            <span>Nuclei con risposta completa</span>
+            <span>Households with complete responses</span>
           </article>
           <article>
             <strong>{dashboard.summary.invitees}</strong>
-            <span>Persone invitate</span>
+            <span>Named guests</span>
           </article>
           <article>
             <strong>{dashboard.summary.attending}</strong>
-            <span>Presenze confermate</span>
+            <span>Confirmed attendance</span>
           </article>
           <article>
             <strong>{dashboard.summary.householdsWithChanges}</strong>
-            <span>Nuclei con modifiche</span>
+            <span>Households with changes</span>
           </article>
         </section>
 
@@ -108,20 +109,20 @@ export default async function AdminRsvpPage() {
           className={styles.sourceSummary}
         >
           <div>
-            <p className={styles.kicker}>Organizzazione privata</p>
-            <h2 id="invitation-source-heading">Provenienza degli inviti</h2>
+            <p className={styles.kicker}>Private planning</p>
+            <h2 id="invitation-source-heading">Invitation source</h2>
           </div>
           <dl>
             <div>
-              <dt>Nuclei invitati da Bridget</dt>
+              <dt>Households invited by Bridget</dt>
               <dd>{dashboard.summary.householdsInvitedByBride}</dd>
             </div>
             <div>
-              <dt>Nuclei invitati da Alessandro</dt>
+              <dt>Households invited by Alessandro</dt>
               <dd>{dashboard.summary.householdsInvitedByGroom}</dd>
             </div>
             <div>
-              <dt>Nuclei invitati da entrambi</dt>
+              <dt>Households invited by both</dt>
               <dd>{dashboard.summary.householdsInvitedByBoth}</dd>
             </div>
           </dl>
@@ -129,22 +130,22 @@ export default async function AdminRsvpPage() {
 
         <section className={styles.tableCard}>
           <div className={styles.tableIntro}>
-            <h2>Dettaglio invitati</h2>
-            <p>L’export contiene dati personali: condividilo solo se necessario.</p>
+            <h2>Guest details</h2>
+            <p>The export contains personal data. Share only when necessary.</p>
           </div>
 
           {dashboard.rows.length === 0 ? (
-            <p className={styles.empty}>Non ci sono ancora nuclei invitati.</p>
+            <p className={styles.empty}>There are no invited households yet.</p>
           ) : (
             <div className={styles.tableScroll}>
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th>Nucleo</th>
-                    <th>Invitato</th>
-                    <th>Risposta</th>
+                    <th>Household</th>
+                    <th>Guest</th>
+                    <th>Response</th>
                     <th>Menu</th>
-                    <th>Aggiornata</th>
+                    <th>Updated</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -162,10 +163,10 @@ export default async function AdminRsvpPage() {
                             <br />
                             <span className={styles.householdMeta}>
                               {row.householdSize === 0
-                                ? "Nucleo senza componenti"
+                                ? "Household without named guests"
                                 : row.householdSize === 1
-                                ? "1 persona nel nucleo"
-                                : `${row.householdSize} persone nello stesso nucleo`}
+                                ? "1 person in the household"
+                                : `${row.householdSize} people in the household`}
                             </span>
                             <br />
                             <span
@@ -192,12 +193,12 @@ export default async function AdminRsvpPage() {
                             ) : null}
                             {row.hasChildren ? (
                               <span className={styles.guestDetail}>
-                                Figli presenti · nessun dato anagrafico raccolto
+                                Children attending · no identifying data collected
                               </span>
                             ) : null}
                             {row.allowPlusOne ? (
                               <span className={styles.guestDetail}>
-                                Un +1 non nominato è autorizzato
+                                One unnamed companion is authorized
                               </span>
                             ) : null}
                           </td>
@@ -211,7 +212,7 @@ export default async function AdminRsvpPage() {
                           ) : null}
                           {row.changedInLatestSubmission ? (
                             <span className={styles.changeBadge}>
-                              Modificata nell’ultimo invio
+                              Changed in the latest submission
                             </span>
                           ) : null}
                         </td>
@@ -228,7 +229,7 @@ export default async function AdminRsvpPage() {
                             </span>
                           ) : (
                             <span className={styles.statusPending}>
-                              In attesa
+                              Pending
                             </span>
                           )}
                         </td>
@@ -236,7 +237,7 @@ export default async function AdminRsvpPage() {
                           {row.mealPreference
                             ? mealLabels[row.mealPreference]
                             : row.attendance === "yes"
-                              ? "Da scegliere più avanti"
+                              ? "To be selected later"
                               : "—"}
                         </td>
                         <td>{formatDate(row.responseUpdatedAt)}</td>

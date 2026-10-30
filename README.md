@@ -64,6 +64,23 @@ Il flusso implementato prevede:
 
 Liste invitati, token, risposte, esportazioni e QR generati non devono entrare in `public/`, nel bundle client, in file versionati o in `localStorage`. `npm run create:rsvp-invitations` genera token e QR soltanto in una cartella privata esterna al repository e rifiuta domini non HTTPS. Va eseguito solo dopo aver stabilizzato dominio e backend. Il contratto completo è in `docs/rsvp.md`.
 
+## Sincronizzazione manuale invitati
+
+`/admin/rsvp` → **Sync Guests** apre `/admin/guests`: **Preview Sync → Review
+Changes → Apply Changes**. Google Sheets è autorevole per la pianificazione;
+Neon resta autorevole per le risposte RSVP. Preview è di sola lettura, Apply è
+transazionale e idempotente, i record mancanti non vengono cancellati.
+
+La nuova migrazione `008_guest_list_sync.sql` aggiunge mapping UUID permanenti e
+storico batch nello stesso database. I nuclei importati sono disabilitati e senza
+token; non vengono creati QR o inviti ufficiali. Non usare il generatore inviti
+esistente sui nuclei importati: inserisce nuovi record e li duplicherebbe.
+
+Configurazione Google, ruolo database dedicato, variabili server-only, comando
+manuale per assegnare **Sync UUID**, mapping, conflitti, test e istruzioni per gli
+sposi sono in [docs/guest-list-sync.md](docs/guest-list-sync.md). Il flusso richiede
+prima dati completi e UUID stabili nel foglio. Nessun cron o deploy è previsto.
+
 ## Area sposi, export e backup
 
 Clerk gestisce login e sessione; `RSVP_ADMIN_EMAILS` aggiunge l’autorizzazione esplicita. Essere registrati su Clerk non basta per leggere le risposte. Dashboard, export e relative azioni verificano autonomamente l’utente sul server e non espongono token RSVP.

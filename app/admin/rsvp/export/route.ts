@@ -26,7 +26,7 @@ export async function GET() {
   const rows = await getAdminRsvpExportRows();
 
   if (!rows) {
-    return new Response("Esportazione temporaneamente non disponibile.", {
+    return new Response("Export temporarily unavailable.", {
       status: 503,
       headers: {
         "Cache-Control": "private, no-store",
@@ -36,21 +36,21 @@ export async function GET() {
   }
 
   const header = [
-    "Nucleo",
-    "Persone nel nucleo",
-    "Lingua",
-    "Stato invito",
-    "Scadenza",
-    "Email di contatto",
-    "+1 autorizzato",
-    "Figli presenti",
-    "Invitato",
-    "Tipo invitato",
-    "Nucleo invitato da",
-    "Presenza",
+    "Household",
+    "People in household",
+    "Language",
+    "Invitation status",
+    "Deadline",
+    "Contact email",
+    "+1 authorized",
+    "Children attending",
+    "Guest",
+    "Guest type",
+    "Household invited by",
+    "Attendance",
     "Menu",
-    "Modificata nell’ultimo invio",
-    "Ultimo aggiornamento"
+    "Changed in latest submission",
+    "Last updated"
   ];
 
   const body = [
@@ -63,16 +63,16 @@ export async function GET() {
         row.householdStatus,
         row.deadline,
         row.contactEmail,
-        row.allowPlusOne ? "Sì" : "No",
-        row.hasChildren ? "Sì" : "No",
+        row.allowPlusOne ? "Yes" : "No",
+        row.hasChildren ? "Yes" : "No",
         row.inviteeName,
         row.guestType,
-        invitationSourceLabels.it[row.invitedBy],
+        invitationSourceLabels.en[row.invitedBy],
         row.attendance,
         row.mealPreference
-          ? mealPreferenceLabels.it[row.mealPreference]
+          ? mealPreferenceLabels.en[row.mealPreference]
           : null,
-        row.changedInLatestSubmission ? "Sì" : "No",
+        row.changedInLatestSubmission ? "Yes" : "No",
         row.responseUpdatedAt
       ]
         .map(csvCell)

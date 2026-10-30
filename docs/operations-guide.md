@@ -529,3 +529,24 @@ precedente; ripristinare Production soltanto dopo aver verificato il bersaglio.
 - `docs/rsvp.md` — token, dati, form e area sposi;
 - `docs/privacy.md` — minimizzazione, accesso e cancellazione;
 - `db/README.md` — migrazioni e backup database.
+
+## Aggiornare gli invitati dal foglio
+
+La procedura completa è in [guest-list-sync.md](guest-list-sync.md), con setup
+Google, migrazione 008, credenziali, backup e recupero.
+
+1. Alessandro e Bridget completano le righe in **Guest List**, mantenendo coerenti
+   **Party / family** e **List owner** per il nucleo.
+2. Dopo nuove righe, sospendono insieme le modifiche e usano **Guest identifiers →
+   Assign missing permanent IDs** nel foglio. Non cambiare UUID già presenti.
+3. Nel sito: **RSVP Dashboard → Sync Guests → Preview Sync**.
+4. Controllare errori e tabella, spuntare la conferma, quindi **Apply Changes**.
+5. Controllare messaggio e **Synchronization History**. Per esito incerto,
+   ripetere lo stesso batch con **Retry / Check Batch** prima di crearne un altro.
+
+Nessuna riga mancante viene eliminata. I conflitti di nuclei/risposte vanno risolti
+con un manutentore. I nuovi nuclei non hanno inviti attivi. **Non eseguire il
+vecchio generatore QR sui nuclei importati**, perché inserirebbe duplicati.
+Prima dell'attivazione serve una procedura separata che emetta l'invito sullo
+stesso UUID, senza ricreare il nucleo. Backup e ripristino devono includere le
+nuove tabelle nello schema rsvp e preservare gli UUID del foglio.

@@ -4,6 +4,19 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Added
+- Manual Google Sheets guest synchronization with read-only Preview, explicit
+  Apply, permanent UUID mapping, atomic Neon updates and private batch history.
+- Separate English admin guest page, minimized child/companion planning,
+  conflict checks, replay recovery and fictional-data test coverage.
+- Google setup, identifier menu, least-privilege database role and operational
+  recovery guide; imported households remain disabled without tokens or QR codes.
+
+### Security
+- Require a verified allowlisted Clerk email for administration; preserve RSVP
+  responses, tokens, timestamps and household relationships during synchronization.
+
+
 ### Rifinitura album e sezioni — 8 settembre 2026
 
 - Ripristinata la colonna fotografica con apertura animata ispirata a Codrops, crop dedicati e foto aperte intere; rimossa la disposizione a due colonne.

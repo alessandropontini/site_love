@@ -83,3 +83,36 @@ versione di produzione; il database non viene automaticamente riportato
 indietro insieme al codice e va gestito separatamente.
 
 La procedura completa è in `docs/operations-guide.md`.
+
+## Sincronizzazione manuale della lista
+
+```mermaid
+flowchart TD
+  sheet["Google Sheets: Guest List + UUID permanenti"]
+  admin["Clerk + email amministratore verificata"]
+  preview["Preview: lettura server e validazione"]
+  diff["Confronto e ricevuta firmata: nessuna scrittura"]
+  confirm["Review Changes + conferma esplicita"]
+  apply["Apply: rilettura sorgente e controllo snapshot"]
+  tx["Neon: lock, transazione e storico atomico"]
+  conflict["Conflitto: nuova Preview o revisione manuale"]
+  admin --> preview
+  sheet --> preview
+  preview --> diff
+  diff --> confirm
+  confirm --> apply
+  sheet --> apply
+  apply -->|"Dati coerenti"| tx
+  apply -->|"Dati cambiati o invalidi"| conflict
+  tx -->|"Dashboard aggiornata"| admin
+```
+
+Il service account Google ha accesso Viewer al solo documento. Il comando manuale
+nel foglio assegna UUID permanenti prima della Preview; il sito non scrive su
+Google. `GUEST_SYNC_DATABASE_URL` usa un ruolo limitato sullo **stesso** database
+Neon di RSVP. Le funzioni SQL controllate separano i permessi sync da quelli del
+form pubblico. Lo storico contiene metadati, non copie della lista.
+
+Nessun cron, nuovo database, token, QR o invio inviti. La transazione conserva
+risposte e relazioni; i nuovi nuclei sono disabilitati e senza token. Dettagli e
+limiti di consistenza tra i due servizi in [guest-list-sync.md](guest-list-sync.md).
