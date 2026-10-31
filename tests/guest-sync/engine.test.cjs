@@ -84,6 +84,59 @@ test("first import; no free-text or child identifiers in plan", () => {
   assert(!JSON.stringify(p).includes("sensitive"));
   assert(!JSON.stringify(p).includes("Private child name"));
 });
+test("provisional guests are skipped without blocking import", () => {
+  const completeGuest = row();
+
+  const provisionalGuest = row({
+    "Guest name": "Fictional Pending Guest",
+    "Guest type": "",
+    Group: "",
+    "List owner": "",
+    "Party / family": "",
+    "Planning status": "",
+    Invitation: "",
+    RSVP: "",
+    Priority: "",
+    Table: "",
+    "Dietary requirements": "",
+    Notes: "",
+    "Sync UUID": ""
+  });
+
+  const result = parseSheet(
+    sheet(completeGuest, provisionalGuest)
+  );
+
+  assert.equal(result.guests.length, 1);
+  assert.deepEqual(result.skippedRows, [3]);
+  assert.equal(result.errors.length, 0);
+  assert.equal(result.sourceCount, 1);
+});
+test("incomplete identified guests must not be silently skipped", () => {
+  const incompleteGuest = row({
+    "Guest name": "Fictional Existing Guest",
+    "Guest type": "",
+    Group: "",
+    "List owner": "",
+    "Party / family": "",
+    "Planning status": "",
+    Invitation: "",
+    RSVP: "",
+    Priority: "",
+    Table: "",
+    "Dietary requirements": "",
+    Notes: "",
+    "Sync UUID": extraId
+  });
+
+  const result = parseSheet(sheet(incompleteGuest));
+
+  // La riga non deve essere esclusa silenziosamente.
+  assert.deepEqual(result.skippedRows, []);
+
+  // I dati incompleti devono generare un errore.
+  assert(result.errors.length > 0);
+});
 test("second import unchanged", () =>
   assert.equal(plan(sheet(), imported()).counts.unchanged, 1));
 test("new named guest in unissued household", () =>

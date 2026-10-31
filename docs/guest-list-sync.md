@@ -2,7 +2,7 @@
 
 ## Operator guide — Alessandro and Bridget
 
-1. Work in **Guest List** in the shared **THE LIST** workbook. Complete Guest name,
+1. Work in **Guest List** in the shared **THE LIST** workbook. Complete Guest name, optional Surname,
    Guest type (Adult/Child), Group, List owner (Ale/Bridget/Both), Party / family,
    Planning status and Priority. Use the same Party / family and List owner for
    every member of one invitation. Use `Plus-one of <host>` for an unnamed seat.
@@ -34,7 +34,8 @@ no QR, official invitation, email or public RSVP link is created.
 | --- | --- |
 | ID | Ignored; formula/row-dependent, never a reconciliation key |
 | Sync UUID | Permanent external UUID; database UUIDs remain separate |
-| Guest name | Named adults only → `rsvp.invitees.display_name` |
+| Guest name | Given-name input (first name); preserve any existing full name without splitting |
+| Surname | Optional surname; combined with Guest name for named adult `rsvp.invitees.display_name` |
 | Guest type | Adult/Child; child rows become anonymous planning places |
 | Group | Private planning metadata |
 | List owner | Ale → groom; Bridget → bride; Both → both; household-wide/private |
@@ -57,6 +58,53 @@ are not embedded in static assets, source fixtures, browser persistence or
 public routes. Google values (including ignored columns) exist transiently in
 server memory during the read and source digest calculation; logs and receipts
 contain no copies. Google Notes/dietary fields should still be minimized at source.
+
+## Name and surname compatibility
+
+### Confirmed source schema
+
+**Guest name is the first-name field**, as confirmed by the owner. Keep Guest
+name and Surname; do not introduce First name or Last name columns or aliases.
+The existing sourceName property stores Guest name without a redundant firstName
+property. No spreadsheet schema change or backfill is required.
+
+Guest name may still contain a full legacy name: preserve it without guessing a
+split. A surname correction for such a row requires deliberate human correction
+of Guest name if necessary. Do not overwrite rows or infer unknown surnames.
+
+The source uses **Guest name** and the existing **Surname** column. Surname may be absent in
+legacy workbooks or blank while the list is completed; duplicate Surname headers
+block validation. Column positions do not matter: parsing and ID assignment use
+headers. Keep the full range (including Sync UUID) together when sorting.
+
+For named adults, `sourceName` preserves the trimmed Guest name cell and `surname`
+stores the explicitly entered surname (or null). `name` remains the display name
+used by existing SQL, the RSVP form and admin exports. Append the surname only
+when Guest name does not already equal it or end with that complete surname after
+a whitespace boundary (case, Unicode normalization and whitespace are ignored
+for this check only). Preserve source spelling; never infer or split names.
+A supplied full name plus a different surname is not automatically repaired:
+review the displayed result in Preview and correct the source deliberately.
+The final display name and individual fields are limited to 120 characters.
+
+Old mapping JSON without sourceName/surname is compared using sourceName=name
+and surname=null. Adding an empty column causes no update; actual source-field
+changes are tracked even if the displayed name stays the same. Existing SQL
+stores these fields in mapping JSONB and still writes only `name` to invitees;
+no additional migration is required for this change. A code rollback to a parser
+that ignores surnames is unsafe after importing them: disable sync until the
+compatible version is restored instead of applying a legacy preview.
+
+Name-only drafts without UUID or organizational fields remain provisional even
+when Surname is filled. Identified incomplete rows still fail validation. Child
+and unnamed companion names **and surnames** are discarded before the plan;
+`Plus-one of <host>` is recognized from Guest name, without adding a surname.
+The ID menu still assigns IDs only to complete organizational rows; Surname is
+not required. No source edits, ID reassignment, or RSVP writes happen in Preview.
+
+The existing issued-invitation and replied-household restrictions remain in
+force. This extension does not reconcile legacy households, identify unnamed
+companions, change their RSVP-provided names, or activate invitations.
 
 ## Google setup (no extra paid runtime service)
 
@@ -264,13 +312,21 @@ Validation evidence: [guest-list-sync-validation.md](guest-list-sync-validation.
 - One configured workbook, exact English headers and Guest List tab; maximum
   5,000 data rows. Sheets reads use bounded timeouts and up to three HTTP attempts
   for 429/5xx. No schedulers, webhooks or automatic synchronization.
-- The current real workbook was inspected read-only; it has incomplete rows and
-  no Sync UUID column. It is not ready for a successful batch without preparation.
-- All permanent-ID initialization is explicit and separate from Apply. No live
-  workbook has been modified during implementation.
+- The real workbook now has Sync UUID and Surname columns. Provisional rows and
+  existing unmapped database households still require separate handling.
+- All permanent-ID initialization is explicit and separate from Apply. The
+  Surname column was added with user authorization; the code change does not
+  write to the live workbook or Neon.
 - Initial legacy mapping and changes to replied/issued household rosters require
   a maintainer; no self-service conflict resolver or deletion tool is included.
 - Complete isolated Neon/Google/Clerk end-to-end tests, least-privilege review,
   human code review, backup/restore test, source cleanup, stable IDs and separate
   invitation activation before production use. No production deploy or migration
   is implied by merging this code.
+
+## Proposed household evolution
+
+See [Household design proposal](households-design.md) for the next stage: stable
+household UUIDs, a separate Households sheet and explicit migration rules.
+This is a proposal, not the active synchronization contract; current batches
+still use the existing grouping and reconciliation protections.

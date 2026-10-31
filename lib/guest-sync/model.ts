@@ -20,7 +20,11 @@ const short = z.string().trim().min(1).max(120);
 export const guestSchema = z
   .object({
     externalId: z.uuid(),
+    // name remains the display name consumed by the existing SQL/RSVP contract.
     name: z.string().max(120).nullable(),
+    // Guest name is the given-name input; retain legacy full values without splitting.
+    sourceName: z.string().max(120).nullable().optional(),
+    surname: z.string().max(120).nullable().optional(),
     kind: z.enum(["named", "plus_one", "child"]),
     party: short,
     owner: z.enum(["groom", "bride", "both"]),
@@ -73,6 +77,7 @@ export type Plan = {
     errors: number;
   };
   sourceCount: number;
+  skippedRows: number[];
 };
 export function hash(value: unknown) {
   // PostgreSQL jsonb does not preserve object-key order; arrays remain ordered.
@@ -86,24 +91,64 @@ export function hash(value: unknown) {
   return createHash("sha256").update(canonical).digest("hex");
 }
 
-// Row order and the volatile formula ID are not identities. No free text from L/M
-// is retained in planning records, previews, logs, or database snapshots.
+// Keep the source spelling; use normalized text only to detect an existing suffix.
+// Never split a legacy full name or infer a missing surname.
+function displayName(sourceName: string, surname: string) {
+  const comparable = (value: string) =>
+    value.normalize("NFC").replace(/\s+/gu, " ").toLocaleLowerCase("en");
+  const name = comparable(sourceName);
+  const last = comparable(surname);
+  return !surname || name === last || name.endsWith(` ${last}`)
+    ? sourceName
+    : `${sourceName} ${surname}`;
+}
+
+// Older JSONB records lack these optional fields. Empty new columns alone must
+// not turn unchanged households (especially answered invitations) into updates.
+function comparableGuest(guest: Guest) {
+  return {
+    ...guest,
+    sourceName: guest.sourceName ?? guest.name,
+    surname: guest.surname ?? null
+  };
+}
+
+// Row order and the volatile formula ID are not identities. Notes and dietary
+// free text are never retained in plans, logs, or database snapshots.
 export function parseSheet(values: unknown[][]) {
   const names = (values[0] ?? []).map(String);
   const errors: string[] = [];
   for (const h of headers)
     if (names.filter((n) => n === h).length !== 1)
       errors.push(`Missing or duplicate column: ${h}`);
+  if (names.filter((name) => name === "Surname").length > 1)
+    errors.push("Duplicate column: Surname");
   const guests: Guest[] = [];
   let sourceCount = 0;
+  const skippedRows: number[] = [];
   const seen = new Set<string>();
   for (let i = 1; i < values.length; i++) {
     const row = values[i];
     const get = (key: string) => String(row[names.indexOf(key)] ?? "").trim();
     if (!names.some((h, col) => h !== "ID" && String(row[col] ?? "").trim()))
       continue;
-    sourceCount++;
+
     const rawName = get("Guest name");
+    const surname = get("Surname");
+    const provisionalFields = [
+      "Guest type", "Group", "List owner", "Party / family",
+      "Planning status", "Invitation", "RSVP", "Priority", "Table",
+      "Dietary requirements", "Notes"
+    ];
+    // A surname alone does not make an unassigned draft ready for import.
+    const isProvisional =
+      rawName !== "" && get("Sync UUID") === "" &&
+      provisionalFields.every((field) => get(field) === "");
+    if (isProvisional) {
+      skippedRows.push(i + 1);
+      continue;
+    }
+    sourceCount++;
     const rawKind = get("Guest type");
     const kind =
       rawKind === "Child"
@@ -122,7 +167,9 @@ export function parseSheet(values: unknown[][]) {
       );
     const parsed = guestSchema.safeParse({
       externalId: get("Sync UUID").toLowerCase(),
-      name: kind === "named" ? rawName : null,
+      name: kind === "named" ? displayName(rawName, surname) : null,
+      sourceName: kind === "named" ? rawName : null,
+      surname: kind === "named" ? surname || null : null,
       kind,
       party: get("Party / family"),
       owner: (
@@ -154,7 +201,8 @@ export function parseSheet(values: unknown[][]) {
   return {
     guests: guests.sort((a, b) => a.externalId.localeCompare(b.externalId)),
     errors,
-    sourceCount
+    sourceCount,
+    skippedRows
   };
 }
 export function buildPlan(
@@ -264,7 +312,7 @@ export function buildPlan(
         );
       const operation = !old
         ? "INSERT"
-        : hash(old.data) === hash(guest)
+        : hash(comparableGuest(old.data)) === hash(comparableGuest(guest))
           ? "NO CHANGE"
           : "UPDATE";
       if (
@@ -341,6 +389,7 @@ export function buildPlan(
     changes,
     errors,
     sourceCount: parsed.sourceCount,
+    skippedRows: parsed.skippedRows,
     counts: {
       created: changes.filter((c) => c.operation === "INSERT").length,
       updated: changes.filter((c) => c.operation === "UPDATE").length,

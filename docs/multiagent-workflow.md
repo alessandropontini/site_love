@@ -4,7 +4,9 @@ SITE LOVE uses a single optional independent reviewer: a fresh, read-only Codex 
 
 ## When to run it
 
-Run `scripts/local-review.sh` before a release and for dependency, framework/configuration, security, RSVP/data, routing/architecture, retained-game, or sensitive asset changes. Also run it whenever the user explicitly requests an independent review.
+Run an independent Codex review automatically before a release and for dependency, framework/configuration, security, RSVP/data, routing/architecture, retained-game, or sensitive asset changes. The standing user authorization in `AGENTS.md` covers this repository, the Codex provider and transmission of scoped private source/diff and sanitized evidence. Do not wait for another command or ask for repeated confirmation. Exclude credentials and real guest/RSVP data; other providers or repositories are outside this authorization.
+
+After an automatic approval rejection, continue local checks and handoff; record the missing review and rejection reason. Do not bypass the rejection or claim that a review ran.
 
 Do not run it automatically for contained documentation, copy, styling, or focused bug-fix work. Those tasks still require a clear diff, proportionate validation, a `CHANGELOG.md` entry, and ordinary human review of the handoff.
 
@@ -12,7 +14,7 @@ The detailed decision rules are maintained in `AGENTS.md` and `docs/ai-workflow.
 
 ## Review command
 
-Create a request file outside the repository with the outcome, allowed scope, acceptance criteria, required validation, and Git constraints. Then run:
+Under the standing authorization, create a request file outside the repository with the outcome, allowed scope, acceptance criteria, required validation, and Git constraints. Then run:
 
 ```bash
 MULTIAGENT_PROVIDER=codex \

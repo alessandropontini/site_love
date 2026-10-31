@@ -151,7 +151,9 @@ npm run build
 
 Le modifiche di codice richiedono lint e build, oltre a un controllo locale quando sono visibili. Per modifiche visibili, controlla tastiera, focus, cambio lingua, `prefers-reduced-motion` e layout a 320, 390, 768, 1024 e 1440 px. Verifica anche che `/` non esponga link o import dei giochi e che una vecchia destinazione di gioco non monti `ExperienceShell`.
 
-La review indipendente combinata Code + QA è necessaria soltanto prima di una release o per cambiamenti ad alto rischio: dipendenze e configurazione, sicurezza/dati RSVP, routing o architettura, logica dei giochi, asset personali o di location, oppure su richiesta esplicita. In quei casi usa una nuova esecuzione Codex in sola lettura:
+La review indipendente combinata Code + QA parte automaticamente prima di una release o per cambiamenti ad alto rischio: dipendenze e configurazione, sicurezza/dati RSVP, routing o architettura, logica dei giochi e asset personali o di location. L’autorizzazione permanente registrata in `AGENTS.md` comprende il provider Codex e la trasmissione del codice privato pertinente di SITE LOVE e delle evidenze ripulite. Non aspettare un nuovo comando né richiedere conferme ripetute. Escludere credenziali e dati reali degli invitati; altri provider o repository richiedono autorizzazione separata.
+
+In caso di rifiuto del controllo automatico, completare i controlli locali e la consegna, dichiarando la review non eseguita e il motivo; non aggirare il rifiuto. L’autorizzazione alla review non comprende commit, push, merge o deployment.
 
 ```bash
 MULTIAGENT_PROVIDER=codex \

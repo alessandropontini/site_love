@@ -3,7 +3,29 @@ const assert = require("node:assert/strict");
 const vm = require("node:vm");
 const fs = require("node:fs");
 const { randomUUID } = require("node:crypto");
+
+const headers = [
+  "Guest name", "Guest type", "Group", "List owner",
+  "Party / family", "Planning status", "Priority"
+];
+
+function guest(name, overrides = {}) {
+  const data = {
+    "Guest name": name,
+    "Guest type": "Adult",
+    Group: "Test",
+    "List owner": "Ale",
+    "Party / family": "Fictional Household",
+    "Planning status": "On list",
+    Priority: "Unassigned",
+    ...overrides
+  };
+  return headers.map(h => data[h] ?? "");
+}
+
 function setup(rows) {
+  // Isolate the header row so tests never mutate shared headers.
+  rows[0] = [...rows[0]];
   let writes = 0,
     fail = false,
     unlocks = 0;
@@ -67,15 +89,15 @@ function setup(rows) {
   };
 }
 test("identifier partial write recovery preserves persisted identities", () => {
-  const rows = [["Guest name"], ["Fictional Rowan"], ["Fictional Morgan"]];
+  const rows = [headers, guest("Fictional Rowan"), guest("Fictional Morgan")];
   const s = setup(rows);
   s.failNext();
   assert.throws(s.run);
-  const persisted = rows[1][1];
+  const persisted = rows[1][headers.length];
   assert(persisted);
   s.run();
-  assert.equal(rows[1][1], persisted);
-  assert.notEqual(rows[2][1], persisted);
+  assert.equal(rows[1][headers.length], persisted);
+  assert.notEqual(rows[2][headers.length], persisted);
   const ids = JSON.stringify(rows);
   s.run();
   assert.equal(JSON.stringify(rows), ids);
@@ -84,11 +106,81 @@ test("identifier partial write recovery preserves persisted identities", () => {
 test("identifier duplicate detection performs no write", () => {
   const id = randomUUID();
   const rows = [
-    ["Guest name", "Sync UUID"],
-    ["Fictional Rowan", id],
-    ["Fictional Morgan", id]
+    [...headers, "Sync UUID"],
+    [...guest("Fictional Rowan"), id],
+    [...guest("Fictional Morgan"), id]
   ];
   const s = setup(rows);
   assert.throws(s.run, /duplicate/);
+  assert.equal(s.writes(), 0);
+});
+
+
+test("complete guests receive IDs; provisional guests do not", () => {
+  const rows = [
+    headers,
+    guest("Fictional Rowan"),
+    guest("Fictional Pending", {
+      "Guest type": "", Group: "", "List owner": "",
+      "Party / family": "", "Planning status": "", Priority: ""
+    }),
+    guest("Fictional Partial", { Group: "" })
+  ];
+
+  const s = setup(rows);
+  s.run();
+
+  const col = headers.length;
+
+  assert.equal(rows[0][col], "Sync UUID");
+  assert.match(rows[1][col], /^[0-9a-f]{8}-[0-9a-f-]{27,}$/i);
+  assert.equal(rows[2][col], "");
+  assert.equal(rows[3][col], "");
+});
+
+test("existing UUID survives when a guest becomes incomplete", () => {
+  const id = randomUUID();
+  const rows = [
+    [...headers, "Sync UUID"],
+    [...guest("Fictional Rowan", { "Guest type": "" }), id]
+  ];
+
+  const s = setup(rows);
+  s.run();
+  assert.equal(rows[1][headers.length], id);
+
+  s.run();
+  assert.equal(rows[1][headers.length], id);
+});
+
+test("invalid UUID blocks writes", () => {
+  const rows = [
+    [...headers, "Sync UUID"],
+    [...guest("Fictional Rowan"), "INVALID-UUID"]
+  ];
+
+  const s = setup(rows);
+  assert.throws(s.run, /invalid or duplicate/i);
+  assert.equal(s.writes(), 0);
+  assert.equal(s.unlocks(), 1);
+});
+
+
+test("surname column preserves existing IDs and does not identify drafts", () => {
+  const id = randomUUID();
+  const cols = ['Guest name', 'Surname', ...headers.slice(1), 'Sync UUID'];
+  const rows = [cols,
+    ['Fictional Rowan', 'Example', ...guest('Fictional Rowan').slice(1), id],
+    ['Fictional Pending', 'Example', '', '', '', '', '', '', '']];
+  const s = setup(rows);
+  s.run();
+  assert.equal(rows[1][cols.indexOf('Sync UUID')], id);
+  assert.equal(rows[2][cols.indexOf('Sync UUID')], '');
+  assert.equal(rows[1][1], 'Example');
+});
+test("duplicate surname columns block identifier writes", () => {
+  const rows = [[...headers, 'Surname', 'Surname'], [...guest('Fictional Rowan'), '', '']];
+  const s = setup(rows);
+  assert.throws(s.run, /Duplicate Surname/);
   assert.equal(s.writes(), 0);
 });

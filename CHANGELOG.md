@@ -4,6 +4,33 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Review authorization policy
+- Make local validation and diff inspection the standard completion path.
+- Run independent Codex reviews automatically for high-risk changes under the
+  owner’s standing authorization for scoped SITE LOVE private-code transfer;
+  do not wait for repeated commands or confirmations. Exclude secrets and real
+  guest data; other providers and publication remain outside this authorization.
+- Align the workflow guides; preserve human release approval and prohibit
+  bypassing automatic approval rejections or reporting unperformed reviews.
+
+### Guest name is the first-name field (steps 1–3)
+- Use the existing Guest name and Surname columns; no extra First name or Last
+  name columns, aliases, backfill or spreadsheet schema changes are needed.
+- Preserve legacy full values, permanent identities, provisional rows and
+  anonymous places; show Guest name and surname changes in Preview.
+- Fix the legacy Preview fallback so a surname-only edit does not show a false
+  Guest name change; independently reviewed with no remaining code findings.
+- Validate name edits and SQL round-trips on fictional data only. No live
+  Sheet/Neon writes, migration, invitation or deployment performed.
+
+### Guest name and surname
+- Support optional Surname alongside Guest name, retaining source values and
+  composing the RSVP display name without duplicating an existing surname.
+- Preserve legacy mapping comparisons, provisional rows, permanent IDs and
+  anonymous child/companion places; show display-name changes in admin Preview.
+- Document the compatible JSONB representation and rollback limitation; no new
+  SQL migration, live database import or invitation activation is performed.
+
 ### Added
 - Manual Google Sheets guest synchronization with read-only Preview, explicit
   Apply, permanent UUID mapping, atomic Neon updates and private batch history.

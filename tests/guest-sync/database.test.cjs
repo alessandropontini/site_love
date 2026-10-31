@@ -106,6 +106,49 @@ test(
           "bride"
         );
       });
+      await t.test("surname JSONB and display changes preserve IDs without a new migration", async () => {
+        const before = (await db.query("select * from rsvp.invitees")).rows[0];
+        // Exercise a real pre-extension mapping, with the new keys absent.
+        await db.exec("update rsvp.guest_sync_members set data=data - 'sourceName' - 'surname'");
+        const legacy = await prepare(make("Fictional Rowan Updated", "Bridget"));
+        assert.equal(legacy.plan.counts.unchanged, 1);
+        const values = make("Fictional Rowan Updated", "Bridget").map(r => [...r]);
+        values[0].push("Surname");
+        values[1].push("Example");
+        const p = await prepare(values);
+        assert.equal(p.plan.errors.length, 0);
+        assert.equal(await execute(p), "SUCCESS");
+        const after = (await db.query("select * from rsvp.invitees")).rows[0];
+        assert.equal(after.id, before.id);
+        assert.equal(after.household_id, before.household_id);
+        assert.equal(after.display_name, "Fictional Rowan Updated Example");
+        const member = (await db.query("select * from rsvp.guest_sync_members")).rows[0];
+        assert.equal(member.external_id, id);
+        assert.equal(member.data.surname, "Example");
+        assert.equal(member.data.sourceName, "Fictional Rowan Updated");
+        assert.equal((await prepare(values)).plan.counts.unchanged, 1);
+        // Restore the fictional baseline used by the remaining integration cases.
+        assert.equal(await execute(await prepare(make("Fictional Rowan Updated", "Bridget"))), "SUCCESS");
+      });
+      await t.test("Guest name correction round-trips through SQL with stable IDs", async () => {
+        const before = (await db.query("select * from rsvp.invitees")).rows[0];
+        const values = make("Robin", "Bridget").map(r => [...r]);
+        values[0].push("Surname");
+        values[1].push("Example");
+        const p = await prepare(values);
+        assert.deepEqual(p.plan.errors, []);
+        assert.equal(await execute(p), "SUCCESS");
+        const after = (await db.query("select * from rsvp.invitees")).rows[0];
+        assert.equal(after.id, before.id);
+        assert.equal(after.household_id, before.household_id);
+        assert.equal(after.display_name, "Robin Example");
+        const member = (await db.query("select * from rsvp.guest_sync_members")).rows[0];
+        assert.equal(member.external_id, id);
+        assert.equal(member.data.surname, "Example");
+        assert.equal(member.data.sourceName, "Robin");
+        assert.equal((await prepare(values)).plan.counts.unchanged, 1);
+        assert.equal(await execute(await prepare(make("Fictional Rowan Updated", "Bridget"))), "SUCCESS");
+      });
       await t.test(
         "new companion place enables permission without named invitee",
         async () => {
@@ -237,7 +280,10 @@ test(
           assert.equal(p.plan.errors.length, 0);
           assert.equal(await execute(p), "SUCCESS");
           assert.equal(await protectedState(), before);
-          const changed = await prepare(make("Fictional changed", "Bridget"));
+          const changedValues = make("Fictional Rowan Updated", "Bridget").map(r => [...r]);
+          changedValues[0].push("Surname");
+          changedValues[1].push("Example");
+          const changed = await prepare(changedValues);
           assert(changed.plan.errors.length);
           await assert.rejects(execute(changed));
           assert.equal(await protectedState(), before);
