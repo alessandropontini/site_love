@@ -57,7 +57,7 @@ test(
       const execute = async (p, batch = randomUUID()) =>
         (
           await db.query(
-            "select rsvp.apply_guest_sync($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7) status",
+            "select rsvp.apply_guest_sync($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7,$8) status",
             [
               batch,
               "fictional-admin",
@@ -65,7 +65,8 @@ test(
               p.hash,
               JSON.stringify(p.plan.changes),
               JSON.stringify(p.plan.counts),
-              1
+              1,
+              p.plan.contractVersion ?? 2
             ]
           )
         ).rows[0].status;

@@ -13,11 +13,11 @@ function sheet(rows = [{}], cols = columns) {
     return cols.map(h => values[h] ?? '');
   })];
 }
-const empty = { households: [], members: [], inviteeCount: 0 };
+const empty = { contractVersion: 2, households: [], members: [], inviteeCount: 0 };
 function snapshot(values, legacy = false) {
   const guests = parseSheet(values).guests;
   return {
-    households: [{ id: hid, name: 'Fictional household', owner: 'groom', plusOne: false,
+    contractVersion: 2, households: [{ id: hid, name: 'Fictional household', owner: 'groom', plusOne: false,
       issued: false, responded: false, version: 0, status: 'disabled' }],
     members: guests.map(g => {
       const data = {...g};

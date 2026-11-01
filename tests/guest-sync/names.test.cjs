@@ -12,7 +12,7 @@ function sheet(overrides = {}, columns = cols) {
 }
 function snapshot(values) {
   const g = parseSheet(values).guests[0];
-  return { households: [{ id: hid, name: g.party, owner: g.owner, plusOne: false,
+  return { contractVersion: 2, households: [{ id: hid, name: g.party, owner: g.owner, plusOne: false,
     issued: false, responded: false, version: 0, status: 'disabled' }],
   members: [{ externalId: id, householdId: hid, inviteeId: id, data: g, actualName: g.name }], inviteeCount: 1 };
 }

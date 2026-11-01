@@ -13,7 +13,14 @@
    sort the **whole table including the hidden column**, never only visible cells.
 3. Open `/admin/rsvp` → **Sync Guests** → **Preview Sync**. This is read-only:
    it does not alter the Sheet, guest tables, or synchronization history.
-4. Review the counts, validation errors and every current/new value. Counts are
+4. Review the counts, blocking errors and labeled current → proposed values.
+   Modified rows show only changed fields; new rows show their proposed fields.
+   Missing rows show retained values, never a deletion. Valid unchanged rows
+   are collapsed; blocked rows remain visible even when unchanged. The household
+   summary groups mapped rows by stable internal ID, new rows by Party / family,
+   and includes missing rows. It distinguishes represented households from those
+   with inserts/updates and those with row errors; global errors remain separate.
+   Counts are
    source rows, including children and unnamed places; the database count is
    named adult RSVP invitees. These numbers intentionally need not match.
 5. If valid, select the explicit confirmation checkbox and **Apply Changes**.
@@ -172,18 +179,18 @@ do not weaken `allowedOrigins` to bypass that protection.
 
 ## Database setup and permissions
 
-Back up and test restore first. Apply migrations 001–008 in numeric order on an
+Back up and test restore first. Apply migrations 001–009 in numeric order on an
 isolated development branch with the schema owner, not a runtime credential.
 Create the dedicated login role `site_love_sync` through Neon role management
 before applying 008, or provision a restricted PostgreSQL login using a secure
 operator workflow. Do not grant it owner membership, `BYPASSRLS`, superuser or
-CREATE on schemas. Migration 008 grants the following if the role exists:
+CREATE on schemas. Migrations 008–009 grant the following if the role exists:
 
 ```sql
 grant usage on schema rsvp to site_love_sync;
 grant select, insert on rsvp.guest_sync_runs to site_love_sync;
 grant execute on function rsvp.guest_sync_snapshot() to site_love_sync;
-grant execute on function rsvp.apply_guest_sync(uuid,text,text,text,jsonb,jsonb,integer)
+grant execute on function rsvp.apply_guest_sync(uuid,text,text,text,jsonb,jsonb,integer,integer)
   to site_love_sync;
 ```
 
@@ -221,8 +228,9 @@ failure insertion cannot overwrite an already committed SUCCESS.
 - Fix incomplete/invalid rows, duplicate IDs, owner inconsistencies and ambiguous
   companion names in the source, then preview again. One critical error blocks
   the whole batch; no partial import is allowed. Empty/oversized sources fail closed.
-- Existing households without mappings block import. A maintainer must reconcile
-  each existing invitee to a verified source UUID in a separate reviewed transaction;
+- Existing households without mappings block import unless explicitly classified
+  as excluded test households by an authorized operator. Real invitees must be
+  reconciled to verified source UUIDs in a separate reviewed transaction;
   never auto-adopt by name or delete existing invitations to bypass the check.
 - Renaming Party / family, merging/splitting households, changing named/child/+1
   type, or naming an existing companion requires manual reconciliation. Existing
@@ -330,3 +338,74 @@ See [Household design proposal](households-design.md) for the next stage: stable
 household UUIDs, a separate Households sheet and explicit migration rules.
 This is a proposal, not the active synchronization contract; current batches
 still use the existing grouping and reconciliation protections.
+
+
+## Existing test-household reconciliation
+
+Migration **009_guest_sync_test_exclusions.sql** introduces synchronization
+contract version **2**. Apply requires the new eight-argument function and a
+matching contract version; the old seven-argument signature raises an upgrade
+error. Preview blocks when the database snapshot lacks version 2. Coordinate
+migration and code rollout with sync paused; discard outstanding previews.
+The migration is prepared/tested locally, not applied to Neon by this task.
+
+`guest_sync_exclusions` stores internal eligibility for each household. Initial
+rows have active=false, revision=0: this is NOT a test classification or a Sheet
+mapping. New households get the same default through a server-side trigger.
+`guest_sync_members.exclusion_active` is constrained to false and references the
+composite household/active key, preventing mapped/excluded overlap even for
+direct writes and concurrent transactions. This is an internal guard column,
+not an RSVP field or another editable source column.
+
+An operator with schema-owner access may invoke
+`rsvp.set_guest_sync_test_exclusion(target, excluded, expected_revision, actor, reason)`
+only after approval of exact IDs, environment verification and backup/restore.
+Reasons are `CONFIRMED_TEST` for activation and `CLASSIFICATION_REVOKED` for
+revocation. Expected revision is optimistic concurrency control. Repeating the
+same state at the current revision is a no-op; a stale revision fails.
+No public, application or sync-role execution grant is provided. Never grant
+those roles registry/event writes. No admin UI action auto-classifies records.
+
+Every actual transition appends a metadata-only event. Revocation keeps the
+history and restores the unmapped-household block. Event foreign keys prevent
+removing classification history through household deletion. Snapshot includes
+active/revision for every ever-classified household, so revocation/reactivation
+invalidates old receipts. Apply and classification share advisory and table
+locks, and SQL rechecks unknown unmapped households, exclusion IDs and label
+collisions independently of the TypeScript plan. No name-based exclusion exists.
+
+Preview separately shows the excluded household and named-guest counts; database
+total remains inclusive. RSVP, tokens and response timestamps are unchanged.
+The registry affects synchronization only, not existing dashboard filtering or
+invitation validity. Live migration and classification remain approval-gated;
+see [guest-reconciliation.md](guest-reconciliation.md).
+
+### Rollback and operator procedure
+
+Pause sync before rollout or rollback. Do not drop the registry/history, rerun
+008, or revert only the code after applying 009. Keep version 2 schema and use a
+compatible application; a deliberate exclusion reversal uses the operator
+function, retaining history. Reverting an exclusion restores the block and does
+not delete or relink any guest. Restore a verified private backup only through a
+separate approved recovery procedure, never an automatic destructive rollback.
+
+A concrete private classification script has been prepared outside the repo for
+the two confirmed test households. It checks exact household/invitee IDs,
+response revisions, absence of mappings and additional guests, then preserves
+all RSVP table content by comparing before/after within the transaction. It
+requires the 009 schema and owner permissions; it has NOT been executed.
+Before use, verify the endpoint belongs to DEVELOPMENT in Neon, review the
+script, obtain approval for the migration and classification, and verify backup
+and restore including token hashes and audit. A local environment filename is
+not proof of the branch. No Apply Changes follows this operation automatically.
+
+
+### Step 6 presentation verification (1 November 2026)
+
+97 guest-sync tests passed without skips, including legacy name fallback,
+removed values, anonymous-name suppression, retained missing rows and stable
+household grouping. TypeScript, lint and build passed. Independent Codex review:
+PASS after correcting keys for duplicate-UUID error rows. Fictional component
+browser check confirmed readable deltas and unchanged-row expansion; the
+authenticated admin page was not exercised. No schema or data change is required
+for this presentation update.

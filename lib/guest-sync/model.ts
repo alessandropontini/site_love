@@ -53,7 +53,10 @@ export type Member = {
   data: Guest;
   actualName: string | null;
 };
+export const SYNC_CONTRACT_VERSION = 2;
 export type Snapshot = {
+  contractVersion?: number;
+  exclusions?: { householdId: string; active: boolean; revision: number }[];
   households: Household[];
   members: Member[];
   inviteeCount: number;
@@ -67,6 +70,9 @@ export type Change = {
   errors: string[];
 };
 export type Plan = {
+  contractVersion: number;
+  excludedHouseholds: number;
+  excludedInvitees: number;
   changes: Change[];
   errors: string[];
   counts: {
@@ -210,9 +216,15 @@ export function buildPlan(
   snapshot: Snapshot
 ): Plan {
   const errors = [...parsed.errors];
+  const exclusions = snapshot.exclusions ?? [];
+  const excluded = new Set(exclusions.filter((e) => e.active).map((e) => e.householdId));
+  if (snapshot.contractVersion !== SYNC_CONTRACT_VERSION)
+    errors.push("Unsupported synchronization contract. Update database and application together.");
+  if (snapshot.members.some((m) => excluded.has(m.householdId)))
+    errors.push("An excluded test household has source mappings. Resolve the conflict manually.");
   if (
     snapshot.households.some(
-      (h) => !snapshot.members.some((m) => m.householdId === h.id)
+      (h) => !excluded.has(h.id) && !snapshot.members.some((m) => m.householdId === h.id)
     )
   )
     errors.push(
@@ -229,6 +241,8 @@ export function buildPlan(
   for (const group of groups.values()) {
     const problems: string[] = [];
     const party = group[0].party;
+    if (snapshot.households.some((h) => excluded.has(h.id) && h.name.toLowerCase() === party.toLowerCase()))
+      problems.push("This label belongs to an excluded test household. Review the source; no adoption is allowed.");
     if (new Set(group.map((g) => g.party)).size !== 1)
       problems.push("Household labels differ only by letter case.");
     if (new Set(group.map((g) => g.owner)).size !== 1)
@@ -288,6 +302,8 @@ export function buildPlan(
     for (const guest of group) {
       const old = members.get(guest.externalId);
       const rowErrors = [...problems];
+      if (householdId && excluded.has(householdId))
+        rowErrors.push("Excluded test households cannot be synchronized.");
       if (
         household &&
         household.plusOne !==
@@ -386,6 +402,9 @@ export function buildPlan(
   for (const change of changes)
     errors.push(...change.errors.map((e) => `${change.guest}: ${e}`));
   return {
+    contractVersion: SYNC_CONTRACT_VERSION,
+    excludedHouseholds: snapshot.households.filter((h) => excluded.has(h.id)).length,
+    excludedInvitees: snapshot.households.filter((h) => excluded.has(h.id)).reduce((n, h) => n + (h.namedCount ?? 0), 0),
     changes,
     errors,
     sourceCount: parsed.sourceCount,

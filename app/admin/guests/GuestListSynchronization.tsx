@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { applyGuests, cancelGuests, previewGuests } from "./actions";
 import type { Plan } from "@/lib/guest-sync/model";
 import styles from "./sync.module.css";
+import PreviewDetails from "./PreviewDetails";
 
 type Preview = {
   plan: Plan;
@@ -70,7 +71,7 @@ export default function GuestListSynchronization({
 
         <div>
           <dt>Current named guests in database</dt>
-          <dd>{databaseCount}</dd>
+          <dd>{preview?.databaseCount ?? databaseCount}</dd>
         </div>
 
         <div>
@@ -190,7 +191,7 @@ export default function GuestListSynchronization({
                         updated: "Updated rows",
                         unchanged: "Unchanged rows",
                         missing: "Missing from source",
-                        errors: "Validation errors"
+                        errors: "Blocking errors"
                       }[name]
                     }
                   </dt>
@@ -204,6 +205,16 @@ export default function GuestListSynchronization({
           {/* ===================================== */}
           {/* EXPLANATORY INFORMATION             */}
           {/* ===================================== */}
+
+          <p>
+            Excluded test households: {preview.plan.excludedHouseholds}.
+            Named guests in excluded test households: {preview.plan.excludedInvitees}.
+            These records remain in the database with their invitations and RSVP responses.
+          </p>
+
+          <p>
+            Preview is read-only. To synchronize later Sheet edits, keep each Sync UUID unchanged and run a new Preview, then Apply Changes.
+          </p>
 
           <p>
             Counts include named adults, unnamed companion
@@ -230,108 +241,20 @@ export default function GuestListSynchronization({
           {/* ===================================== */}
 
           {!!preview.plan.errors.length && (
-            <ul className={styles.errors}>
+            <div role="alert"><h3>Blocking errors — nothing can be applied</h3><ul className={styles.errors}>
               {preview.plan.errors.map((error, i) => (
                 <li key={i}>
                   {error}
                 </li>
               ))}
-            </ul>
+            </ul></div>
           )}
 
           {/* ===================================== */}
           {/* PROPOSED CHANGES TABLE              */}
           {/* ===================================== */}
 
-          <div className={styles.scroll}>
-            <table>
-              <caption>
-                Proposed planning changes
-              </caption>
-
-              <thead>
-                <tr>
-                  <th>Guest / household</th>
-                  <th>Operation</th>
-                  <th>Current value</th>
-                  <th>New value</th>
-                  <th>Validation status</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {preview.plan.changes.map((change, i) => (
-                  <tr key={i}>
-                    <td>
-                      {change.guest}
-                      {change.operation === "UPDATE" &&
-                        change.current?.name !== change.next?.name && (
-                          <p>
-                            Name: {change.current?.name ?? "—"} → {change.next?.name ?? "—"}
-                          </p>
-                        )}
-                      {change.operation === "UPDATE" &&
-                        (["sourceName", "surname"] as const).map((field) => {
-                          const current = field === "sourceName"
-                            ? change.current?.sourceName ?? change.current?.name ?? null
-                            : change.current?.surname ?? null;
-                          const next = field === "sourceName"
-                            ? change.next?.sourceName ?? change.next?.name ?? null
-                            : change.next?.surname ?? null;
-                          return current !== next ? (
-                            <p key={field}>
-                              {field === "sourceName" ? "Guest name" : "Surname"}: {current ?? "—"} → {next ?? "—"}
-                            </p>
-                          ) : null;
-                        })}
-                    </td>
-
-                    <td>
-                      {change.operation}
-                    </td>
-
-                    <td>
-                      <pre>
-                        {change.current
-                          ? JSON.stringify(
-                              change.current,
-                              (key, value) =>
-                                key === "externalId"
-                                  ? undefined
-                                  : value,
-                              2
-                            )
-                          : "—"}
-                      </pre>
-                    </td>
-
-                    <td>
-                      <pre>
-                        {change.next
-                          ? JSON.stringify(
-                              change.next,
-                              (key, value) =>
-                                key === "externalId"
-                                  ? undefined
-                                  : value,
-                              2
-                            )
-                          : "—"}
-                      </pre>
-                    </td>
-
-                    <td>
-                      {change.errors.join(" ") ||
-                        (change.operation ===
-                        "MISSING FROM SOURCE"
-                          ? "Review separately; retained"
-                          : "Valid")}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <PreviewDetails plan={preview.plan} />
 
           {/* ===================================== */}
           {/* EXPLICIT CONFIRMATION               */}

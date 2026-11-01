@@ -69,7 +69,7 @@ export async function applyPlan(
   duration: number
 ) {
   const rows = await sql().query(
-    "select rsvp.apply_guest_sync($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7) as status",
+    "select rsvp.apply_guest_sync($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7,$8) as status",
     [
       receipt.id,
       receipt.actor,
@@ -77,7 +77,8 @@ export async function applyPlan(
       receipt.dbHash,
       JSON.stringify(plan.changes),
       JSON.stringify(plan.counts),
-      duration
+      duration,
+      plan.contractVersion
     ]
   );
   return rows[0]?.status as string;

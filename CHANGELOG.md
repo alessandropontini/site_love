@@ -4,6 +4,42 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Readable synchronization Preview
+- Replace raw planning JSON with labeled before/after values and highlight only
+  changed fields for updates. Keep missing records visibly retained.
+- Summarize households represented, proposed changes and row errors; collapse
+  valid unchanged rows while keeping every blocked row visible.
+- Use the fresh Preview database count and explain manual synchronization of
+  later Sheet edits. Preview remains read-only and administrator-only.
+
+### DEVELOPMENT guest import
+- Import the approved 62 source rows into 29 disabled households without tokens,
+  keeping 2 test households excluded; verify the next Preview reports 62 unchanged.
+- Verify an in-memory name/surname edit produces one UPDATE with stable identity.
+  Future Sheet changes require Preview and Apply; RSVP protections remain active.
+
+### Live sync preview verification
+- Verify the current Preview workflow against Sheets and DEVELOPMENT: zero
+  errors, 62 proposed source inserts across 29 households, 11 draft rows skipped,
+  and 2 test households / 4 test invitees excluded. No import applied.
+
+### Explicit test-household exclusions
+- Prepare migration 009 and operator-only classification history, with database
+  constraints preventing overlap between test exclusions and source mappings.
+- Enforce sync contract v2, SQL guards and stale-preview invalidation; show test
+  household/guest counts separately while preserving RSVP and token state.
+- Add fictional PostgreSQL regression tests (92 passing). Apply migration 009
+  and two approved test exclusions to user-confirmed DEVELOPMENT after private
+  backup/restore verification; preserve all protected RSVP tables unchanged.
+  No Sheet edits, imports or Apply Changes performed.
+
+### Existing guest reconciliation proposal
+- Inspect the configured database in read-only transactions and confirm with the
+  owner that the two unmapped households are test data to preserve separately.
+- Propose explicit ID-based sync exclusions with snapshot/SQL safeguards;
+  no associations, migrations or database writes performed. Private IDs remain
+  outside the repository; branch label and audit access require later verification.
+
 ### Review authorization policy
 - Make local validation and diff inspection the standard completion path.
 - Run independent Codex reviews automatically for high-risk changes under the
@@ -22,6 +58,18 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
   Guest name change; independently reviewed with no remaining code findings.
 - Validate name edits and SQL round-trips on fictional data only. No live
   Sheet/Neon writes, migration, invitation or deployment performed.
+
+### Household design proposal
+- Recheck the existing empty Households structure and prepare a private approval
+  map for 29 candidate households, preserving 62 guest UUIDs and 11 draft rows.
+- Define explicit activation/versioning and legacy mapping reconciliation;
+  runtime UUID grouping remains pending. No Sheet/Neon writes performed.
+- Created the approved empty Households sheet and Household UUID / Host Sync UUID
+  columns in the source workbook; verified readback. No identities assigned and
+  no database writes or runtime activation.
+- Document the proposed Households sheet, permanent household references, contact ownership,
+  companion transitions and staged migration. Proposal only; no source or database writes
+  and no household runtime changes are activated.
 
 ### Guest name and surname
 - Support optional Surname alongside Guest name, retaining source values and
