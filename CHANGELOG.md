@@ -4,6 +4,13 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Validated dependency lockfile
+- Record the existing resolved dependency updates, including Next.js 16.4.3,
+  sharp 0.35.5 and Zod 4.6.7, within the unchanged package.json ranges.
+- Validate the installed versions with 97 guest-sync tests, TypeScript, lint
+  and production build. Ignore the local TypeScript incremental build cache.
+- No setup or operational guide changes are required for this lockfile update.
+
 ### Readable synchronization Preview
 - Replace raw planning JSON with labeled before/after values and highlight only
   changed fields for updates. Keep missing records visibly retained.
