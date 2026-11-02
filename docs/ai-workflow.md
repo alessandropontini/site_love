@@ -26,14 +26,14 @@ Never add AI tools, provider SDKs, or orchestration packages to runtime or devel
    - visible public behavior: the previous checks plus a local browser check of the affected flow;
    - assets or RSVP work: also record the required provenance, privacy, or endpoint evidence.
 5. Update `CHANGELOG.md` under `Unreleased` and every directly affected guide, README section, or architecture note. Say explicitly when no additional guide is affected.
-6. Run an independent review only when the task meets the criteria below.
+6. For the risk criteria below, run an independent Codex review automatically under the standing user authorization in `AGENTS.md`; do not wait for another user command. Continue permitted local work if review execution is blocked.
 7. Hand off a short summary, validation results, known limitations, and a proposed commit message. Do not commit, merge, or push unless the user asks.
 
 ## Risk-based independent review
 
 Routine work does not require a separate Codex review: documentation and copy changes, contained visual polish, focused bug fixes, and small refactors that do not alter public routes, data, privacy, dependencies, configuration, or retained-game behavior.
 
-Run the independent, read-only review with `scripts/local-review.sh` before a release or when a task changes:
+Run an independent Codex review before a release or when a task changes:
 
 - dependencies, Next.js/React/TypeScript configuration, build, deployment, environment variables, security, or authentication;
 - RSVP routes, guest data, tokens, QR codes, storage, or privacy boundaries;
@@ -42,7 +42,9 @@ Run the independent, read-only review with `scripts/local-review.sh` before a re
 - personal or venue imagery, including provenance or metadata concerns;
 - anything the user explicitly requests to be independently reviewed.
 
-When required, provide the original request and acceptance criteria in a file outside the repository. Include supplemental evidence for screenshots, assets, or endpoint checks that cannot be represented in a diff:
+The standing authorization recorded in `AGENTS.md` covers the Codex provider and transmission of scoped private SITE LOVE code and sanitized evidence. Run the review without requesting another command or confirmation; read-only mode does not prevent transmission, which is already authorized. Do not send credentials or real guest/RSVP data. Other providers or repositories need separate authorization. If automatic approval rejects execution, continue local validation and handoff, report the missing review and reason, and do not bypass the rejection.
+
+Under that authorization, provide the original request and acceptance criteria in a file outside the repository. Include supplemental evidence for screenshots, assets, or endpoint checks that cannot be represented in a diff:
 
 ```bash
 MULTIAGENT_PROVIDER=codex \

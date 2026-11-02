@@ -8,7 +8,7 @@ This repository is `alessandropontini/site_love`, a private Next.js microsite na
 
 The home RSVP section is deliberately informational. The implemented invitation flow uses one personal QR code per invited household and an opaque route token at `/rsvp/[token]`, backed by server-side Neon storage when production services are configured. Do not publish guest data, response data, RSVP tokens, exports, backups, manifests, or generated QR codes in `public/`, client bundles, source-controlled configuration, or `localStorage`.
 
-Codex is the only active AI development and review tool. Routine, scoped work is validated in the interactive session; an independent read-only Codex review is reserved for releases and high-risk changes. Final approval remains human.
+Codex is the only active AI development and review tool. Work is validated in the interactive session with local checks and diff inspection. An additional independent Codex review runs automatically for releases and high-risk changes under the standing user authorization below; do not wait for a new user command. Final approval remains human.
 
 Ruflo has been removed. CrewAI and OpenClaw are retained only as inactive experiments and compatibility documentation; they are not part of the release path or merge gate. Do not reintroduce automatic multi-agent orchestration without an explicit project decision.
 
@@ -188,7 +188,7 @@ These invariants apply only if the dormant experience is intentionally edited or
 
 Routine changes do **not** require a separate reviewer: documentation and copy edits, contained visual polish, focused bug fixes, and small refactors that do not alter public routes, data, privacy, dependencies, or retained-game behavior. The implementer must still inspect the diff and run proportionate validation.
 
-Run one fresh, read-only Codex review with `scripts/local-review.sh` only when preparing a release or when a change affects any of the following:
+Run one independent, read-only Codex review automatically when preparing a release or when a change affects any of the following:
 
 - dependencies, Next.js/React/TypeScript configuration, build, deployment, environment variables, security, or authentication;
 - RSVP routes, guest data, tokens, QR codes, storage, or privacy boundaries;
@@ -197,7 +197,13 @@ Run one fresh, read-only Codex review with `scripts/local-review.sh` only when p
 - new or changed personal/venue assets, where provenance and metadata evidence are required;
 - any change the user explicitly asks to have independently reviewed.
 
-When a review is required, provide the request plus any non-diff evidence, and retain the resulting report under `.agent/reports/`. A `PASS` or `PASS WITH NOTES` is evidence for human decision-making, never an automatic commit, merge, or push. `noop` remains limited to workflow smoke tests.
+Local validation and handoff must continue without an external review. Inspect the diff, run relevant tests and the required lint/build checks, and state which checks ran and which limitations remain. Do not describe self-review as independent review. An unperformed external review is not a reason to leave authorized implementation or local validation unfinished.
+
+**Standing user authorization (31 October 2026):** the owner has authorized independent reviews of this repository through the Codex provider, including transmission of the scoped private source code, diff and sanitized review evidence. Use `MULTIAGENT_PROVIDER=codex` with `scripts/local-review.sh` without asking for a new command or confirmation whenever the risk criteria above apply. This authorization persists until revoked; it is not limited to the current task. Read-only mode does not prevent transmission, and that transmission is covered by this authorization.
+
+The authorization covers only Codex reviews of SITE LOVE, not other providers or repositories, credentials, real guest/RSVP records, private exports, tokens, production writes, commits, pushes, merges or deployments. Minimize and inspect review inputs before execution. Ask only if the proposed review requires expanding this scope or if a tool approval explicitly requires user action. This standing authorization does not override an automatic approval rejection.
+
+When authorized, provide a minimal request plus relevant non-diff evidence, exclude credentials and real guest/RSVP data, and retain the report under `.agent/reports/`. If automatic approval review rejects the action, do not retry through another tool or provider to bypass it; continue permitted local work and report the blocked action and reason. Never claim an unperformed review passed. A `PASS` or `PASS WITH NOTES` is evidence for human decision-making, never an automatic commit, merge, push, or deployment. `noop` remains limited to workflow smoke tests. Release approval remains human and must account for any missing review evidence.
 
 ## Documentation and cleanup policy
 

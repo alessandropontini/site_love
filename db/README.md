@@ -29,3 +29,22 @@ For a local encrypted-disk backup, load `DATABASE_URL` into the shell and run
 files are created with owner-only permissions. Move backups to an encrypted,
 access-controlled location; do not email them or put them in a shared public
 folder. Periodically test restoration into a separate Neon branch.
+
+`008_guest_list_sync.sql` adds manual guest planning synchronization, permanent
+source mappings, batch history and restricted functions. It permits null token
+hashes only for disabled households; it does not issue tokens or touch existing
+responses. Create the separate `site_love_sync` role before migration or apply
+the documented grants afterwards. Its URL must point to the same database as
+RSVP. See [the sync guide](../docs/guest-list-sync.md) before applying or rolling
+back; do not grant its functions to the public RSVP runtime role.
+
+
+`009_guest_sync_test_exclusions.sql` introduces sync contract v2, explicit
+operator-only test exclusions and classification history. It does not classify
+any existing household automatically. Eligibility rows default to false and a
+composite FK prevents excluded households from acquiring source membership.
+The seven-argument Apply entry point fails closed; application and schema must
+be upgraded together with sync paused. Do not grant the classification function
+or registry writes to runtime roles. Apply to DEVELOPMENT only after separate
+approval and backup/restore verification; do not automatically deploy it to
+production. See the sync guide for rollback and the exact operator contract.

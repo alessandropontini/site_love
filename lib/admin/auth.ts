@@ -2,6 +2,7 @@ import "server-only";
 
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
+import { hasVerifiedAdminEmail } from "./allowlist";
 
 function configuredAdminEmails() {
   return new Set(
@@ -26,9 +27,7 @@ export async function requireRsvpAdmin() {
   await auth.protect();
 
   const [{ userId }, user] = await Promise.all([auth(), currentUser()]);
-  const isAllowed = user?.emailAddresses.some((address) =>
-    allowedEmails.has(address.emailAddress.trim().toLowerCase())
-  );
+  const isAllowed = hasVerifiedAdminEmail(user?.emailAddresses ?? [], allowedEmails);
 
   if (!userId || !user || !isAllowed) {
     notFound();
@@ -36,6 +35,6 @@ export async function requireRsvpAdmin() {
 
   return {
     actorId: userId,
-    displayName: user.firstName || "Amministratore"
+    displayName: user.firstName || "Administrator"
   };
 }

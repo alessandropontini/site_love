@@ -64,6 +64,23 @@ Il flusso implementato prevede:
 
 Liste invitati, token, risposte, esportazioni e QR generati non devono entrare in `public/`, nel bundle client, in file versionati o in `localStorage`. `npm run create:rsvp-invitations` genera token e QR soltanto in una cartella privata esterna al repository e rifiuta domini non HTTPS. Va eseguito solo dopo aver stabilizzato dominio e backend. Il contratto completo è in `docs/rsvp.md`.
 
+## Sincronizzazione manuale invitati
+
+`/admin/rsvp` → **Sync Guests** apre `/admin/guests`: **Preview Sync → Review
+Changes → Apply Changes**. Google Sheets è autorevole per la pianificazione;
+Neon resta autorevole per le risposte RSVP. Preview è di sola lettura, Apply è
+transazionale e idempotente, i record mancanti non vengono cancellati.
+
+La nuova migrazione `008_guest_list_sync.sql` aggiunge mapping UUID permanenti e
+storico batch nello stesso database. I nuclei importati sono disabilitati e senza
+token; non vengono creati QR o inviti ufficiali. Non usare il generatore inviti
+esistente sui nuclei importati: inserisce nuovi record e li duplicherebbe.
+
+Configurazione Google, ruolo database dedicato, variabili server-only, comando
+manuale per assegnare **Sync UUID**, mapping, conflitti, test e istruzioni per gli
+sposi sono in [docs/guest-list-sync.md](docs/guest-list-sync.md). Il flusso richiede
+prima dati completi e UUID stabili nel foglio. Nessun cron o deploy è previsto.
+
 ## Area sposi, export e backup
 
 Clerk gestisce login e sessione; `RSVP_ADMIN_EMAILS` aggiunge l’autorizzazione esplicita. Essere registrati su Clerk non basta per leggere le risposte. Dashboard, export e relative azioni verificano autonomamente l’utente sul server e non espongono token RSVP.
@@ -134,7 +151,9 @@ npm run build
 
 Le modifiche di codice richiedono lint e build, oltre a un controllo locale quando sono visibili. Per modifiche visibili, controlla tastiera, focus, cambio lingua, `prefers-reduced-motion` e layout a 320, 390, 768, 1024 e 1440 px. Verifica anche che `/` non esponga link o import dei giochi e che una vecchia destinazione di gioco non monti `ExperienceShell`.
 
-La review indipendente combinata Code + QA è necessaria soltanto prima di una release o per cambiamenti ad alto rischio: dipendenze e configurazione, sicurezza/dati RSVP, routing o architettura, logica dei giochi, asset personali o di location, oppure su richiesta esplicita. In quei casi usa una nuova esecuzione Codex in sola lettura:
+La review indipendente combinata Code + QA parte automaticamente prima di una release o per cambiamenti ad alto rischio: dipendenze e configurazione, sicurezza/dati RSVP, routing o architettura, logica dei giochi e asset personali o di location. L’autorizzazione permanente registrata in `AGENTS.md` comprende il provider Codex e la trasmissione del codice privato pertinente di SITE LOVE e delle evidenze ripulite. Non aspettare un nuovo comando né richiedere conferme ripetute. Escludere credenziali e dati reali degli invitati; altri provider o repository richiedono autorizzazione separata.
+
+In caso di rifiuto del controllo automatico, completare i controlli locali e la consegna, dichiarando la review non eseguita e il motivo; non aggirare il rifiuto. L’autorizzazione alla review non comprende commit, push, merge o deployment.
 
 ```bash
 MULTIAGENT_PROVIDER=codex \
