@@ -4,6 +4,11 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Household UUID runtime — Step 9C.3
+- Add migration 010 with an explicit source-mode registry, one-to-one Household UUID mapping, composite member foreign key, and contract v3 snapshot/transactional Apply.
+- Create new UUID households disabled and keyed by external household UUID; block unmapped existing guests, cross-household moves, source-mode mismatches, and use of old Apply signatures.
+- Enable the administrative Apply confirmation for the explicitly configured UUID mode and document operator-only legacy reconciliation. No Neon migration or real Sheet operation was performed.
+
 ### Household UUID Preview integration — Step 9C.2
 - Integrate the explicitly selected two-tab Household UUID source with Preview planning while keeping legacy mode as the default.
 - Bind mode and both source tabs to the signed preview receipt; re-read and validate them before Apply. UUIDs, not labels, keep same-name households separate.

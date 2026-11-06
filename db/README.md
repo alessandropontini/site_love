@@ -48,3 +48,13 @@ be upgraded together with sync paused. Do not grant the classification function
 or registry writes to runtime roles. Apply to DEVELOPMENT only after separate
 approval and backup/restore verification; do not automatically deploy it to
 production. See the sync guide for rollback and the exact operator contract.
+
+`010_guest_sync_household_runtime.sql` upgrades synchronization to contract v3.
+It registers existing sources as legacy, adds a one-to-one source Household UUID
+mapping with a composite member foreign key, includes mappings and modes in the
+snapshot, and adds explicit-mode transactional Apply. Existing Neon households
+are never adopted or assigned a Household UUID by this migration. A reviewed,
+owner-only reconciliation must map every existing member before changing a
+source from legacy mode. Old 7/8-argument Apply signatures fail closed. Validate
+on an isolated database first and follow `docs/guest-list-sync.md`; this
+repository step does not apply the migration to Neon.

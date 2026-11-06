@@ -63,14 +63,26 @@ export type Household = {
 export type Member = {
   externalId: string;
   householdId: string;
+  externalHouseholdId?: string | null;
   inviteeId: string | null;
   data: Guest;
   actualName: string | null;
 };
-export const SYNC_CONTRACT_VERSION = 2;
+export const SYNC_CONTRACT_VERSION = 3;
+export type HouseholdMapping = {
+  sourceId: string;
+  externalHouseholdId: string;
+  householdId: string;
+};
+export type SourceMode = {
+  sourceId: string;
+  mode: "legacy" | "household_uuid";
+};
 export type Snapshot = {
   contractVersion?: number;
   exclusions?: { householdId: string; active: boolean; revision: number }[];
+  householdMappings?: HouseholdMapping[];
+  sourceModes?: SourceMode[];
   households: Household[];
   members: Member[];
   inviteeCount: number;
@@ -81,6 +93,7 @@ export type Change = {
   current: Guest | null;
   next: Guest | null;
   householdId: string | null;
+  householdUuid: string | null;
   errors: string[];
 };
 export type Plan = {
@@ -499,14 +512,20 @@ export function parseGuestSheets(sheets: GuestSheets, mode: "legacy" | "househol
 }
 export function buildPlan(
   parsed: ReturnType<typeof parseSheet> | HouseholdSheetParse,
-  snapshot: Snapshot
+  snapshot: Snapshot,
+  sourceId?: string
 ): Plan {
+  const mode = "mode" in parsed ? parsed.mode : "legacy";
+  const registeredMode = snapshot.sourceModes?.find((source) => source.sourceId === sourceId)?.mode;
+  const modeErrors = registeredMode && registeredMode !== mode
+    ? [`This spreadsheet is registered for ${registeredMode} synchronization. A reviewed operator migration is required before switching modes.`]
+    : [];
   if ("mode" in parsed && parsed.mode === "household_uuid")
-    return buildHouseholdUuidPlan(parsed, snapshot);
+    return buildHouseholdUuidPlan(parsed, snapshot, sourceId, modeErrors);
   const legacy: ReturnType<typeof parseSheet> = "mode" in parsed
     ? { guests: parsed.guests, errors: parsed.errors, sourceCount: parsed.sourceCount, skippedRows: parsed.skippedRows }
     : parsed;
-  const errors = [...legacy.errors];
+  const errors = [...legacy.errors, ...modeErrors];
   const exclusions = snapshot.exclusions ?? [];
   const excluded = new Set(exclusions.filter((e) => e.active).map((e) => e.householdId));
   if (snapshot.contractVersion !== SYNC_CONTRACT_VERSION)
@@ -664,6 +683,7 @@ export function buildPlan(
         current: old?.data ?? null,
         next: guest,
         householdId,
+        householdUuid: null,
         errors: rowErrors
       });
     }
@@ -677,6 +697,7 @@ export function buildPlan(
         current: old.data,
         next: null,
         householdId: old.householdId,
+        householdUuid: old.externalHouseholdId ?? null,
         errors: []
       });
       // Retained rows must not silently disagree with a changed household owner or permission.
@@ -720,8 +741,8 @@ export function buildPlan(
  * guest external UUIDs already mapped together; unmapped existing groups block
  * the entire plan. Labels never select or merge a database household.
  */
-function buildHouseholdUuidPlan(parsed: HouseholdSheetParse, snapshot: Snapshot): Plan {
-  const errors = [...parsed.errors];
+function buildHouseholdUuidPlan(parsed: HouseholdSheetParse, snapshot: Snapshot, sourceId: string | undefined, sourceModeErrors: string[]): Plan {
+  const errors = [...parsed.errors, ...sourceModeErrors];
   const warnings = [...parsed.warnings];
   const exclusions = snapshot.exclusions ?? [];
   const excluded = new Set(exclusions.filter((e) => e.active).map((e) => e.householdId));
@@ -735,7 +756,8 @@ function buildHouseholdUuidPlan(parsed: HouseholdSheetParse, snapshot: Snapshot)
   const membersByExternal = new Map(snapshot.members.map((member) => [member.externalId, member]));
   const householdByExternal = new Map(parsed.households.map((household) => [household.externalId, household]));
   const sourceLinks = new Map(parsed.memberLinks.map((link) => [link.externalGuestId, link]));
-  const sourceGuests = new Map(parsed.guests.map((guest) => [guest.externalId, guest]));
+  const mappings = snapshot.householdMappings ?? [];
+  const mappingByExternal = new Map(mappings.filter((mapping) => mapping.sourceId === sourceId).map((mapping) => [mapping.externalHouseholdId, mapping]));
   const changes: Change[] = [];
   const sourceByHousehold = new Map<string, Guest[]>();
   for (const guest of parsed.guests) {
@@ -747,27 +769,26 @@ function buildHouseholdUuidPlan(parsed: HouseholdSheetParse, snapshot: Snapshot)
   for (const [externalHouseholdId, guests] of sourceByHousehold) {
     const sourceHousehold = householdByExternal.get(externalHouseholdId);
     if (!sourceHousehold) continue;
-    const mappedIds = new Set(guests.flatMap((guest) => {
+    const memberHouseholdIds = new Set(guests.flatMap((guest) => {
       const old = membersByExternal.get(guest.externalId);
       return old ? [old.householdId] : [];
     }));
     const rowErrors: string[] = [];
-    if (mappedIds.size > 1) rowErrors.push("This Household UUID spans multiple existing database households. Reconcile membership manually.");
-    let householdId = [...mappedIds][0] ?? null;
-    const existingSourceMap = snapshot.households.filter((household) =>
-      snapshot.members.some((member) => member.householdId === household.id && member.externalId === guests[0]?.externalId)
-    );
-    if (existingSourceMap.length > 1) rowErrors.push("The guest identity is mapped ambiguously in the database.");
+    const mapping = mappingByExternal.get(externalHouseholdId);
+    if (memberHouseholdIds.size > 1) rowErrors.push("This Household UUID spans multiple existing database households. Reconcile membership manually.");
+    if (!mapping && memberHouseholdIds.size > 0)
+      rowErrors.push("Existing guest UUIDs have no approved Household UUID mapping. Reconcile them explicitly before synchronization.");
+    if (mapping && [...memberHouseholdIds].some((id) => id !== mapping.householdId))
+      rowErrors.push("The existing guest roster conflicts with the approved Household UUID mapping.");
+    const householdId = mapping?.householdId ?? null;
     const household = householdId ? snapshot.households.find((entry) => entry.id === householdId) : undefined;
     const knownExternalMembers = snapshot.members.filter((member) => member.householdId === householdId);
     if (household && knownExternalMembers.some((member) => {
       const link = sourceLinks.get(member.externalId);
       return link && link.householdUuid !== externalHouseholdId;
     })) rowErrors.push("A mapped guest belongs to a different Household UUID in the source. Reconcile manually.");
-    if (household && household.name !== sourceHousehold.party)
-      rowErrors.push("Changing the household label requires the approved Household UUID database mapping and a fresh schema version.");
-    if (household && household.owner !== sourceHousehold.owner)
-      rowErrors.push("The database List owner differs from the source household mapping.");
+    if (household && (household.name !== sourceHousehold.party || household.owner !== sourceHousehold.owner) && (household.issued || household.responded))
+      rowErrors.push("Changing a mapped household label or owner after invitation issuance or RSVP requires manual review.");
     if (household?.responded && guests.some((guest) => {
       const old = membersByExternal.get(guest.externalId);
       return !old || hash(comparableGuest(old.data)) !== hash(comparableGuest(guest));
@@ -795,10 +816,11 @@ function buildHouseholdUuidPlan(parsed: HouseholdSheetParse, snapshot: Snapshot)
         current: old?.data ?? null,
         next: guest,
         householdId,
+        householdUuid: externalHouseholdId,
         errors: [...rowErrors]
       });
     }
-    if (!household) warnings.push(`Household ${externalHouseholdId} is new; Preview does not create or adopt a database household.`);
+    if (!mapping) warnings.push(`Household ${externalHouseholdId} has no approved database mapping yet; Apply may create a new disabled household only when no existing guest identities are being adopted.`);
   }
 
   const incoming = new Set(parsed.guests.map((guest) => guest.externalId));
@@ -809,6 +831,7 @@ function buildHouseholdUuidPlan(parsed: HouseholdSheetParse, snapshot: Snapshot)
       current: old.data,
       next: null,
       householdId: old.householdId,
+      householdUuid: old.externalHouseholdId ?? null,
       errors: []
     });
   }

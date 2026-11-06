@@ -36,7 +36,7 @@ function row(overrides = {}) {
 }
 const sheet = (...rows) => [headers, ...(rows.length ? rows : [row()])];
 const blank = () => ({
-  contractVersion: 2, households: [],
+  contractVersion: 3, households: [],
   members: [],
   inviteeCount: 0,
   sources: []
@@ -44,7 +44,7 @@ const blank = () => ({
 function imported(values = sheet()) {
   const guests = parseSheet(values).guests;
   return {
-    contractVersion: 2, households: [
+    contractVersion: 3, households: [
       {
         id: hid,
         name: "Fictional Household",

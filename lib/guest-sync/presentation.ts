@@ -28,11 +28,7 @@ export function householdSummary(plan: Plan) {
   for (const change of plan.changes) {
     const guest = change.next ?? change.current;
     if (!guest) continue;
-    const sourceHousehold = plan.mode === "household_uuid"
-      ? plan.sourceHouseholdIds.find((id) => plan.changes.some((candidate) =>
-          candidate.next?.externalId === guest.externalId && candidate.householdId === change.householdId
-        ))
-      : undefined;
+    const sourceHousehold = plan.mode === "household_uuid" ? change.householdUuid : undefined;
     const key = sourceHousehold ? `source:${sourceHousehold}` : change.householdId ? `id:${change.householdId}` : `new:${guest.party.toLocaleLowerCase("en")}`;
     const group = groups.get(key) ?? { name: sourceHousehold ? `${guest.party} · ${sourceHousehold}` : guest.party, rows: 0, changed: false, blocked: false };
     group.rows++;

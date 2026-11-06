@@ -179,18 +179,18 @@ do not weaken `allowedOrigins` to bypass that protection.
 
 ## Database setup and permissions
 
-Back up and test restore first. Apply migrations 001–009 in numeric order on an
+Back up and test restore first. Apply migrations 001–010 in numeric order on an
 isolated development branch with the schema owner, not a runtime credential.
 Create the dedicated login role `site_love_sync` through Neon role management
 before applying 008, or provision a restricted PostgreSQL login using a secure
 operator workflow. Do not grant it owner membership, `BYPASSRLS`, superuser or
-CREATE on schemas. Migrations 008–009 grant the following if the role exists:
+CREATE on schemas. Migrations 008–010 grant the following if the role exists:
 
 ```sql
 grant usage on schema rsvp to site_love_sync;
 grant select, insert on rsvp.guest_sync_runs to site_love_sync;
 grant execute on function rsvp.guest_sync_snapshot() to site_love_sync;
-grant execute on function rsvp.apply_guest_sync(uuid,text,text,text,jsonb,jsonb,integer,integer)
+grant execute on function rsvp.apply_guest_sync(uuid,text,text,text,jsonb,jsonb,integer,integer,text)
   to site_love_sync;
 ```
 
@@ -200,6 +200,16 @@ to households, invitees or responses. Reviewed SECURITY DEFINER functions owned
 by the migration owner have fixed `pg_catalog, rsvp` search paths and PUBLIC
 execution revoked. Their write list excludes every protected response field.
 Do not grant untrusted users CREATE in `rsvp` or ownership of these functions.
+
+Migration 010 upgrades the sync contract to v3. It registers existing source
+IDs as `legacy`, creates explicit per-source Household UUID mappings, and
+extends the snapshot and Apply function. The 9-argument Apply function must be
+granted to `site_love_sync`; the 7- and 8-argument signatures fail closed.
+Changing a source from legacy to Household UUID requires an operator-reviewed
+mapping for every existing member. The owner-only mode function never creates
+those mappings. New UUID households are created disabled and keyed by source
+UUID, never by label. Applying migration 010 requires a separately approved
+database release procedure; this repository change does not apply it to Neon.
 
 Migration 008:
 

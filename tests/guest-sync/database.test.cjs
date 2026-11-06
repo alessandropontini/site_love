@@ -57,7 +57,7 @@ test(
       const execute = async (p, batch = randomUUID()) =>
         (
           await db.query(
-            "select rsvp.apply_guest_sync($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7,$8) status",
+            "select rsvp.apply_guest_sync($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7,$8,$9) status",
             [
               batch,
               "fictional-admin",
@@ -66,7 +66,8 @@ test(
               JSON.stringify(p.plan.changes),
               JSON.stringify(p.plan.counts),
               1,
-              p.plan.contractVersion ?? 2
+              p.plan.contractVersion ?? 3,
+              p.plan.mode ?? "legacy"
             ]
           )
         ).rows[0].status;
@@ -82,6 +83,44 @@ test(
           assert.equal(h.response_version, 0);
         }
       );
+      await t.test("household UUID Apply creates distinct disabled households by source UUID", async () => {
+        await db.exec("begin");
+        try {
+        const { householdHeaders, parseGuestSheets } = require(process.env.SYNC_TEST_BUILD + "/model.js");
+        const guestIdA = randomUUID(), guestIdB = randomUUID();
+        const householdIdA = randomUUID(), householdIdB = randomUUID();
+        const guestHeaders = [...headers, "Household UUID", "Host Sync UUID"];
+        const row = (guestId, householdId, name) => guestHeaders.map((h) => ({
+          "Guest name": name, "Guest type": "Adult", Group: "Fiction", "List owner": "Ale",
+          "Party / family": "Fictional Same Label", "Planning status": "On list", Priority: "Unassigned",
+          "Sync UUID": guestId, "Household UUID": householdId
+        })[h] ?? "");
+        const source = {
+          guestList: [guestHeaders, row(guestIdA, householdIdA, "Fictional A"), row(guestIdB, householdIdB, "Fictional B")],
+          households: [householdHeaders,
+          [householdIdA, "Fictional Same Label", "Ale", guestIdA, "", "", "en"],
+            [householdIdB, "Fictional Same Label", "Ale", guestIdB, "", "", "en"]]
+        };
+        const parsed = parseGuestSheets(source, "household_uuid");
+        assert.deepEqual(parsed.errors, []);
+        const s = await snapshot();
+        const plan = buildPlan(parsed, s.data, "fictional-household-source");
+        assert.deepEqual(plan.errors, []);
+        const result = await db.query(
+          "select rsvp.apply_guest_sync($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7,$8,$9) status",
+          [randomUUID(), "fictional-admin", "fictional-household-source", s.hash,
+            JSON.stringify(plan.changes), JSON.stringify(plan.counts), 1, plan.contractVersion, plan.mode]);
+        assert.equal(result.rows[0].status, "SUCCESS");
+        const maps = (await db.query("select external_household_id,household_id from rsvp.guest_sync_households where source_id=$1 order by external_household_id", ["fictional-household-source"])).rows;
+        assert.equal(maps.length, 2);
+        assert.notEqual(maps[0].household_id, maps[1].household_id);
+        assert.equal((await db.query("select count(*)::int n from rsvp.households where id=any($1::uuid[]) and status='disabled' and token_hash is null", [maps.map((x) => x.household_id)])).rows[0].n, 2);
+        assert.equal((await db.query("select mode from rsvp.guest_sync_sources where source_id=$1", ["fictional-household-source"])).rows[0].mode, "household_uuid");
+        await assert.rejects(db.query("select rsvp.register_guest_sync_source_mode($1,'legacy','household_uuid','fictional-owner')", ["fictional-household-source"]), /HOUSEHOLD_RECONCILIATION_REQUIRED/);
+        } finally {
+          await db.exec("rollback");
+        }
+      });
       await t.test(
         "unchanged import and replay do not duplicate records",
         async () => {

@@ -12,21 +12,21 @@ function sheet(party='Fictional real household'){
 const house=(id,name)=>({id,name,owner:'groom',plusOne:false,issued:true,responded:true,version:1,status:'active',namedCount:2});
 test('only explicit active exclusions bypass unmapped guard; no name/status inference',()=>{
  const h=house(randomUUID(),'TEST — fictional');
- const db={contractVersion:2,households:[h],members:[],inviteeCount:2};
+ const db={contractVersion:3,households:[h],members:[],inviteeCount:2};
  assert(buildPlan(parseSheet(sheet()),db).errors.length);
- const active={...db,contractVersion:2,exclusions:[{householdId:h.id,active:true,revision:1}]};
+ const active={...db,exclusions:[{householdId:h.id,active:true,revision:1}]};
  const p=buildPlan(parseSheet(sheet()),active);
  assert.deepEqual(p.errors,[]);assert.equal(p.excludedHouseholds,1);assert.equal(p.excludedInvitees,2);
- assert.equal(p.contractVersion,2);
+ assert.equal(p.contractVersion,3);
  assert(buildPlan(parseSheet(sheet()),{...active,exclusions:[{householdId:h.id,active:false,revision:2}]}).errors.length);
  assert(buildPlan(parseSheet(sheet()),{...active,households:[h,house(randomUUID(),'Another TEST')]}).errors.length);
  assert(buildPlan(parseSheet(sheet(h.name)),active).errors.some(e=>e.includes('excluded test')));
  assert(buildPlan(parseSheet(sheet()),{...active,contractVersion:undefined}).errors.length);
- assert(buildPlan(parseSheet(sheet()),{...active,contractVersion:3}).errors.length);
+ assert(buildPlan(parseSheet(sheet()),{...active,contractVersion:2}).errors.length);
 });
 test('inconsistent mapped/excluded snapshot fails closed',()=>{
  const g=parseSheet(sheet()).guests[0];const h=house(randomUUID(),g.party);
- const p=buildPlan(parseSheet(sheet()),{contractVersion:2,households:[h],members:[{externalId:g.externalId,householdId:h.id,inviteeId:randomUUID(),data:g,actualName:g.name}],inviteeCount:1,exclusions:[{householdId:h.id,active:true,revision:1}]});
+ const p=buildPlan(parseSheet(sheet()),{contractVersion:3,households:[h],members:[{externalId:g.externalId,householdId:h.id,inviteeId:randomUUID(),data:g,actualName:g.name}],inviteeCount:1,exclusions:[{householdId:h.id,active:true,revision:1}]});
  assert(p.errors.some(e=>e.includes('source mappings')));
 });
 test('missing database contract blocks Preview before an upgrade',()=>{
@@ -37,7 +37,7 @@ test('signed Preview is invalidated by exclusion revision changes',async()=>{
  const {preview,apply}=require(process.env.SYNC_TEST_BUILD+'/workflow.js');
  process.env.GUEST_SYNC_SIGNING_SECRET='fictional-test-secret-never-use-in-production';
  const h=house(randomUUID(),'Fictional test');
- const data={contractVersion:2,households:[h],members:[],inviteeCount:2,sources:[],exclusions:[{householdId:h.id,active:true,revision:1}]};
+ const data={contractVersion:3,households:[h],members:[],inviteeCount:2,sources:[],sourceModes:[],householdMappings:[],exclusions:[{householdId:h.id,active:true,revision:1}]};
  const runs=new Map();let writes=0;
  const deps={sourceId:()=> 'fictional-source',readSheet:async()=>sheet(),snapshot:async()=>({data,hash:hash(data).slice(0,32)}),getRun:async r=>runs.get(r.id),recordRun:async(r,status)=>{runs.set(r.id,status);},applyPlan:async()=>{writes++;return 'SUCCESS';}};
  const p=await preview('fictional-admin',deps);assert.deepEqual(p.plan.errors,[]);assert.equal(runs.size,0);
@@ -62,13 +62,14 @@ test('exclusion SQL migration, history, privileges and protected RSVP data',{ski
   const protectedState=async()=>JSON.stringify(await Promise.all(['households','invitees','responses','additional_guests','audit_events'].map(table=>db.query(`select * from rsvp.${table} where ${table==='households'?'id':'household_id'} = any($1::uuid[]) order by 1,2`,[fixtureIds]))));
   const original=await protectedState();
   await migrate('009_guest_sync_test_exclusions.sql');
+  await migrate('010_guest_sync_household_runtime.sql');
   const snap=async()=>(await db.query('select s data,md5(s::text) hash from (select rsvp.guest_sync_snapshot() s) q')).rows[0];
   const prep=async(values=sheet())=>{const s=await snap();return {hash:s.hash,plan:buildPlan(parseSheet(values),s.data)}};
-  const apply=async(p,batch=randomUUID(),version=2)=>(await db.query('select rsvp.apply_guest_sync($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7,$8) status',[batch,'fictional-admin','fictional-source',p.hash,JSON.stringify(p.plan.changes),JSON.stringify(p.plan.counts),1,version])).rows[0].status;
+  const apply=async(p,batch=randomUUID(),version=3,mode='legacy')=>(await db.query('select rsvp.apply_guest_sync($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7,$8,$9) status',[batch,'fictional-admin','fictional-source',p.hash,JSON.stringify(p.plan.changes),JSON.stringify(p.plan.counts),1,version,mode])).rows[0].status;
   const classify=async(h,active,rev)=>(await db.query('select rsvp.set_guest_sync_test_exclusion($1,$2,$3,$4,$5) revision',[h,active,rev,'fictional-owner',active?'CONFIRMED_TEST':'CLASSIFICATION_REVOKED'])).rows[0].revision;
   const stripErrors=p=>({...p,plan:{...p.plan,changes:p.plan.changes.map(c=>({...c,errors:[]}))}});
   await t.test('migration preserves existing RSVP and leaves all households unclassified',async()=>{
-   assert.equal(await protectedState(),original);const s=await snap();assert.equal(s.data.contractVersion,2);assert.deepEqual(s.data.exclusions,[]);
+   assert.equal(await protectedState(),original);const s=await snap();assert.equal(s.data.contractVersion,3);assert.deepEqual(s.data.exclusions,[]);
    assert.equal((await db.query('select count(*)::int n from rsvp.guest_sync_exclusions where active')).rows[0].n,0);
    assert.equal((await db.query('select count(*)::int n from rsvp.guest_sync_exclusion_events')).rows[0].n,0);
   });
@@ -118,8 +119,9 @@ test('exclusion SQL migration, history, privileges and protected RSVP data',{ski
     const p=await prep();assert(p.plan.errors.length);await assert.rejects(apply(stripErrors(p)),/UNMAPPED_HOUSEHOLDS/);
    }finally{await db.exec('rollback');}
   });
-  await t.test('old signature and wrong/null contracts fail closed',async()=>{
-   const p=await prep();for(const version of [1,3,null])await assert.rejects(apply(p,randomUUID(),version),/SYNC_CONTRACT_VERSION/);
+  await t.test('old signatures and wrong/null contracts fail closed',async()=>{
+   const p=await prep();for(const version of [1,2,null])await assert.rejects(apply(p,randomUUID(),version),/SYNC_CONTRACT_VERSION/);
+   await assert.rejects(db.query('select rsvp.apply_guest_sync($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7,$8)',[randomUUID(),'fictional-admin','fictional-source',p.hash,JSON.stringify(p.plan.changes),JSON.stringify(p.plan.counts),1,2]),/SYNC_CONTRACT_VERSION/);
    await assert.rejects(db.query('select rsvp.apply_guest_sync($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7)',[randomUUID(),'fictional-admin','fictional-source',p.hash,JSON.stringify(p.plan.changes),JSON.stringify(p.plan.counts),1]),/SYNC_CONTRACT_VERSION/);
   });
   await t.test('runtime roles cannot classify, alter registry/history or call trigger helper',async()=>{

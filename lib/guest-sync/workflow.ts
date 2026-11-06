@@ -33,7 +33,7 @@ export async function preview(actor: string, deps: Dependencies) {
       ? parseGuestSheets(sourceData, mode)
       : parseGuestSheets({ guestList: sourceData, households: [] }, mode)
     : parseSheet("guestList" in sourceData ? sourceData.guestList : sourceData);
-  const plan = buildPlan(parsed, database.data);
+  const plan = buildPlan(parsed, database.data, source);
   if (mode === "legacy" && database.data.sources.some((s) => s !== source)) {
     plan.errors.push(
       "The database is linked to another spreadsheet. Source migration requires manual reconciliation."
@@ -81,7 +81,7 @@ export async function apply(token: string, actor: string, deps: Dependencies) {
         ? parseGuestSheets(sourceData, mode)
         : parseGuestSheets({ guestList: sourceData, households: [] }, mode)
       : parseSheet("guestList" in sourceData ? sourceData.guestList : sourceData);
-    const plan = buildPlan(parsed, database.data);
+    const plan = buildPlan(parsed, database.data, receipt.source);
     if (
       hash({ mode, source: sourceData }) !== receipt.sourceHash ||
       mode !== receipt.mode ||

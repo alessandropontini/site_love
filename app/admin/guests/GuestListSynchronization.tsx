@@ -327,7 +327,6 @@ export default function GuestListSynchronization({
               disabled={
                 pending ||
                 !confirmed ||
-                preview.plan.mode !== "legacy" ||
                 !!preview.plan.errors.length
               }
               onClick={() =>
@@ -357,9 +356,7 @@ export default function GuestListSynchronization({
                 })
               }
             >
-              {preview.plan.mode === "household_uuid"
-                ? "Apply available in Step 9C.3"
-                : unknown
+              {unknown
                 ? "Retry / Check Batch"
                 : "Apply Changes"}
             </button>

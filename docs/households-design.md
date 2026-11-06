@@ -45,20 +45,43 @@ Implementato sul branch `feat/roadmap-recovery-20261106`:
   non fondono gruppi. Le righe Preview mostrano il conteggio sorgente; le note
   chiariscono che i nuclei nuovi non sono creati né adottati durante Preview.
 - Nuclei Neon già mappati si correlano soltanto attraverso Sync UUID già
-  persistiti. Mapping ambiguo, nucleo senza mapping, roster divergente, cambio
-  di appartenenza, risposta o invito emesso producono errori bloccanti. Non si
+  persistiti. Il mapping household esterno è una tabella separata; l'assenza di
+  un mapping approvato per ospiti già presenti blocca Preview/Apply. Non si
   adottano record per nome, cognome o etichetta.
 - La ricevuta HMAC vincola modalità e contenuto di entrambe le schede; Apply
   rilegge le due schede e ricalcola il piano prima di procedere. Il flusso legacy
   resta il default.
-- La modalità UUID non mostra conferma e non consente Apply finché il runtime DB
-  basato sul mapping non è completato. La scrittura Neon per nuovi nuclei, il
-  mapping UUID esterno → ID Neon e le relative garanzie transazionali sono 9C.3.
-  L'ambiente reale non è stato contattato e nessuna migrazione è stata applicata.
+- La modalità UUID supporta Preview e Apply con contratto v3. Apply crea soltanto
+  nuclei nuovi disabilitati oppure usa un mapping già approvato; non riconcilia
+  automaticamente nuclei Neon esistenti. L'ambiente reale non è stato
+  contattato e nessuna migrazione è stata applicata.
 
 Test fittizi aggiunti per identità separate, blocco di adozione per etichetta e
-invalidazione della ricevuta se cambia una delle due schede. La suite locale
-risulta 90 pass e 2 test PostgreSQL saltati per assenza del database isolato.
+invalidazione della ricevuta se cambia una delle due schede.
+
+## Step 9C.3 — runtime e mapping Household UUID
+
+Implementazione sul branch `feat/roadmap-recovery-20261106`:
+
+- La migrazione nuova `010_guest_sync_household_runtime.sql` lascia inalterate
+  008 e 009, porta snapshot e Apply al contratto v3 e registra le sorgenti
+  legacy esistenti senza modificarne i record.
+- `guest_sync_households` associa in modo univoco `(source_id,
+  external_household_id)` a un `rsvp.households.id`; una FK composta collega ogni
+  guest sync member alla stessa tripla. Una sorgente non può introdurre alias.
+- Il registro di modalità è esplicito e l'entrypoint di cambio modalità è
+  riservato al proprietario DB. Passare da legacy a UUID richiede mapping
+  completo preesistente; la routine non crea mai tali mapping. Nessun runtime
+  grant consente di cambiare modalità o scrivere il registro.
+- In modalità UUID Apply crea un nucleo disabilitato solo se nuovo, usando
+  l'UUID sorgente come chiave; UUID ospite già importati senza mapping approvato
+  vengono rifiutati. Rinominare etichetta o owner è consentito solo prima di
+  emissione e RSVP. Spostamenti, fusioni e divisioni restano bloccati.
+- La ricevuta e il piano vincolano modalità, due schede, versione e mapping DB;
+  hash e controlli transazionali restano sotto lock. Le firme Apply vecchie
+  (7/8 argomenti) falliscono chiuse.
+- La migrazione è stata verificata solo su PGlite locale; non è stata eseguita
+  su Neon e non sono stati letti o modificati Google Sheets reali.
 
 ## Verifica dello step 4 — 31 ottobre 2026
 

@@ -237,7 +237,9 @@ test("private contact values are validated but never returned in the model", () 
 
 function householdSnapshot(overrides = {}) {
   return {
-    contractVersion: 2,
+    contractVersion: 3,
+    sourceModes: [],
+    householdMappings: [],
     exclusions: [],
     households: [],
     members: [],
@@ -250,17 +252,38 @@ test("Household UUID plan keeps same-label UUIDs distinct and never adopts by la
   const secondGuest = guestRow({ "Guest name": "Fictional Casey", "Sync UUID": ids.other, "Household UUID": ids.h2 });
   const secondHousehold = householdRow({ "Household UUID": ids.h2, "Contact guest UUID": ids.other });
   const parsed = parseGuestSheets(sheets([guestRow(), secondGuest], [householdRow(), secondHousehold]), "household_uuid");
-  const planned = buildPlan(parsed, householdSnapshot());
+  const planned = buildPlan(parsed, householdSnapshot(), "fictional-source");
   assert.equal(planned.mode, "household_uuid");
   assert.equal(planned.sourceHouseholdCount, 2);
   assert.equal(planned.counts.created, 2);
   assert.deepEqual(new Set(planned.changes.map((change) => change.next && change.next.party)), new Set(["Fictional household"]));
-  assert(planned.warnings.some((warning) => warning.includes("new; Preview does not create")));
+  assert(planned.warnings.some((warning) => warning.includes("no approved database mapping")));
 
   const labelMatch = householdSnapshot({ households: [{ id: ids.h2, name: "Fictional household", owner: "groom", plusOne: false, issued: false, responded: false, version: 0, status: "disabled", namedCount: 0 }] });
-  const blocked = buildPlan(parsed, labelMatch);
+  const blocked = buildPlan(parsed, labelMatch, "fictional-source");
   assert(blocked.errors.some((error) => error.includes("no source mapping")));
   assert(blocked.changes.every((change) => change.householdId === null));
+});
+
+test("existing guest UUIDs require an approved source household mapping", () => {
+  const parsed = parseGuestSheets(sheets(), "household_uuid");
+  const existingId = ids.other;
+  const member = { externalId: ids.adult, householdId: existingId, externalHouseholdId: null,
+    inviteeId: ids.partner, data: parsed.guests[0], actualName: parsed.guests[0].name };
+  const noMap = householdSnapshot({ households: [{ id: existingId, name: "Fictional household", owner: "groom",
+    plusOne: false, issued: false, responded: false, version: 0, status: "disabled", namedCount: 1 }], members: [member] });
+  assert(buildPlan(parsed, noMap, "fictional-source").errors.some((error) => error.includes("no approved Household UUID mapping")));
+  const approved = { ...noMap, householdMappings: [{ sourceId: "fictional-source", externalHouseholdId: ids.h1, householdId: existingId }] };
+  const plan = buildPlan(parsed, approved, "fictional-source");
+  assert.deepEqual(plan.errors, []);
+  assert.equal(plan.changes[0].householdId, existingId);
+  assert.equal(plan.changes[0].householdUuid, ids.h1);
+});
+
+test("a persisted source mode mismatch blocks planning", () => {
+  const parsed = parseGuestSheets(sheets(), "household_uuid");
+  const snapshot = householdSnapshot({ sourceModes: [{ sourceId: "fictional-source", mode: "legacy" }] });
+  assert(buildPlan(parsed, snapshot, "fictional-source").errors.some((error) => error.includes("operator migration")));
 });
 
 test("household source mode is bound into the signed receipt and both source tabs are rechecked", async () => {
