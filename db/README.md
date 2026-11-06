@@ -58,3 +58,14 @@ owner-only reconciliation must map every existing member before changing a
 source from legacy mode. Old 7/8-argument Apply signatures fail closed. Validate
 on an isolated database first and follow `docs/guest-list-sync.md`; this
 repository step does not apply the migration to Neon.
+
+`011_guest_sync_household_reconciliation.sql` adds a privileged, owner-only
+entrypoint for separately approved existing-household mappings. The caller must
+provide the exact complete set of mapped guest UUIDs for one internal
+household; the procedure verifies the roster under the sync lock, rejects
+excluded or already mapped households, records a metadata-only event attributed
+to the database login, and changes only the mapping table/member mapping
+column. It does not update invitation or RSVP state. Runtime roles receive no
+execute or audit-table access. Use only with an independently reviewed mapping
+and an approved environment/backup procedure; the migration does not reconcile
+any records by itself.

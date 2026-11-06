@@ -212,3 +212,19 @@ Le modifiche del foglio richiedono una nuova Preview e Apply; non è attiva una
 sincronizzazione automatica. Restano le protezioni su RSVP, inviti emessi,
 cambi di nucleo/tipo e conflitti con modifiche effettuate direttamente nel DB.
 Nessun invito/token generato, nessun deploy o commit Git.
+
+## Migrazione 011 — procedura di mapping Household UUID
+
+La successiva implementazione aggiunge un entrypoint owner-only per associare,
+su approvazione separata, un Household UUID esterno a un household interno già
+presente. La procedura richiede l'intera lista dei Sync UUID attualmente
+mappati al household interno, confrontata in modo esatto sotto lock; non usa
+nomi o etichette, non modifica lo stato RSVP e registra un evento senza dati
+personali. Mapping ripetuto con stesso UUID e roster è idempotente.
+
+La funzione è stata testata solo con dati fittizi in PGlite. Non è stata
+eseguita su Neon e non cambia lo stato dei due household test esclusi descritti
+sopra. Prima di qualsiasi mapping reale occorrono una mappa completa
+indipendentemente verificata, conferma dell'ambiente DEVELOPMENT e backup con
+ripristino; questa implementazione non costituisce approvazione a eseguire tali
+passi.

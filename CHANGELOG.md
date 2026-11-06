@@ -4,6 +4,11 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Operatore riconciliazione Household UUID — Step 5
+- Add migration 011 with an owner-only exact-roster reconciliation function and metadata-only audit events for existing source mappings.
+- Require the complete, duplicate-free guest UUID set for an internal household; reject excluded households, mismatched rosters, reused mappings, and changes after a source leaves legacy mode.
+- Verify with fictional PGlite data that RSVP/token fields remain unchanged, the operation is idempotent, and runtime roles cannot execute it. No live Neon mapping was performed.
+
 ### Household UUID runtime — Step 9C.3
 - Add migration 010 with an explicit source-mode registry, one-to-one Household UUID mapping, composite member foreign key, and contract v3 snapshot/transactional Apply.
 - Create new UUID households disabled and keyed by external household UUID; block unmapped existing guests, cross-household moves, source-mode mismatches, and use of old Apply signatures.

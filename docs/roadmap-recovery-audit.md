@@ -4,6 +4,16 @@ Data: 6 novembre 2026
 Branch: `feat/roadmap-recovery-20261106`
 Commit di riferimento: `8e5bbdd5f63519f67d9dd242e8323bcd1b6dc1cc`
 
+## Avanzamento successivo all'audit
+
+Il rilievo è uno snapshot storico al commit indicato. In seguito è stato
+completato il runtime Household UUID (9C.1–9C.3) e aggiunta la migrazione 011
+con procedura owner-only per mapping esatti e approvati (step 5). Le migrazioni
+010–011 sono state verificate solo localmente con dati fittizi; nessun mapping
+live è stato eseguito. La riconciliazione reale resta quindi da svolgere per
+ogni household solo dopo approvazione esplicita, mappa verificata, conferma
+DEVELOPMENT e backup/ripristino. Restano da ricostruire gli artefatti 012–015.
+
 ## Scopo e limiti
 
 Questo audit confronta codice, migrazioni, test e documentazione versionati. Non implementa né ricostruisce funzionalità; non legge o scrive Google Sheets o Neon; non consulta dati reali, credenziali, token o esportazioni. La parte grafica resta fuori perimetro.

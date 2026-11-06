@@ -83,6 +83,29 @@ Implementazione sul branch `feat/roadmap-recovery-20261106`:
 - La migrazione è stata verificata solo su PGlite locale; non è stata eseguita
   su Neon e non sono stati letti o modificati Google Sheets reali.
 
+## Step 5 — procedura di riconciliazione esplicita
+
+Preparata la migrazione `011_guest_sync_household_reconciliation.sql` per
+registrare un mapping approvato tra una sorgente, un Household UUID esterno e
+un `rsvp.households.id` esistente. La funzione richiede l'elenco completo e
+senza duplicati dei Sync UUID già associati a quel household nella sorgente;
+qualsiasi differenza, household escluso, mapping in conflitto o sorgente già
+passata a modalità UUID blocca l'operazione. Lo stesso mapping con lo stesso
+roster è idempotente.
+
+La funzione non deduce né approva la corrispondenza, non modifica `households`,
+invitees, token, risposte o audit RSVP e registra solo ID, numero membri,
+digest del roster e login DB. Solo l'owner DB può eseguirla; ruolo sync e ruolo
+RSVP non possono invocarla o leggere il journal. La funzione non è stata usata
+su dati live: i due nuclei test documentati in DEVELOPMENT restano esclusi e
+nessun nucleo reale è stato identificato o mappato.
+
+Verifica locale PGlite: roster errato/duplicato rifiutato, mappatura esplicita
+idempotente, modalità aggiornabile solo dopo mapping completo, campi token/RSVP
+invariati e permessi runtime negati. La migrazione non è stata applicata a Neon;
+branch/ambiente, backup e mappa approvata restano prerequisiti separati per una
+eventuale operazione reale.
+
 ## Verifica dello step 4 — 31 ottobre 2026
 
 Rilettura del foglio originale in sola lettura: Households contiene soltanto le

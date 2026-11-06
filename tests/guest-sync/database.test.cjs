@@ -83,6 +83,31 @@ test(
           assert.equal(h.response_version, 0);
         }
       );
+      await t.test("operator reconciliation requires the exact roster and preserves RSVP fields", async () => {
+        const householdId = (await db.query("select household_id from rsvp.guest_sync_members where external_id=$1", [id])).rows[0].household_id;
+        const externalHouseholdId = randomUUID();
+        const before = JSON.stringify((await db.query("select id,token_hash,status,response_version,updated_at from rsvp.households where id=$1", [householdId])).rows[0]);
+        await assert.rejects(db.query("select rsvp.reconcile_guest_sync_household($1,$2,$3,$4::uuid[])", ["fictional-source",externalHouseholdId,householdId,[randomUUID()]]), /ROSTER_MISMATCH/);
+        await assert.rejects(db.query("select rsvp.reconcile_guest_sync_household($1,$2,$3,$4::uuid[])", ["fictional-source",externalHouseholdId,householdId,[id,id]]), /DUPLICATE_APPROVED_GUEST/);
+        await db.exec("begin");
+        try {
+          assert.equal((await db.query("select rsvp.reconcile_guest_sync_household($1,$2,$3,$4::uuid[]) count", ["fictional-source",externalHouseholdId,householdId,[id]])).rows[0].count, 1);
+          assert.equal((await db.query("select external_household_id from rsvp.guest_sync_members where external_id=$1", [id])).rows[0].external_household_id, externalHouseholdId);
+          assert.equal((await db.query("select count(*)::int n from rsvp.guest_sync_household_mapping_events")).rows[0].n, 1);
+          assert.equal((await db.query("select rsvp.reconcile_guest_sync_household($1,$2,$3,$4::uuid[]) count", ["fictional-source",externalHouseholdId,householdId,[id]])).rows[0].count, 1);
+          assert.equal((await db.query("select count(*)::int n from rsvp.guest_sync_household_mapping_events")).rows[0].n, 1);
+          assert.equal(JSON.stringify((await db.query("select id,token_hash,status,response_version,updated_at from rsvp.households where id=$1", [householdId])).rows[0]), before);
+          await db.exec("set role site_love_sync");
+          await db.exec("savepoint check_runtime_permission");
+          try {
+            await assert.rejects(db.query("select rsvp.reconcile_guest_sync_household($1,$2,$3,$4::uuid[])", ["fictional-source",randomUUID(),householdId,[id]]), /permission denied/);
+          } finally { await db.exec("rollback to savepoint check_runtime_permission"); await db.exec("reset role"); }
+          await db.query("select rsvp.register_guest_sync_source_mode($1,'household_uuid','legacy','fictional-operator')", ["fictional-source"]);
+          await assert.rejects(db.query("select rsvp.reconcile_guest_sync_household($1,$2,$3,$4::uuid[])", ["fictional-source",randomUUID(),householdId,[id]]), /SOURCE_NOT_LEGACY/);
+        } finally {
+          await db.exec("rollback");
+        }
+      });
       await t.test("household UUID Apply creates distinct disabled households by source UUID", async () => {
         await db.exec("begin");
         try {

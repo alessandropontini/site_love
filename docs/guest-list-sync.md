@@ -211,6 +211,18 @@ those mappings. New UUID households are created disabled and keyed by source
 UUID, never by label. Applying migration 010 requires a separately approved
 database release procedure; this repository change does not apply it to Neon.
 
+Migration 011 adds `rsvp.reconcile_guest_sync_household(...)`, callable only by
+the database owner. It accepts the source ID, the confirmed external Household
+UUID, the existing internal household ID, and the exact complete set of mapped
+guest UUIDs. It rejects duplicate or mismatched rosters, excluded households,
+existing conflicting mappings, and sources no longer in legacy mode. It records
+only the database login, IDs, member count and a roster digest in its event
+table; no names, contact values, tokens or response data are copied. The
+operation is idempotent for the same exact mapping and roster and never changes
+invitation or RSVP fields. It does not determine or approve the mapping: compare
+the IDs against a separately reviewed source before calling it. No runtime role
+can execute the function. No records are reconciled by migration 011 itself.
+
 Migration 008:
 
 - Makes `households.token_hash` nullable, with a constraint requiring disabled
