@@ -4,6 +4,11 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Roadmap recovery audit — Step 9B
+- Audit the current guest sync, household identity, invitation and RSVP code against the available roadmap evidence.
+- Record missing Household UUID runtime support, Save the Date, imported-household invitation activation, offline RSVP entry and migrations 010–015; no features or external data were changed.
+- See `docs/roadmap-recovery-audit.md` for evidence, test coverage, risks and the proposed reconstruction order.
+
 ### Durable Work checkpoints across devices
 - Authorize automatic validated commits and pushes to a SITE LOVE task branch after each completed implementation step, including Work sessions launched from a phone.
 - Verify the remote SHA before declaring completion; keep merges, deployments, production or guest-data changes, and force pushes outside this standing authorization.
