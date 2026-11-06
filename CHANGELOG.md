@@ -4,6 +4,12 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Durable Work checkpoints across devices
+- Authorize automatic validated commits and pushes to a SITE LOVE task branch after each completed implementation step, including Work sessions launched from a phone.
+- Verify the remote SHA before declaring completion; keep merges, deployments, production or guest-data changes, and force pushes outside this standing authorization.
+- Document unavailable GitHub/review/test checks as blockers instead of relying on ephemeral Work checkouts.
+
+
 ### Validated dependency lockfile
 - Record the existing resolved dependency updates, including Next.js 16.4.3,
   sharp 0.35.5 and Zod 4.6.7, within the unchanged package.json ranges.

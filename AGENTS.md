@@ -181,8 +181,20 @@ These invariants apply only if the dormant experience is intentionally edited or
 - Codex may implement scoped patches, read files, run commands, and summarize results.
 - Keep patches small. Select validation in proportion to the change: documentation needs `git diff --check`; code changes need lint and the relevant test/build; visible public changes also need a local browser check.
 - Update the `Unreleased` section of `CHANGELOG.md` and every directly affected guide or README section before handoff. State explicitly when no additional guide is affected.
-- At handoff, return a short summary, validation results, known limitations, and a proposed commit message. Do not commit, merge, or push unless the user asks.
+- At handoff, return a short summary, validation results, known limitations, and the actual commit/remote status. The standing Work checkpoint authorization below permits scoped commits and pushes for requested implementation tasks; it does not permit merging, deploying, or writing production data.
 - Do not present simulated roles inside one response as independent review.
+
+## Work remote checkpoints — standing authorization (6 November 2026)
+
+For all SITE LOVE implementation tasks executed by ChatGPT Work or Codex, **regardless of whether the owner gives instructions from a phone, remote computer or Mac**, use GitHub as the durable handoff point. Work cloud checkouts may be temporary; never imply that a Work commit automatically exists on the owner's Mac or GitHub.
+
+- **Start:** read this file and relevant documentation; identify the actual checkout, current branch, `git status`, `origin`, and latest remote branch head. Do not assume a previous temporary checkout still exists. Preserve unrelated edits, stashes, collaborators' work, and Bridget's frontend changes.
+- **Branch:** perform implementation on a dedicated non-protected task branch (never directly on `main`, `prod` or `system`). Base it on the intended upstream after verifying history. If a new task branch is local only, publish it as an early remote checkpoint when connectivity and approval permit. Never force-push, rewrite shared history, or silently overwrite a newer remote head.
+- **Each completed scope/roadmap step:** inspect the exact diff, exclude secrets, personal guest data, tokens, generated QR files and local artifacts; update `CHANGELOG.md` and affected docs; run relevant tests, TypeScript/lint/build and the risk-based review rules above as applicable. Do not claim checks passed if they did not run.
+- **Checkpoint automatically:** once a user-requested implementation step is complete and checks permit delivery, create a focused commit and **push it to the GitHub task branch before starting the next step**, without asking again for routine commit/push approval. Fetch or query GitHub to verify that the exact commit SHA is present on the remote. Include branch, SHA, tests and push confirmation in the handoff. A local commit alone is not completion.
+- **Failure:** if GitHub or authentication is unavailable, or a push/review/test is blocked, state clearly that the work is not durably published. Preserve the working copy and provide a patch/archive when possible; do not proceed as though the checkpoint succeeded. Never conceal blockers by relying on the next session.
+- **Scope of authorization:** the owner's standing authorization is only for commits and pushes of expressly requested SITE LOVE implementation/documentation changes to task branches. It **does not** authorize merges, pushes to protected or release branches, deployments, production database migrations/writes, real Google Sheets or guest-data mutations, credential changes, public release of personal data, destructive Git commands, or force pushes. Obtain separate explicit approval for those actions. Read-only investigations and proposals do not generate commits or pushes.
+- This commit/push authorization is **separate** from the 31 October 2026 authorization for independent Codex reviews; neither expands the other. If a tool requests approval or denies an action, respect that result.
 
 ## Risk-based Codex review policy
 
