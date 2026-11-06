@@ -1,6 +1,37 @@
 # STEP 4 — Nuclei familiari: proposta di schema e implementazione
 
-Stato strutturale registrato al 30 ottobre 2026: struttura approvata e creata nel foglio originale. Households contiene le sette intestazioni previste; Guest List contiene Household UUID e Host Sync UUID nelle colonne P e Q. Nessun nucleo o identificativo assegnato: le celle dati nuove sono vuote. Verificati intestazioni, formato e convalide tramite rilettura API. Non ancora implementata nel runtime. Nessuna migrazione applicata. Il codice nome/cognome già sviluppato resta invariato.
+Stato strutturale registrato al 30 ottobre 2026: struttura approvata e creata nel foglio originale. Households contiene le sette intestazioni previste; Guest List contiene Household UUID e Host Sync UUID nelle colonne P e Q. Nessun nucleo o identificativo assegnato: le celle dati nuove erano vuote alla verifica. Verificati intestazioni, formato e convalide tramite rilettura API. La modalità non è attivata nel runtime e non è integrata con Preview/Apply. Nessuna migrazione applicata. Il codice nome/cognome resta invariato.
+
+## Step 9C.1 — lettura e validazione preparatoria
+
+Implementato sul branch `feat/roadmap-recovery-20261106` dopo il commit
+`9c9b2fb`:
+
+- `lib/guest-sync/google.ts` espone `readSheets()` per leggere entrambe le schede
+  con lo scope Google `spreadsheets.readonly`; `readSheet()` conserva il
+  contratto legacy a singola scheda usato dal workflow corrente.
+- `lib/guest-sync/model.ts` definisce le intestazioni e il parser isolato
+  `parseHouseholdSheets()`. La selezione passa da `parseGuestSheets(...,
+  "household_uuid")`; l’omissione della modalità seleziona sempre `legacy`.
+- Il parser controlla UUID household mancanti/duplicati, riferimenti sconosciuti,
+  proprietario ed etichetta non coerenti, UUID guest duplicati, relazioni Host e
+  referente, posti incompleti, roster minimo e riferimenti a bambini/+1 anonimi.
+  Gli UUID distinti con la stessa etichetta rimangono distinti e producono un
+  avviso; l’UUID, non l’etichetta, è la chiave del modello.
+- Rinomina dell’etichetta con UUID invariato produce la stessa identità di
+  sorgente; il confronto con la mappatura persistita è rimandato agli step
+  9C.2/9C.3. Il parser non deduce un referente o un ospitante.
+- Email e telefono vengono validati ma esclusi dall’oggetto restituito. Il
+  modello non è collegato a snapshot DB, Preview o Apply e non importa dati in
+  Neon.
+- Nuove colonne e nuova scheda non attivano automaticamente la modalità; il
+  flusso legacy continua a chiamare `readSheet()` e `parseSheet()`.
+
+Test fittizi in `tests/guest-sync/households.test.cjs` e il test dell’adapter
+Google in `tests/guest-sync/google.test.cjs` coprono struttura e compatibilità.
+Questa consegna non implementa la migrazione, la riconciliazione dei nuclei
+esistenti, la modalità household nel batch Preview/Apply, né l’attivazione degli
+inviti. Nessuna lettura/scrittura del foglio reale o di Neon è stata eseguita.
 
 ## Verifica dello step 4 — 31 ottobre 2026
 
@@ -101,13 +132,13 @@ Il sistema attuale permette un solo accompagnatore sconosciuto per un nucleo con
 
 | Area | Intervento |
 | --- | --- |
-| lib/guest-sync/google.ts | Lettura di Guest List e Households; escludere i recapiti dal modello/piano, mantenendo i dati privati. |
-| lib/guest-sync/model.ts | Schema household, relazioni per UUID, validazione referenti/ospitanti, piano di rinomina senza ricreazione e protezioni delle transizioni. |
+| lib/guest-sync/google.ts | **9C.1 preparato:** `readSheets()` legge Guest List e Households; `readSheet()` mantiene il contratto legacy. Il workflow attuale non usa ancora la nuova lettura. |
+| lib/guest-sync/model.ts | **9C.1 preparato:** schema e validazione household standalone, link UUID e minimizzazione dei recapiti. Integrazione con piano e protezioni transazionali resta successiva. |
 | lib/guest-sync/workflow.ts e receipt.ts | Firma della modalità/schema e impronta delle due sorgenti; rilettura e confronto al momento dell'Apply. Modifiche a una delle due schede invalidano la Preview. Non presumere una transazione condivisa Google/Neon. |
 | lib/guest-sync/db.ts e nuova migrazione numerata | Mappatura unica fra source_id + Household UUID e household_id interno; estendere snapshot e Apply, sostituendo la ricerca del gruppo per etichetta con la chiave stabile. Non riscrivere 008 già applicata. |
 | scripts/guest-sync-identifiers.gs | Operazione distinta per i nuclei, con assegnazione idempotente solo su mappa approvata. Testare su dati fittizi prima di installare o eseguire sul foglio originale. |
 | /admin/guests | Mostrare nucleo, membri, UUID di collegamento quando necessario alla revisione, errori e cambi di etichetta/appartenenza; tutto riservato agli amministratori. |
-| tests/guest-sync | Casi sotto elencati e conservazione dei 76 test attuali. |
+| tests/guest-sync | Casi sotto elencati; `households.test.cjs` copre il parser preparatorio. Conservare la suite legacy e aggiungere i casi di integrazione 9C.2/9C.3. |
 
 La nuova tabella di mappatura proposta ha chiave primaria (source_id, external_household_id), FK household_id verso rsvp.households e vincolo univoco su household_id per evitare alias multipli. La migrazione futura deve garantire che ogni guest_sync_member si riferisca alla stessa associazione di nucleo (FK composta o vincolo equivalente), non affidarsi solo al parser. I dati organizzativi della scheda Households appartengono alla mappatura di sincronizzazione; campi RSVP, token e risposte restano esclusi dalle scritture.
 

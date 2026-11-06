@@ -7,7 +7,7 @@ Module._load = function (name, ...args) {
   if (name === "server-only") return {};
   return originalLoad.call(this, name, ...args);
 };
-const { readSheet } = require(process.env.SYNC_TEST_BUILD + "/google.js");
+const { readSheet, readSheets } = require(process.env.SYNC_TEST_BUILD + "/google.js");
 Module._load = originalLoad;
 process.env.GUEST_SYNC_SPREADSHEET_ID = "fictional-spreadsheet-id-for-tests";
 process.env.GUEST_SYNC_GOOGLE_CLIENT_EMAIL = "fictional@example.invalid";
@@ -49,6 +49,27 @@ test("Google adapter: readonly scope, private requests, authorization and retry 
         assert.equal(calls, 2);
       }
     );
+    await t.test("two-tab reader fetches Guest List and Households with one readonly token", async () => {
+      const requestedTabs = [];
+      global.fetch = async (url, init) => {
+        assert.equal(init.cache, "no-store");
+        if (url.includes("oauth2")) {
+          const assertion = init.body.get("assertion");
+          const body = JSON.parse(Buffer.from(assertion.split(".")[1], "base64url"));
+          assert.equal(body.scope, "https://www.googleapis.com/auth/spreadsheets.readonly");
+          return response({ access_token: "fictional-token" });
+        }
+        assert(init.headers.Authorization);
+        const tab = url.includes("Households") ? "Households" : "Guest List";
+        requestedTabs.push(tab);
+        return response({ values: [[tab]] });
+      };
+      assert.deepEqual(await readSheets(), {
+        guestList: [["Guest List"]],
+        households: [["Households"]]
+      });
+      assert.deepEqual(requestedTabs.sort(), ["Guest List", "Households"].sort());
+    });
     await t.test("403 and 401 return sanitized actionable errors", async () => {
       global.fetch = async () => response({}, 403);
       await assert.rejects(readSheet(), (e) => e.code === "GOOGLE_ACCESS");

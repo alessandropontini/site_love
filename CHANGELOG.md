@@ -4,6 +4,12 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Household UUID preparation — Step 9C.1
+- Add a read-only two-tab Google Sheets reader and an explicitly selected Household UUID parser with structural and relationship validation.
+- Keep the legacy single-tab sync unchanged; validate but omit contact email and phone from the parsed model.
+- Add fictional parser/Google adapter coverage. No database migration, Preview/Apply integration, live Sheet/Neon access, invitation or QR operation was performed.
+- See `docs/households-design.md` for the exact scope and remaining 9C.2/9C.3 work.
+
 ### Roadmap recovery audit — Step 9B
 - Audit the current guest sync, household identity, invitation and RSVP code against the available roadmap evidence.
 - Record missing Household UUID runtime support, Save the Date, imported-household invitation activation, offline RSVP entry and migrations 010–015; no features or external data were changed.

@@ -100,10 +100,8 @@ async function accessToken() {
     );
   return token.data.access_token;
 }
-export async function readSheet(): Promise<unknown[][]> {
-  const id = sourceId();
-  const token = await accessToken();
-  // Read the used values of this tab, not a fixed row count that silently truncates.
+async function readTab(token: string, id: string, tab: "Guest List" | "Households") {
+  // Read the used values of each tab, not a fixed row count that silently truncates.
   const result = z
     .object({
       values: z
@@ -115,7 +113,7 @@ export async function readSheet(): Promise<unknown[][]> {
     })
     .safeParse(
       await request(
-        `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/${encodeURIComponent("'Guest List'")}?valueRenderOption=UNFORMATTED_VALUE`,
+        `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/${encodeURIComponent(`'${tab}'`)}?valueRenderOption=UNFORMATTED_VALUE`,
         { headers: { Authorization: `Bearer ${token}` } }
       )
     );
@@ -125,4 +123,22 @@ export async function readSheet(): Promise<unknown[][]> {
       "Invalid source response or more than 5,000 guest rows. Nothing was imported."
     );
   return result.data.values ?? [];
+}
+
+/** Read both planning tabs for the later, explicitly selected Household UUID mode. */
+export async function readSheets(): Promise<{ guestList: unknown[][]; households: unknown[][] }> {
+  const id = sourceId();
+  const token = await accessToken();
+  const [guestList, households] = await Promise.all([
+    readTab(token, id, "Guest List"),
+    readTab(token, id, "Households")
+  ]);
+  return { guestList, households };
+}
+
+/** Preserve the existing legacy integration and its single-tab contract. */
+export async function readSheet(): Promise<unknown[][]> {
+  const id = sourceId();
+  const token = await accessToken();
+  return readTab(token, id, "Guest List");
 }
