@@ -4,6 +4,12 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Household UUID Preview integration — Step 9C.2
+- Integrate the explicitly selected two-tab Household UUID source with Preview planning while keeping legacy mode as the default.
+- Bind mode and both source tabs to the signed preview receipt; re-read and validate them before Apply. UUIDs, not labels, keep same-name households separate.
+- Block ambiguous/unmapped Neon households and roster, identity, issued-invitation or RSVP conflicts; do not auto-adopt records by name. No Neon writes or migrations are included; transactional Household UUID database runtime remains Step 9C.3.
+- Add fictional planning and stale-source tests. See `docs/households-design.md`.
+
 ### Household UUID preparation — Step 9C.1
 - Add a read-only two-tab Google Sheets reader and an explicitly selected Household UUID parser with structural and relationship validation.
 - Keep the legacy single-tab sync unchanged; validate but omit contact email and phone from the parsed model.

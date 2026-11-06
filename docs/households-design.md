@@ -33,6 +33,33 @@ Questa consegna non implementa la migrazione, la riconciliazione dei nuclei
 esistenti, la modalità household nel batch Preview/Apply, né l’attivazione degli
 inviti. Nessuna lettura/scrittura del foglio reale o di Neon è stata eseguita.
 
+## Step 9C.2 — integrazione della modalità nella Preview
+
+Implementato sul branch `feat/roadmap-recovery-20261106`:
+
+- `GUEST_SYNC_MODE=household_uuid` seleziona esplicitamente il lettore a due
+  schede e il parser; in assenza del valore esatto resta attivo il percorso
+  legacy. Non viene effettuato fallback se la modalità UUID è selezionata ma la
+  scheda Households non è disponibile o valida.
+- `buildPlan()` usa Household UUID per separare i nuclei. Etichette identiche
+  non fondono gruppi. Le righe Preview mostrano il conteggio sorgente; le note
+  chiariscono che i nuclei nuovi non sono creati né adottati durante Preview.
+- Nuclei Neon già mappati si correlano soltanto attraverso Sync UUID già
+  persistiti. Mapping ambiguo, nucleo senza mapping, roster divergente, cambio
+  di appartenenza, risposta o invito emesso producono errori bloccanti. Non si
+  adottano record per nome, cognome o etichetta.
+- La ricevuta HMAC vincola modalità e contenuto di entrambe le schede; Apply
+  rilegge le due schede e ricalcola il piano prima di procedere. Il flusso legacy
+  resta il default.
+- La modalità UUID non mostra conferma e non consente Apply finché il runtime DB
+  basato sul mapping non è completato. La scrittura Neon per nuovi nuclei, il
+  mapping UUID esterno → ID Neon e le relative garanzie transazionali sono 9C.3.
+  L'ambiente reale non è stato contattato e nessuna migrazione è stata applicata.
+
+Test fittizi aggiunti per identità separate, blocco di adozione per etichetta e
+invalidazione della ricevuta se cambia una delle due schede. La suite locale
+risulta 90 pass e 2 test PostgreSQL saltati per assenza del database isolato.
+
 ## Verifica dello step 4 — 31 ottobre 2026
 
 Rilettura del foglio originale in sola lettura: Households contiene soltanto le

@@ -85,6 +85,10 @@ export type Change = {
 };
 export type Plan = {
   contractVersion: number;
+  mode: "legacy" | "household_uuid";
+  sourceHouseholdCount: number;
+  sourceHouseholdIds: string[];
+  warnings: string[];
   excludedHouseholds: number;
   excludedInvitees: number;
   changes: Change[];
@@ -124,7 +128,10 @@ export type HouseholdSheetParse = {
 };
 export type LegacySheetParse = {
   mode: "legacy";
-  guests: ReturnType<typeof parseSheet>;
+  guests: ReturnType<typeof parseSheet> extends { guests: infer T } ? T : never;
+  errors: string[];
+  sourceCount: number;
+  skippedRows: number[];
 };
 export type GuestSheets = {
   guestList: unknown[][];
@@ -487,13 +494,19 @@ export function parseHouseholdSheets(
 export function parseGuestSheets(sheets: GuestSheets, mode: "legacy" | "household_uuid" = "legacy") {
   if (mode === "household_uuid")
     return parseHouseholdSheets(sheets.guestList, sheets.households);
-  return { mode: "legacy" as const, guests: parseSheet(sheets.guestList) };
+  const parsed = parseSheet(sheets.guestList);
+  return { mode: "legacy" as const, guests: parsed.guests, errors: parsed.errors, sourceCount: parsed.sourceCount, skippedRows: parsed.skippedRows };
 }
 export function buildPlan(
-  parsed: ReturnType<typeof parseSheet>,
+  parsed: ReturnType<typeof parseSheet> | HouseholdSheetParse,
   snapshot: Snapshot
 ): Plan {
-  const errors = [...parsed.errors];
+  if ("mode" in parsed && parsed.mode === "household_uuid")
+    return buildHouseholdUuidPlan(parsed, snapshot);
+  const legacy: ReturnType<typeof parseSheet> = "mode" in parsed
+    ? { guests: parsed.guests, errors: parsed.errors, sourceCount: parsed.sourceCount, skippedRows: parsed.skippedRows }
+    : parsed;
+  const errors = [...legacy.errors];
   const exclusions = snapshot.exclusions ?? [];
   const excluded = new Set(exclusions.filter((e) => e.active).map((e) => e.householdId));
   if (snapshot.contractVersion !== SYNC_CONTRACT_VERSION)
@@ -510,7 +523,7 @@ export function buildPlan(
     );
   const changes: Change[] = [];
   const groups = new Map<string, Guest[]>();
-  for (const guest of parsed.guests) {
+  for (const guest of legacy.guests) {
     const key = guest.party.toLocaleLowerCase("en");
     groups.set(key, [...(groups.get(key) ?? []), guest]);
   }
@@ -655,7 +668,7 @@ export function buildPlan(
       });
     }
   }
-  const incoming = new Set(parsed.guests.map((g) => g.externalId));
+  const incoming = new Set(legacy.guests.map((g) => g.externalId));
   for (const old of snapshot.members)
     if (!incoming.has(old.externalId)) {
       changes.push({
@@ -681,18 +694,142 @@ export function buildPlan(
     errors.push(...change.errors.map((e) => `${change.guest}: ${e}`));
   return {
     contractVersion: SYNC_CONTRACT_VERSION,
+    mode: "legacy",
+    sourceHouseholdCount: 0,
+    sourceHouseholdIds: [],
+    warnings: [],
     excludedHouseholds: snapshot.households.filter((h) => excluded.has(h.id)).length,
     excludedInvitees: snapshot.households.filter((h) => excluded.has(h.id)).reduce((n, h) => n + (h.namedCount ?? 0), 0),
     changes,
     errors,
-    sourceCount: parsed.sourceCount,
-    skippedRows: parsed.skippedRows,
+    sourceCount: legacy.sourceCount,
+    skippedRows: legacy.skippedRows,
     counts: {
       created: changes.filter((c) => c.operation === "INSERT").length,
       updated: changes.filter((c) => c.operation === "UPDATE").length,
       unchanged: changes.filter((c) => c.operation === "NO CHANGE").length,
       missing: changes.filter((c) => c.operation === "MISSING FROM SOURCE")
         .length,
+      errors: errors.length
+    }
+  };
+}
+
+/**
+ * Household UUID preview planning. Existing Neon groups are matched only by
+ * guest external UUIDs already mapped together; unmapped existing groups block
+ * the entire plan. Labels never select or merge a database household.
+ */
+function buildHouseholdUuidPlan(parsed: HouseholdSheetParse, snapshot: Snapshot): Plan {
+  const errors = [...parsed.errors];
+  const warnings = [...parsed.warnings];
+  const exclusions = snapshot.exclusions ?? [];
+  const excluded = new Set(exclusions.filter((e) => e.active).map((e) => e.householdId));
+  if (snapshot.contractVersion !== SYNC_CONTRACT_VERSION)
+    errors.push("Unsupported synchronization contract. Update database and application together.");
+  if (snapshot.members.some((m) => excluded.has(m.householdId)))
+    errors.push("An excluded test household has source mappings. Resolve the conflict manually.");
+  if (snapshot.households.some((h) => !excluded.has(h.id) && !snapshot.members.some((m) => m.householdId === h.id)))
+    errors.push("Existing households have no source mapping. A maintainer must reconcile them before importing to avoid duplicates.");
+
+  const membersByExternal = new Map(snapshot.members.map((member) => [member.externalId, member]));
+  const householdByExternal = new Map(parsed.households.map((household) => [household.externalId, household]));
+  const sourceLinks = new Map(parsed.memberLinks.map((link) => [link.externalGuestId, link]));
+  const sourceGuests = new Map(parsed.guests.map((guest) => [guest.externalId, guest]));
+  const changes: Change[] = [];
+  const sourceByHousehold = new Map<string, Guest[]>();
+  for (const guest of parsed.guests) {
+    const link = sourceLinks.get(guest.externalId);
+    if (!link) continue;
+    sourceByHousehold.set(link.householdUuid, [...(sourceByHousehold.get(link.householdUuid) ?? []), guest]);
+  }
+
+  for (const [externalHouseholdId, guests] of sourceByHousehold) {
+    const sourceHousehold = householdByExternal.get(externalHouseholdId);
+    if (!sourceHousehold) continue;
+    const mappedIds = new Set(guests.flatMap((guest) => {
+      const old = membersByExternal.get(guest.externalId);
+      return old ? [old.householdId] : [];
+    }));
+    const rowErrors: string[] = [];
+    if (mappedIds.size > 1) rowErrors.push("This Household UUID spans multiple existing database households. Reconcile membership manually.");
+    let householdId = [...mappedIds][0] ?? null;
+    const existingSourceMap = snapshot.households.filter((household) =>
+      snapshot.members.some((member) => member.householdId === household.id && member.externalId === guests[0]?.externalId)
+    );
+    if (existingSourceMap.length > 1) rowErrors.push("The guest identity is mapped ambiguously in the database.");
+    const household = householdId ? snapshot.households.find((entry) => entry.id === householdId) : undefined;
+    const knownExternalMembers = snapshot.members.filter((member) => member.householdId === householdId);
+    if (household && knownExternalMembers.some((member) => {
+      const link = sourceLinks.get(member.externalId);
+      return link && link.householdUuid !== externalHouseholdId;
+    })) rowErrors.push("A mapped guest belongs to a different Household UUID in the source. Reconcile manually.");
+    if (household && household.name !== sourceHousehold.party)
+      rowErrors.push("Changing the household label requires the approved Household UUID database mapping and a fresh schema version.");
+    if (household && household.owner !== sourceHousehold.owner)
+      rowErrors.push("The database List owner differs from the source household mapping.");
+    if (household?.responded && guests.some((guest) => {
+      const old = membersByExternal.get(guest.externalId);
+      return !old || hash(comparableGuest(old.data)) !== hash(comparableGuest(guest));
+    })) rowErrors.push("This household has RSVP responses. Resolve planning changes manually.");
+    if (household?.issued && guests.some((guest) => {
+      const old = membersByExternal.get(guest.externalId);
+      return !old || hash(comparableGuest(old.data)) !== hash(comparableGuest(guest));
+    })) rowErrors.push("An invitation has been issued. Roster and name changes require manual review.");
+    const sourceIds = new Set(guests.map((guest) => guest.externalId));
+    if (household && knownExternalMembers.some((member) => !sourceIds.has(member.externalId)))
+      rowErrors.push("The source household omits a mapped member. Missing members are retained; reconcile before changing this roster.");
+
+    for (const guest of guests) {
+      const old = membersByExternal.get(guest.externalId);
+      if (old && old.householdId !== householdId)
+        rowErrors.push("Changing an existing guest Household UUID requires manual reconciliation.");
+      if (old && old.data.kind !== guest.kind)
+        rowErrors.push("Changing guest type or naming a previously anonymous companion requires manual review.");
+      if (old && old.data.kind === "named" && old.actualName !== old.data.name)
+        rowErrors.push("The database name was changed outside synchronization. Resolve the conflict first.");
+      const operation = !old ? "INSERT" : hash(comparableGuest(old.data)) === hash(comparableGuest(guest)) ? "NO CHANGE" : "UPDATE";
+      changes.push({
+        guest: `${sourceHousehold.party} / ${guest.name ?? (guest.kind === "child" ? "Child place" : "Unnamed companion")}`,
+        operation,
+        current: old?.data ?? null,
+        next: guest,
+        householdId,
+        errors: [...rowErrors]
+      });
+    }
+    if (!household) warnings.push(`Household ${externalHouseholdId} is new; Preview does not create or adopt a database household.`);
+  }
+
+  const incoming = new Set(parsed.guests.map((guest) => guest.externalId));
+  for (const old of snapshot.members) if (!incoming.has(old.externalId)) {
+    changes.push({
+      guest: `${old.data.party} / ${old.data.name ?? old.data.kind}`,
+      operation: "MISSING FROM SOURCE",
+      current: old.data,
+      next: null,
+      householdId: old.householdId,
+      errors: []
+    });
+  }
+  for (const change of changes) errors.push(...change.errors.map((error) => `${change.guest}: ${error}`));
+  return {
+    contractVersion: SYNC_CONTRACT_VERSION,
+    mode: "household_uuid",
+    sourceHouseholdCount: parsed.households.length,
+    sourceHouseholdIds: parsed.households.map((household) => household.externalId),
+    warnings: [...new Set(warnings)],
+    excludedHouseholds: snapshot.households.filter((household) => excluded.has(household.id)).length,
+    excludedInvitees: snapshot.households.filter((household) => excluded.has(household.id)).reduce((count, household) => count + (household.namedCount ?? 0), 0),
+    changes,
+    errors,
+    sourceCount: parsed.sourceCount,
+    skippedRows: parsed.skippedRows,
+    counts: {
+      created: changes.filter((change) => change.operation === "INSERT").length,
+      updated: changes.filter((change) => change.operation === "UPDATE").length,
+      unchanged: changes.filter((change) => change.operation === "NO CHANGE").length,
+      missing: changes.filter((change) => change.operation === "MISSING FROM SOURCE").length,
       errors: errors.length
     }
   };

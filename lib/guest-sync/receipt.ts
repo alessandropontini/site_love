@@ -5,6 +5,7 @@ const receiptSchema = z
     id: z.uuid(),
     actor: z.string().min(1).max(255),
     source: z.string().max(150),
+    mode: z.enum(["legacy", "household_uuid"]),
     sourceHash: z.string().length(64),
     dbHash: z.string().length(32),
     planHash: z.string().length(64),

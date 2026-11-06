@@ -50,7 +50,7 @@ export default function GuestListSynchronization({
       </h1>
 
       <p>
-        Source: Google Sheets — THE LIST / Guest List
+        Source: Google Sheets — THE LIST / {preview?.plan.mode === "household_uuid" ? "Guest List + Households" : "Guest List"}
       </p>
 
       {/* ========================================= */}
@@ -147,6 +147,17 @@ export default function GuestListSynchronization({
       {preview && (
         <>
           <h2>Sync Preview</h2>
+
+          <p>
+            Sync mode: <strong>{preview.plan.mode === "household_uuid" ? "Household UUID" : "Legacy Party / family"}</strong>
+            {preview.plan.mode === "household_uuid" && ` · ${preview.plan.sourceHouseholdCount} source households`}
+          </p>
+
+          {preview.plan.warnings.length > 0 && (
+            <div><h3>Review notes</h3><ul className={styles.errors}>
+              {preview.plan.warnings.map((warning, index) => <li key={index}>{warning}</li>)}
+            </ul></div>
+          )}
 
           {/* ===================================== */}
           {/* SKIPPED ROWS                         */}
@@ -260,7 +271,7 @@ export default function GuestListSynchronization({
           {/* EXPLICIT CONFIRMATION               */}
           {/* ===================================== */}
 
-          {!preview.plan.errors.length && (
+          {!preview.plan.errors.length && preview.plan.mode === "legacy" && (
             <label className={styles.confirm}>
               <input
                 type="checkbox"
@@ -316,6 +327,7 @@ export default function GuestListSynchronization({
               disabled={
                 pending ||
                 !confirmed ||
+                preview.plan.mode !== "legacy" ||
                 !!preview.plan.errors.length
               }
               onClick={() =>
@@ -345,7 +357,9 @@ export default function GuestListSynchronization({
                 })
               }
             >
-              {unknown
+              {preview.plan.mode === "household_uuid"
+                ? "Apply available in Step 9C.3"
+                : unknown
                 ? "Retry / Check Batch"
                 : "Apply Changes"}
             </button>

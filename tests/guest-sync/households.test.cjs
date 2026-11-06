@@ -5,8 +5,10 @@ const {
   householdHeaders,
   parseGuestSheets,
   parseHouseholdSheets,
-  parseSheet
+  parseSheet,
+  buildPlan
 } = require(process.env.SYNC_TEST_BUILD + "/model.js");
+const { preview, apply } = require(process.env.SYNC_TEST_BUILD + "/workflow.js");
 
 const ids = {
   h1: "11111111-1111-4111-8111-111111111111",
@@ -212,8 +214,8 @@ test("new columns do not automatically activate Household UUID mode", () => {
   const input = sheets();
   const legacy = parseGuestSheets(input);
   assert.equal(legacy.mode, "legacy");
-  assert.deepEqual(legacy.guests.errors, []);
-  assert.equal(legacy.guests.guests[0].externalId, ids.adult);
+  assert.deepEqual(legacy.errors, []);
+  assert.equal(legacy.guests[0].externalId, ids.adult);
   assert.equal(parseSheet(input.guestList).guests[0].externalId, ids.adult);
 });
 
@@ -231,4 +233,54 @@ test("private contact values are validated but never returned in the model", () 
   assert(invalid.errors.some((error) => error.includes("Contact email is invalid")));
   assert(invalid.errors.some((error) => error.includes("Language must be it or en")));
   assert(!JSON.stringify(invalid).includes("not-an-email-secret"));
+});
+
+function householdSnapshot(overrides = {}) {
+  return {
+    contractVersion: 2,
+    exclusions: [],
+    households: [],
+    members: [],
+    inviteeCount: 0,
+    ...overrides
+  };
+}
+
+test("Household UUID plan keeps same-label UUIDs distinct and never adopts by label", () => {
+  const secondGuest = guestRow({ "Guest name": "Fictional Casey", "Sync UUID": ids.other, "Household UUID": ids.h2 });
+  const secondHousehold = householdRow({ "Household UUID": ids.h2, "Contact guest UUID": ids.other });
+  const parsed = parseGuestSheets(sheets([guestRow(), secondGuest], [householdRow(), secondHousehold]), "household_uuid");
+  const planned = buildPlan(parsed, householdSnapshot());
+  assert.equal(planned.mode, "household_uuid");
+  assert.equal(planned.sourceHouseholdCount, 2);
+  assert.equal(planned.counts.created, 2);
+  assert.deepEqual(new Set(planned.changes.map((change) => change.next && change.next.party)), new Set(["Fictional household"]));
+  assert(planned.warnings.some((warning) => warning.includes("new; Preview does not create")));
+
+  const labelMatch = householdSnapshot({ households: [{ id: ids.h2, name: "Fictional household", owner: "groom", plusOne: false, issued: false, responded: false, version: 0, status: "disabled", namedCount: 0 }] });
+  const blocked = buildPlan(parsed, labelMatch);
+  assert(blocked.errors.some((error) => error.includes("no source mapping")));
+  assert(blocked.changes.every((change) => change.householdId === null));
+});
+
+test("household source mode is bound into the signed receipt and both source tabs are rechecked", async () => {
+  process.env.GUEST_SYNC_SIGNING_SECRET = "fictional-household-test-signing-secret";
+  let reads = 0;
+  const source = sheets();
+  const deps = {
+    sourceId: () => "fictional-source",
+    mode: () => "household_uuid",
+    readSheet: async () => { throw new Error("legacy read must not run"); },
+    readSheets: async () => { reads++; return source; },
+    snapshot: async () => ({ data: householdSnapshot(), hash: "a".repeat(32) }),
+    getRun: async () => undefined,
+    recordRun: async () => {},
+    applyPlan: async () => "SUCCESS"
+  };
+  const result = await preview("fictional-admin", deps);
+  assert.equal(result.plan.mode, "household_uuid");
+  assert.equal(reads, 1);
+  source.households[1][1] = "Renamed fictional household";
+  assert.equal(await apply(result.receipt, "fictional-admin", deps), "CONFLICT");
+  assert.equal(reads, 2);
 });

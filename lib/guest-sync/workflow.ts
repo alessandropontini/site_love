@@ -1,11 +1,13 @@
 import { randomUUID } from "node:crypto";
-import { buildPlan, hash, parseSheet } from "./model";
-import type { Plan, Snapshot } from "./model";
+import { buildPlan, hash, parseGuestSheets, parseSheet } from "./model";
+import type { GuestSheets, Plan, Snapshot } from "./model";
 import { signReceipt, verifyReceipt } from "./receipt";
 import type { Receipt } from "./receipt";
 export type Dependencies = {
   sourceId(): string;
   readSheet(): Promise<unknown[][]>;
+  readSheets?(): Promise<GuestSheets>;
+  mode?(): "legacy" | "household_uuid";
   snapshot(): Promise<{ data: Snapshot & { sources: string[] }; hash: string }>;
   getRun(receipt: Receipt): Promise<string | undefined>;
   recordRun(
@@ -19,12 +21,20 @@ export type Dependencies = {
 };
 export async function preview(actor: string, deps: Dependencies) {
   const source = deps.sourceId();
-  const [values, database] = await Promise.all([
-    deps.readSheet(),
+  const mode = deps.mode?.() ?? "legacy";
+  const [sourceData, database] = await Promise.all([
+    mode === "household_uuid" && deps.readSheets
+      ? deps.readSheets()
+      : deps.readSheet(),
     deps.snapshot()
   ]);
-  const plan = buildPlan(parseSheet(values), database.data);
-  if (database.data.sources.some((s) => s !== source)) {
+  const parsed = mode === "household_uuid"
+    ? "guestList" in sourceData
+      ? parseGuestSheets(sourceData, mode)
+      : parseGuestSheets({ guestList: sourceData, households: [] }, mode)
+    : parseSheet("guestList" in sourceData ? sourceData.guestList : sourceData);
+  const plan = buildPlan(parsed, database.data);
+  if (mode === "legacy" && database.data.sources.some((s) => s !== source)) {
     plan.errors.push(
       "The database is linked to another spreadsheet. Source migration requires manual reconciliation."
     );
@@ -34,7 +44,8 @@ export async function preview(actor: string, deps: Dependencies) {
     id: randomUUID(),
     actor,
     source,
-    sourceHash: hash(values),
+    sourceHash: hash({ mode, source: sourceData }),
+    mode,
     dbHash: database.hash,
     planHash: hash(plan),
     expires: Date.now() + 15 * 60_000
@@ -58,17 +69,26 @@ export async function apply(token: string, actor: string, deps: Dependencies) {
       );
       return (await deps.getRun(receipt)) ?? "CONFLICT";
     }
-    const [values, database] = await Promise.all([
-      deps.readSheet(),
+    const mode = deps.mode?.() ?? "legacy";
+    const [sourceData, database] = await Promise.all([
+      mode === "household_uuid" && deps.readSheets
+        ? deps.readSheets()
+        : deps.readSheet(),
       deps.snapshot()
     ]);
-    const plan = buildPlan(parseSheet(values), database.data);
+    const parsed = mode === "household_uuid"
+      ? "guestList" in sourceData
+        ? parseGuestSheets(sourceData, mode)
+        : parseGuestSheets({ guestList: sourceData, households: [] }, mode)
+      : parseSheet("guestList" in sourceData ? sourceData.guestList : sourceData);
+    const plan = buildPlan(parsed, database.data);
     if (
-      hash(values) !== receipt.sourceHash ||
+      hash({ mode, source: sourceData }) !== receipt.sourceHash ||
+      mode !== receipt.mode ||
       database.hash !== receipt.dbHash ||
       hash(plan) !== receipt.planHash ||
       plan.errors.length ||
-      database.data.sources.some((s) => s !== receipt.source)
+      (mode === "legacy" && database.data.sources.some((s) => s !== receipt.source))
     ) {
       await deps.recordRun(
         receipt,
