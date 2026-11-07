@@ -4,6 +4,14 @@ Data: 6 novembre 2026
 Branch: `feat/roadmap-recovery-20261106`
 Commit di riferimento: `8e5bbdd5f63519f67d9dd242e8323bcd1b6dc1cc`
 
+### Addendum di riconciliazione — 7 novembre 2026
+
+La punta del branch remoto include il checkpoint Step 8.2 (`3026cfb`). La
+storia locale del branch `docs/household-uuid-plan` conserva i commit 012–015,
+ma la sua base migrazione 010–011 differisce da quella remota attuale. Il branch
+alternativo non è pubblicato su GitHub e il worktree registrato non è presente.
+Gli asset temporanei non tracciati nel checkout non sono stati modificati.
+
 ## Avanzamento successivo all'audit
 
 Il rilievo è uno snapshot storico al commit indicato. In seguito è stato
@@ -12,7 +20,10 @@ con procedura owner-only per mapping esatti e approvati (step 5). Le migrazioni
 010–011 sono state verificate solo localmente con dati fittizi; nessun mapping
 live è stato eseguito. La riconciliazione reale resta quindi da svolgere per
 ogni household solo dopo approvazione esplicita, mappa verificata, conferma
-DEVELOPMENT e backup/ripristino. Restano da ricostruire gli artefatti 012–015.
+DEVELOPMENT e backup/ripristino. Gli artefatti 012–015 sono assenti dal branch
+di lavoro remoto, ma sono stati recuperati nella storia locale di
+`docs/household-uuid-plan`; dipendono da una diversa base Household UUID e non
+sono stati integrati.
 
 ## Scopo e limiti
 
@@ -32,8 +43,8 @@ Il repository documenta esplicitamente gli step 1–3, 4, 5 e 6, ma non contiene
 | 4. Household UUID come identità stabile del nucleo | **COMPLETA nel runtime** | Lettura e parsing espliciti delle due schede; snapshot, ricevuta e Apply contratto v3; mapping univoco `(source_id, external_household_id)`; migrazione 010; UI Preview/Apply e test fittizi. | Nessuna migrazione è stata applicata a Neon in questo lavoro. Associazioni effettive dei nuclei esistenti restano soggette a riconciliazione approvata. |
 | 5. Riconciliazione dei nuclei Neon esistenti | **PARZIALE: procedura pronta, mapping reale non eseguito** | Migrazione 011 e funzione owner-only per mapping espliciti, roster esatto e audit metadata-only; test PGlite. | Nessun mapping live è stato approvato o scritto. Per un'operazione reale servono ambiente e backup verificati e una mappa privata approvata. |
 | 6. Preview/Apply amministrativo della sincronizzazione | **COMPLETA** nei contratti legacy e Household UUID | `app/admin/guests/GuestListSynchronization.tsx`; `lib/guest-sync/workflow.ts`; SQL 008–010; test `engine`, `database`, `google`, `auth`, `exclusions`, `presentation`, `households`. | I test locali non verificano Clerk/browser autenticati o concorrenza multi-connessione Neon. |
-| 7. Save the Date | **MANCANTE** | Nessuna route, UI, modello, API, job o test per preparare/inviare comunicazioni Save the Date trovato in app, componenti, lib, script e docs. Il campo di planning `Invitation` non invia comunicazioni. | Mancano destinatari/canali, contenuti, stati di invio, log, retry/idempotenza, autorizzazioni, UI e test. Eventuali attività manuali fuori repository: **DA VERIFICARE**. |
-| 8. Emissione inviti/QR, dashboard RSVP e risposte offline | **PARZIALE; preview admin 8.1–8.2 completata, attivazione è il prossimo bullet** | Generatore per nuovi nuclei, route RSVP personale, dashboard/export online e preview admin read-only per nuclei importati. | Manca l'attivazione atomica/idempotente con token e QR privati. Mancano inoltre registrazione/correzione amministrativa delle risposte offline. |
+| 7. Save the Date | **MANCANTE nel branch di lavoro; implementazione storica locale non integrata** | Nessuna route, UI, modello o test nella punta GitHub. Il commit locale `179bfd4` aggiungeva UI e modello, con migrazione 012, ma non è disponibile su un branch GitHub e presupponeva la diversa base Household UUID descritta sotto. | La funzionalità va riconciliata con il mapping v3 corrente prima di considerarla completa. Il campo di planning `Invitation` non invia comunicazioni. |
+| 8. Emissione inviti/QR, dashboard RSVP e risposte offline | **PARZIALE; preview admin 8.1–8.2 completata, attivazione ancora aperta** | Generatore per nuovi nuclei, route RSVP personale, dashboard/export online e preview admin read-only per nuclei importati. Il commit locale `0f26498` aggiungeva un lifecycle per household esistenti, non integrato nel branch remoto. | L'attivazione richiesta deve selezionare il mapping esplicito e passare da Clerk/allowlist; il lifecycle storico usa un diverso contratto operativo e non è ancora una soluzione compatibile. Le risposte offline restano da integrare o reimplementare. |
 
 ## Architettura e componenti presenti
 
@@ -59,7 +70,25 @@ Il repository documenta esplicitamente gli step 1–3, 4, 5 e 6, ma non contiene
 | `010_guest_sync_household_runtime.sql` | Modalità sorgente esplicita, mapping Household UUID, vincoli composti, snapshot e Apply contrattuale v3. |
 | `011_guest_sync_household_reconciliation.sql` | Funzione owner-only per registrare un mapping approvato a roster esatto, con journal metadata-only. |
 
-**Da recuperare:** gli artefatti `012`–`015` non sono presenti nel branch corrente; non dedurne il contenuto. Le migrazioni 010–011 sono nuove, verificate localmente e non applicate a Neon. Per qualsiasi applicazione reale servono specifica, ambiente, backup e autorizzazione separata.
+Le migrazioni `012`–`015` non sono presenti nel branch di lavoro remoto, ma la storia locale `docs/household-uuid-plan` contiene i commit `179bfd4`, `0f26498`, `59025e7` e `51fb37a`. Non fanno parte del branch corrente né risultano pubblicati su GitHub. Il worktree registrato per quel branch non è disponibile.
+
+I commit storici 012–015 si basano anche su una coppia di migrazioni diversa:
+`010_guest_sync_household_foundation.sql` e
+`011_guest_sync_household_runtime.sql`. Il branch di lavoro usa invece
+`010_guest_sync_household_runtime.sql` e
+`011_guest_sync_household_reconciliation.sql`. La 010 storica introduce mapping
+di staging, campi baseline/contact e una barriera all'attivazione; la 011
+storica sostituisce il flusso di staging con l'attivazione UUID globale e un
+Apply v3. Il branch attuale registra invece modalità e mapping runtime in 010 e
+fornisce in 011 una riconciliazione owner-only per mapping esatti.
+
+Per questo le migrazioni e il codice 012–015 non si possono cherry-pickare o
+applicare alla cieca. In particolare, il Save the Date storico e il lifecycle
+inviti fanno affidamento sul contratto di mapping/contact della base alternativa;
+il lifecycle storico usa inoltre una CLI operativa con actor dichiarato e non
+una Server Action autorizzata da Clerk. Conservare i commit originali, portare
+solo i comportamenti necessari e adattarli al contratto corrente. Nessuna delle
+migrazioni 012–015 è stata applicata a Neon.
 
 ## Household UUID e Google Sheets → Neon
 
@@ -88,11 +117,13 @@ La riconciliazione non può usare nomi o numeri di riga. La migrazione 011 forni
 
 ## Test esistenti e copertura assente
 
-Presenti test Node in `tests/guest-sync/` per parser/piano, UUID, nome/cognome,
-Google adapter, allowlist Clerk, workflow, replay, UI Preview, mapping Household
-UUID e migrazioni SQL 008–011. La suite eseguita durante l'integrazione di questo
-step ha superato 119 test con PGlite, senza test saltati; TypeScript, lint e
-build sono passati. Non sono test live di Neon, Sheets o Clerk.
+Nel branch di lavoro sono presenti test Node in `tests/guest-sync/` per
+parser/piano, UUID, nome/cognome, Google adapter, allowlist Clerk, workflow,
+replay, UI Preview, mapping Household UUID e migrazioni SQL 008–011. La suite
+eseguita durante l'integrazione dello Step 8.2 ha superato 127 test con PGlite,
+senza test saltati; TypeScript, lint e build sono passati. Non sono test live di
+Neon, Sheets o Clerk. I test Save the Date, lifecycle, RSVP offline e roadmap
+esistono solo nella storia locale alternativa e non verificano la base attuale.
 
 Non risultano test dedicati a Save the Date, attivazione di nuclei importati,
 risposte offline o dashboard RSVP end-to-end. Da svolgere anche: test reali
@@ -114,20 +145,20 @@ email e restore backup.
 1. L’etichetta `Party / family` non è una chiave stabile; usarla dopo rinomina può associare o duplicare household.
 2. Riconciliare per nome/cognome/ordine righe può alterare inviti e risposte.
 3. Eseguire il generatore QR sugli importati può creare household duplicati.
-4. Migrazioni 012–015 non presenti: requisiti e contenuto non ricostruibili per supposizione.
+4. I commit locali 012–015 usano una base 010–011 incompatibile e non pubblicata; portarli senza adattamento può sovrascrivere o aggirare il contratto v3 attuale.
 5. Inserire risposte offline senza provenienza, audit e controllo concorrenza può sovrascrivere risposte degli ospiti.
 6. Save the Date coinvolge recapiti e invii personali; scopo, canali e minimizzazione vanno specificati prima del codice.
 7. Test locali non verificano configurazioni live né comportamento reale sotto concorrenza.
 
 ## Piano ordinato di ricostruzione
 
-1. Cercare gli artefatti originali restanti (`179bfd4`, `0f26498`, `59025e7`, `51fb37a` e SQL 012–015); se mancanti, definire requisiti nuovi senza attribuire loro equivalenza con codice non recuperato.
+1. **Completato in sola lettura:** recuperare la storia locale dei commit `179bfd4`, `0f26498`, `59025e7`, `51fb37a` e confrontare le migrazioni storiche 010–015 con la base attuale. I commit sono locali soltanto; la compatibilità funzionale resta da risolvere.
 2. Household UUID runtime 9C.1–9C.3 completato; la migrazione resta non applicata fuori dai test locali.
 3. Procedura tecnica di riconciliazione completata; mapping reale resta separato e non autorizzato da questo step.
-4. **Step 8.1–8.2 completati: preview e revisione admin degli household importati. Prossimo bullet: attivazione per mapping UUID esplicito**, preservando identità e risposte, con token opachi, atomicità e idempotenza; separata dal generatore attuale.
-5. Definire e implementare risposta offline con fonte/autore, motivo, audit, concorrenza e regole di notifica; coprire con test UI/DB.
-6. Specificare Save the Date (destinatari, canale, contenuto approvato, stato, retry, audit, privacy), poi implementare e testare.
-7. Gate di rilascio: test SQL isolati, concorrenza Neon, browser autenticato con dati fittizi, review di sicurezza quando applicabile e piano backup/rollback. Nessun deploy o dato reale nell’ambito di questo audit.
+4. Conservare e confrontare i commit locali 012–015 con la base runtime/reconciliation 010–011 corrente. Non integrare la vecchia coppia 010–011 né sovrascrivere Step 8.1–8.2.
+5. Riconciliare il punto 7 Save the Date con il mapping corrente, oppure registrare esplicitamente una diversa sequenza approvata; soltanto dopo tale gate confermare il prossimo bullet funzionale.
+6. Completare l'attivazione richiesta per mapping UUID esplicito, riusando dal lifecycle storico solo i contratti compatibili: Clerk/allowlist, selezione `(source_id, external_household_id)`, preservazione di identità/risposte, token hash-only, atomicità, replay safety e output QR privato senza invio.
+7. Valutare separatamente le risposte offline (014) e i grant (015); verificare la parità con il runtime corrente prima di portarli. Chiudere con test SQL isolati, concorrenza PostgreSQL, browser autenticato fittizio e gate backup/rollback. Nessun deploy o dato reale.
 
 ## Validazione dell’audit
 

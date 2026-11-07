@@ -4,6 +4,10 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Riconciliazione artefatti roadmap 012–015
+- Recuperati nella storia Git locale i commit storici `179bfd4`–`51fb37a`, non pubblicati su GitHub e basati su migrazioni Household UUID 010–011 differenti da quelle del branch di lavoro.
+- Aggiornato l'audit per distinguere gli artefatti assenti dal branch remoto da quelli esistenti nel branch locale alternativo; nessun codice storico è stato portato o applicato.
+
 ### Step 8.2 — preview amministrativa degli inviti importati
 - Aggiunta `/admin/invitations`, protetta da Clerk e allowlist, con caricamento manuale: la pagina non legge Sheets o database all'apertura.
 - Mostrati mapping e conteggi per la revisione; il DTO esclude nomi degli invitati, contatti, dati RSVP, hash/token e snapshot grezzi.
