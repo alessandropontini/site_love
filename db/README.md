@@ -103,3 +103,18 @@ combination is already committed, allowing an administrator retry after a
 network timeout to recover success before receipt expiry checks. It cannot
 create or mutate an activation and exposes no journal contents. The RSVP app
 role and public remain denied.
+
+`014_manual_rsvp.sql` adds the database contract for an explicitly confirmed
+response received by phone, message, paper or in person. It shares the current
+household revision and RSVP response tables; an operation checks the complete
+named roster and writes answers, response audit metadata and a replay journal
+atomically. A structured reason distinguishes a first off-site response from a
+correction. The journal contains actor, provenance, reason, revision and a
+server-computed HMAC commitment, never response content, contact email or
+token. The future Clerk-protected Server Action must bind every request field
+to that HMAC; SQL cannot verify a Clerk session. The
+`site_love_sync` role can execute the restricted functions and read the
+metadata-only journal, but cannot directly write it; `site_love_app` remains
+denied. No admin form is included in this database bullet. The migration has
+only been tested locally with fictional data and must not be applied to Neon
+without separate approval.

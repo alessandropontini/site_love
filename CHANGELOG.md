@@ -4,6 +4,11 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Step 8.6a — contratto database per risposte offline
+- Aggiunta migration 014 adattata allo schema RSVP e ai grant attuali: le risposte raccolte offline usano la revisione condivisa, una chiave di replay e un journal metadata-only, senza modificare identità o token.
+- Provenienza e motivo strutturato (`initial_offsite_response` / `correction`) sono obbligatori; il ruolo sync può invocare la funzione senza privilegi diretti di scrittura. Il form admin e i grant di lettura dashboard restano bullet separati. Migration non applicata a Neon.
+- Aggiunte fixture PGlite sintetiche per scrittura, replay, correzione, conflitto di revisione, dati preservati e diniego al ruolo RSVP.
+
 ### Step 8.5 — handoff privato URL/QR
 - Dopo l'attivazione confermata, l'admin può copiare l'URL RSVP privato e generare/scaricare un QR PNG su richiesta nel browser. Nessun QR viene scritto nel repository o inviato automaticamente.
 - Il renderer accetta soltanto URL RSVP same-origin HTTPS con token opaco nel path, senza query/hash; testano output PNG e rifiuto di host/path non validi con un URL sintetico.

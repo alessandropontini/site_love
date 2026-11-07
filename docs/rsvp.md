@@ -164,6 +164,11 @@ Games are not mounted by the wedding site. If they return, they use a separate r
 
 `/admin/rsvp` uses Clerk authentication plus `RSVP_ADMIN_EMAILS`. Registration alone never grants access. The page and CSV route each enforce authorization server-side. CSV cells that could be interpreted as spreadsheet formulas are prefixed safely, and exports are marked private/no-store.
 
+The local-only database contract for recording a response received off-site is
+documented in [manual RSVP](manual-rsvp.md). Migration 014 is not applied to
+Neon, and no manual-response admin screen is available until its separate UI
+and authorization bullet is completed.
+
 `npm run backup:rsvp` creates a custom-format `pg_dump` of the `rsvp` schema with owner-only permissions. Restore tests must target a separate Neon branch. A lost or shared link requires token rotation/reissue before launch; do not send the same compromised URL again.
 
 ## Decisions still required before launch
