@@ -67,6 +67,7 @@ export default async function AdminRsvpPage() {
           <div className={styles.actions}>
             <Link className={styles.secondaryAction} href="/admin/guests">Sync Guests</Link>
             <Link className={styles.secondaryAction} href="/admin/invitations">Imported Invitations</Link>
+            <Link className={styles.secondaryAction} href="/admin/save-the-date">Save the Date</Link>
             <Link
               className={styles.primaryAction}
               href="/admin/rsvp/export"

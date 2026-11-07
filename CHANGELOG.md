@@ -4,6 +4,10 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Step 7.5c — interfaccia privata di revisione Save the Date
+- Aggiunta `/admin/save-the-date`, con preview su richiesta, selezione del solo household eleggibile, draft readonly e conferma separata dello stato manuale.
+- La registrazione richiede una checkbox coerente con l'esito e dichiara che SITE LOVE non invia messaggi. Aggiunti test per le conferme e le transizioni consentite.
+
 ### Step 7.5b — azioni admin Save the Date
 - Aggiunte azioni server per preview, preparazione e registrazione manuale, con Clerk/allowlist verificata a ogni chiamata.
 - Il preview restituisce solo mapping e stato minimizzati; errori database imprevisti non espongono query o dettagli di connessione. Test sintetici verificano autorizzazione, privacy e sanitizzazione.

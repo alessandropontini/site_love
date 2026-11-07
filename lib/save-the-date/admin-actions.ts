@@ -33,6 +33,24 @@ export type SaveTheDateAdminDependencies = SaveTheDateWorkflowDependencies & {
   }[]>;
 };
 
+export type SaveTheDateAdminPreview = {
+  eligibleHouseholds: number;
+  blockedHouseholds: number;
+  blockers: string[];
+  households: {
+    externalHouseholdId: string;
+    householdId: string | null;
+    memberCount: number;
+    eligibleForPreparation: boolean;
+    blockers: string[];
+    status: "NOT_SENT" | "READY" | "SENT" | "FAILED";
+    version: number;
+  }[];
+};
+
+export type SaveTheDatePreparation = Awaited<ReturnType<typeof prepareSaveTheDate>>;
+export type SaveTheDateAdminRecord = Awaited<ReturnType<typeof recordSaveTheDate>>;
+
 function safeError(error: unknown) {
   const code = error instanceof Error ? error.message : "";
   return safeErrors.has(code) ? code : "STD_UNAVAILABLE";

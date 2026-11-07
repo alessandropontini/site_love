@@ -1,0 +1,150 @@
+.panel {
+  margin: 24px 0;
+  padding: clamp(16px, 3vw, 32px);
+  border: 1px solid rgba(38, 27, 32, 0.16);
+  border-radius: 22px;
+  background: rgba(251, 248, 244, 0.94);
+  box-shadow: 0 20px 55px rgba(38, 27, 32, 0.08);
+}
+
+.panel h2,
+.panel h3,
+.draftCard h3 {
+  font-family: var(--font-display), Georgia, serif;
+}
+
+.panel p {
+  max-width: 75ch;
+  line-height: 1.6;
+}
+
+.notice {
+  padding: 14px 16px;
+  border-left: 4px solid #9b7948;
+  background: rgba(155, 121, 72, 0.1);
+}
+
+.status {
+  min-height: 1.5em;
+}
+
+.button {
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 1px solid #261b20;
+  border-radius: 999px;
+  color: #fbf8f4;
+  background: #261b20;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.button:focus-visible,
+.reviewForm select:focus-visible,
+.draftCard select:focus-visible,
+.draftCard textarea:focus-visible,
+.confirmation input:focus-visible {
+  outline: 3px solid #9b7948;
+  outline-offset: 3px;
+}
+
+.metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin: 24px 0;
+}
+
+.metrics dt {
+  font-size: 0.85rem;
+}
+
+.metrics dd {
+  margin: 6px 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.tableScroll {
+  max-width: 100%;
+  margin-top: 24px;
+  overflow-x: auto;
+}
+
+.tableScroll table {
+  width: 100%;
+  min-width: 780px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.tableScroll th,
+.tableScroll td {
+  padding: 12px;
+  border-bottom: 1px solid rgba(38, 27, 32, 0.16);
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.blockers {
+  padding-left: 20px;
+  color: #862d24;
+  line-height: 1.5;
+}
+
+.reviewForm,
+.draftCard {
+  display: grid;
+  gap: 12px;
+  margin-top: 28px;
+  padding: clamp(16px, 3vw, 28px);
+  border: 1px solid rgba(38, 27, 32, 0.14);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.48);
+}
+
+.reviewForm select,
+.draftCard select,
+.draftCard textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid rgba(38, 27, 32, 0.3);
+  border-radius: 10px;
+  color: #261b20;
+  background: #fffdfa;
+  font: inherit;
+}
+
+.draftCard textarea {
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.confirmation {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.5;
+}
+
+.confirmation input {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  margin-top: 2px;
+  accent-color: #3d4728;
+}
+
+@media (max-width: 520px) {
+  .metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}

@@ -2,9 +2,9 @@
 
 Questo documento descrive il lavoro del punto 7. Planner, draft bilingue,
 workflow con ricevuta, journal SQL e adapter server-side sono implementati e
-verificati con fixture sintetiche. Le azioni server Clerk/allowlist per preview,
-preparazione e registrazione manuale sono implementate; la pagina di revisione
-e i relativi test UI restano aperti. Non vengono inviati messaggi.
+verificati con fixture sintetiche. Le azioni server Clerk/allowlist e la pagina
+privata di revisione sono implementate. Resta un walkthrough browser autenticato
+con servizi di test; non vengono inviati messaggi.
 
 ## Contratto di associazione
 
@@ -23,9 +23,8 @@ non crea household o invitee e non modifica mapping o membership.
 
 ## Passi successivi
 
-1. Mostrare planner e draft nell'area Clerk/allowlist, con controllo di household,
-   lingua, canale e testo, conferma esplicita e recovery del retry.
-2. Aggiungere test UI e verifiche locali della route protetta.
+1. Eseguire un walkthrough browser autenticato con Clerk Development e servizi
+   di test, senza usare household o recapiti reali.
 
 ## Draft e canali
 
@@ -59,7 +58,7 @@ allo stesso database configurato da `DATABASE_URL`, espone solo letture
 minimizzate e l'invocazione della funzione `record_save_the_date`. Il lookup
 di recovery confronta l'hash della stessa richiesta prima dei controlli di
 scadenza del workflow. L'adapter è testato con query simulate; la connessione
-non è stata eseguita contro Neon. Restano la pagina Clerk/allowlist e i test UI.
+non è stata eseguita contro Neon. La UI privata è descritta nello Step 7.5c.
 Nessuna migration è stata applicata a Neon.
 
 ## Azioni amministrative — Step 7.5b
@@ -74,6 +73,20 @@ ricevuta e uno stato manuale. Errori non riconosciuti diventano
 `STD_UNAVAILABLE`, senza dettagli SQL o host. Test con sorgente e attore fittizi
 verificano l'autorizzazione prima delle letture, la minimizzazione e la gestione
 degli errori. Le azioni non inviano comunicazioni.
+
+## Interfaccia di revisione — Step 7.5c
+
+`/admin/save-the-date` richiede Clerk e allowlist sia nel rendering della pagina
+sia in ogni server action. La pagina non carica dati al render: l'amministratore
+deve premere “Load review”. La tabella mostra UUID esterno/interno, conteggio,
+blocchi e stato, senza nomi o recapiti. Solo un nucleo eleggibile può essere
+selezionato; la preparazione ricontrolla sorgente e snapshot e mostra il draft
+in una textarea readonly. La registrazione richiede la conferma separata di uno
+stato ammesso e non invia messaggi. Se il risultato è incerto, l'interfaccia
+chiede di controllare lo stato prima del retry. Test Node verificano le frasi di
+conferma e che la registrazione sia disabilitata senza consenso o con una
+transizione non ammessa; lint, TypeScript e build validano la route. Il browser
+Clerk autenticato non è stato collegato in questo ambiente.
 
 ## Persistenza atomica — Step 7.4
 
