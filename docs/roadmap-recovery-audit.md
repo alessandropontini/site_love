@@ -43,7 +43,7 @@ Il repository documenta esplicitamente gli step 1–3, 4, 5 e 6, ma non contiene
 | 4. Household UUID come identità stabile del nucleo | **COMPLETA nel runtime** | Lettura e parsing espliciti delle due schede; snapshot, ricevuta e Apply contratto v3; mapping univoco `(source_id, external_household_id)`; migrazione 010; UI Preview/Apply e test fittizi. | Nessuna migrazione è stata applicata a Neon in questo lavoro. Associazioni effettive dei nuclei esistenti restano soggette a riconciliazione approvata. |
 | 5. Riconciliazione dei nuclei Neon esistenti | **PARZIALE: procedura pronta, mapping reale non eseguito** | Migrazione 011 e funzione owner-only per mapping espliciti, roster esatto e audit metadata-only; test PGlite. | Nessun mapping live è stato approvato o scritto. Per un'operazione reale servono ambiente e backup verificati e una mappa privata approvata. |
 | 6. Preview/Apply amministrativo della sincronizzazione | **COMPLETA** nei contratti legacy e Household UUID | `app/admin/guests/GuestListSynchronization.tsx`; `lib/guest-sync/workflow.ts`; SQL 008–010; test `engine`, `database`, `google`, `auth`, `exclusions`, `presentation`, `households`. | I test locali non verificano Clerk/browser autenticati o concorrenza multi-connessione Neon. |
-| 7. Save the Date | **PARZIALE: planner 7.1, draft 7.2, ricevuta 7.3 e journal SQL 7.4 presenti; adapter/UI mancanti** | Planner read-only per mapping esatto, draft bilingue/canali manuali, ricevuta HMAC e migration 012 atomica/idempotente con grant minimi. Test PGlite sintetici. Il vecchio commit `179bfd4` resta un riferimento incompatibile non integrato. | Mancano adapter DB, revisione/conferma nella pagina Clerk/allowlist e test UI. Nessun invio automatico o migration live. |
+| 7. Save the Date | **PARZIALE: planner 7.1, draft 7.2, ricevuta 7.3, journal SQL 7.4 e adapter 7.5a presenti** | Planner read-only per mapping esatto, draft bilingue/canali manuali, ricevuta HMAC, migration 012 atomica/idempotente con grant minimi e adapter server-side sul ruolo sync. Test PGlite e query simulate. Il vecchio commit `179bfd4` resta un riferimento incompatibile non integrato. | Mancano revisione/conferma nella pagina Clerk/allowlist e test UI. Nessun invio automatico o migration live. |
 | 8. Emissione inviti/QR, dashboard RSVP e risposte offline | **PARZIALE; preview admin 8.1–8.2 completata, attivazione ancora aperta** | Generatore per nuovi nuclei, route RSVP personale, dashboard/export online e preview admin read-only per nuclei importati. Il commit locale `0f26498` aggiungeva un lifecycle per household esistenti, non integrato nel branch remoto. | L'attivazione richiesta deve selezionare il mapping esplicito e passare da Clerk/allowlist; il lifecycle storico usa un diverso contratto operativo e non è ancora una soluzione compatibile. Le risposte offline restano da integrare o reimplementare. |
 
 ## Architettura e componenti presenti
@@ -51,7 +51,7 @@ Il repository documenta esplicitamente gli step 1–3, 4, 5 e 6, ma non contiene
 - Next.js App Router: home pubblica `app/page.tsx`; route privata `/rsvp/[token]`; aree admin `/admin/rsvp` e `/admin/guests`.
 - Neon Postgres per risposte RSVP e planning; sincronizzazione Google Sheets manuale, server-side e con scope API read-only.
 - Clerk per identità amministrativa, con allowlist di email verificata. Ruoli DB runtime e sync distinti secondo le migrazioni e le guide.
-- QR generati localmente in cartella privata esterna al repository. Save the Date ha planner, draft, ricevuta e journal SQL, ma non ancora adapter/UI; `lib/rsvp/email.ts` serve le conferme del modulo RSVP.
+- QR generati localmente in cartella privata esterna al repository. Save the Date ha planner, draft, ricevuta, journal SQL e adapter; la UI admin è ancora aperta. `lib/rsvp/email.ts` serve le conferme del modulo RSVP.
 - Il contenuto grafico e gli asset non sono stati modificati né valutati visivamente.
 
 ## Migrazioni SQL 001–012
@@ -157,7 +157,7 @@ email e restore backup.
 2. Household UUID runtime 9C.1–9C.3 completato; la migrazione resta non applicata fuori dai test locali.
 3. Procedura tecnica di riconciliazione completata; mapping reale resta separato e non autorizzato da questo step.
 4. Conservare e confrontare i commit locali 012–015 con la base runtime/reconciliation 010–011 corrente. Non integrare la vecchia coppia 010–011 né sovrascrivere Step 8.1–8.2.
-5. **Step 7.1–7.4 completati:** planner, draft, ricevuta HMAC e journal SQL atomico verificati con fixture; prossimo bullet: adapter DB e pagina admin Clerk/allowlist, senza invio.
+5. **Step 7.1–7.5a completati:** planner, draft, ricevuta HMAC, journal SQL atomico e adapter DB verificati con fixture; prossimo bullet: pagina admin Clerk/allowlist e test UI, senza invio.
 6. Completare l'attivazione richiesta per mapping UUID esplicito, riusando dal lifecycle storico solo i contratti compatibili: Clerk/allowlist, selezione `(source_id, external_household_id)`, preservazione di identità/risposte, token hash-only, atomicità, replay safety e output QR privato senza invio.
 7. Valutare separatamente le risposte offline (014) e i grant (015); verificare la parità con il runtime corrente prima di portarli. Chiudere con test SQL isolati, concorrenza PostgreSQL, browser autenticato fittizio e gate backup/rollback. Nessun deploy o dato reale.
 

@@ -1,9 +1,9 @@
 # Save the Date — modello di pianificazione
 
 Questo documento descrive il lavoro del punto 7. Planner, draft bilingue,
-workflow con ricevuta e journal SQL sono implementati come componenti server-side
-con test sintetici. L'adapter DB e la pagina admin Clerk/allowlist sono ancora
-aperti. Non vengono inviati messaggi.
+workflow con ricevuta, journal SQL e adapter server-side sono implementati e
+verificati con fixture sintetiche. La pagina admin Clerk/allowlist e i relativi
+test UI restano aperti. Non vengono inviati messaggi.
 
 ## Contratto di associazione
 
@@ -22,11 +22,9 @@ non crea household o invitee e non modifica mapping o membership.
 
 ## Passi successivi
 
-1. Collegare il workflow al database tramite `site_love_sync`, mantenendo
-   `site_love_app` privo di accesso alle tabelle e alla funzione.
-2. Mostrare planner e draft nell'area Clerk/allowlist, con controllo di household,
+1. Mostrare planner e draft nell'area Clerk/allowlist, con controllo di household,
    lingua, canale e testo, conferma esplicita e recovery del retry.
-3. Aggiungere test UI e verifiche locali della route protetta.
+2. Aggiungere test UI e verifiche locali della route protetta.
 
 ## Draft e canali
 
@@ -53,11 +51,15 @@ invalida la registrazione.
 La conferma accetta solo gli stati manuali `READY`, `SENT` o `FAILED` (oltre al
 reset correttivo esplicito `NOT_SENT`). Prima di verificare scadenza e sorgente,
 il workflow controlla se lo stesso evento è già stato registrato: un timeout
-dopo il commit può così essere recuperato senza duplicare la transizione. In
-questo bullet la persistenza è ancora un'interfaccia iniettata e testata con
-fixture. La migration 012 aggiunge lo stato e il journal atomico con lock e
-grants minimi; la connessione dell'applicazione e la pagina Clerk/allowlist
-restano il prossimo bullet. Nessuna migration è stata applicata a Neon.
+dopo il commit può così essere recuperato senza duplicare la transizione.
+La migration 012 aggiunge lo stato e il journal atomico con lock e grants
+minimi; l'adapter Step 7.5a usa `GUEST_SYNC_DATABASE_URL`, verifica che punti
+allo stesso database configurato da `DATABASE_URL`, espone solo letture
+minimizzate e l'invocazione della funzione `record_save_the_date`. Il lookup
+di recovery confronta l'hash della stessa richiesta prima dei controlli di
+scadenza del workflow. L'adapter è testato con query simulate; la connessione
+non è stata eseguita contro Neon. Restano la pagina Clerk/allowlist e i test UI.
+Nessuna migration è stata applicata a Neon.
 
 ## Persistenza atomica — Step 7.4
 

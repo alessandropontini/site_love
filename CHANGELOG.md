@@ -4,6 +4,10 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Step 7.5a — adapter database Save the Date
+- Aggiunto l'adapter server-side sul ruolo sync per leggere stato/storico e invocare la funzione SQL con request minimizzata.
+- Il lookup replay confronta l'hash della stessa richiesta; i riepiloghi non espongono contatto o attore. Aggiunti test dell'adapter con query simulate.
+
 ### Step 7.4 — journal SQL Save the Date
 - Aggiunta la migration 012 con stato versionato ed eventi append-only, legati al mapping Household UUID e al contatto nominativo.
 - La funzione atomica valida modalità, mapping, esclusioni, replay e versione; `site_love_sync` riceve solo SELECT/EXECUTE e il runtime RSVP resta escluso.
