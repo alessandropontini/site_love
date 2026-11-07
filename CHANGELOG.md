@@ -4,6 +4,10 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Step 7.3 — ricevuta privata Save the Date
+- Aggiunta ricevuta HMAC legata ad amministratore, mapping, sorgente, snapshot, canale, lingua e draft; i dati sorgente sono vincolati con commitment HMAC senza entrare nella ricevuta.
+- Aggiunti controlli di attore, integrità, scadenza, cambi sorgente/snapshot e recupero replay prima della scadenza. Test con dipendenze fittizie; nessun esito è scritto da questo bullet.
+
 ### Step 7.2 — draft Save the Date bilingue
 - Aggiunto il testo italiano/inglese collegato ai contenuti editoriali centrali e ai canali manuali approvati, inclusa la carta.
 - Il draft non contiene destinatari né azioni di trasporto/invio; test sintetici verificano testo, lingua e canali.

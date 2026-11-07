@@ -41,6 +41,23 @@ Il testo è una bozza operativa: l'amministratore deve rivederlo prima di
 copiarlo. La scelta del canale e la generazione del testo non inviano messaggi,
 non aprono applicazioni esterne e non registrano che l'invio sia avvenuto.
 
+## Ricevuta di preparazione — Step 7.3
+
+La ricevuta è firmata HMAC con scopo dedicato e legata all'attore Clerk,
+all'identità esterna/interna del household, al contatto selezionato, alla lingua,
+al canale, alla versione, ai dati sorgente, allo snapshot DB e al testo. Sorgente,
+snapshot e testo sono rappresentati nella ricevuta solo da commitment HMAC: non
+contiene nomi, recapiti, testo sorgente o risposte RSVP. La scadenza è di 30
+minuti. Una modifica dei dati sorgente, dello snapshot, del mapping o del template
+invalida la registrazione.
+
+La conferma accetta solo gli stati manuali `READY`, `SENT` o `FAILED` (oltre al
+reset correttivo esplicito `NOT_SENT`). Prima di verificare scadenza e sorgente,
+il workflow controlla se lo stesso evento è già stato registrato: un timeout
+dopo il commit può così essere recuperato senza duplicare la transizione. In
+questo bullet la persistenza è ancora un'interfaccia iniettata e testata con
+fixture; migrazione e adapter SQL sono il bullet successivo.
+
 Gli artefatti storici del branch `docs/household-uuid-plan` sono riferimenti
 funzionali, non una base da cherry-pickare: il loro schema SQL 012 dipende da una
 diversa coppia di migrazioni 010–011. Ogni migrazione futura sarà verificata con
