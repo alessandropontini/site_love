@@ -4,6 +4,10 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Step 7.2 — draft Save the Date bilingue
+- Aggiunto il testo italiano/inglese collegato ai contenuti editoriali centrali e ai canali manuali approvati, inclusa la carta.
+- Il draft non contiene destinatari né azioni di trasporto/invio; test sintetici verificano testo, lingua e canali.
+
 ### Step 7.1 — planner Save the Date read-only
 - Aggiunto il controllo di eleggibilità su mapping Household UUID esplicito, roster, contatto nominativo, lingua e household esclusi, senza generare testi o leggere recapiti.
 - Aggiunte fixture sintetiche per mapping mancanti/ambigui, roster divergenti e contatti non validi. Nessuna sorgente o database reale è stata consultata.

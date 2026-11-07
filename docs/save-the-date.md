@@ -1,8 +1,9 @@
 # Save the Date — modello di pianificazione
 
-Questo documento descrive il lavoro iniziale del punto 7. Il planner attuale è
-solo una verifica read-only dell'associazione UUID e del roster: non prepara
-testi, non legge contatti, non registra esiti e non invia comunicazioni.
+Questo documento descrive il lavoro del punto 7. Il planner è una verifica
+read-only dell'associazione UUID e del roster. Il draft bilingue usa la data,
+il luogo e i nomi già configurati nel sito e offre una scelta di canale manuale;
+non legge recapiti, registra esiti o invia comunicazioni.
 
 ## Contratto di associazione
 
@@ -21,12 +22,24 @@ non crea household o invitee e non modifica mapping o membership.
 
 ## Passi successivi
 
-1. Estendere la revisione privata con canale, lingua e testo approvato, senza
-   esporre dati oltre l'area admin e senza inviare automaticamente.
+1. Mostrare planner e draft nell'area privata, con controllo amministrativo di
+   household, lingua, canale e testo prima dell'uso.
 2. Registrare soltanto l'esito dichiarato dall'amministratore tramite un evento
    atomico, idempotente e append-only; mantenere il runtime RSVP senza privilegi
    diretti di scrittura sulle nuove tabelle.
 3. Aggiungere l'interfaccia Clerk/allowlist con conferma e recovery del retry.
+
+## Draft e canali
+
+Il draft `std-draft-v1` è disponibile in italiano e inglese. La data, il luogo e
+i nomi sono letti da `lib/editorialConfig.ts`, evitando copie indipendenti. I
+canali selezionabili manualmente sono SMS, iMessage, WhatsApp, email, Telegram,
+Instagram e carta. Il risultato contiene solo canale, lingua, versione del
+template e testo; nessun destinatario o dato di contatto è aggiunto.
+
+Il testo è una bozza operativa: l'amministratore deve rivederlo prima di
+copiarlo. La scelta del canale e la generazione del testo non inviano messaggi,
+non aprono applicazioni esterne e non registrano che l'invio sia avvenuto.
 
 Gli artefatti storici del branch `docs/household-uuid-plan` sono riferimenti
 funzionali, non una base da cherry-pickare: il loro schema SQL 012 dipende da una
