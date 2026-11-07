@@ -223,7 +223,23 @@ excluded households, token or RSVP activity, non-disabled status and source /
 database roster or invitation metadata drift.
 
 This preview neither issues invitations nor creates or exposes a token, QR,
-manifest or database write. It is not an admin action yet. Later bullets must
-add independent review, explicit Clerk/allowlist confirmation and a single
-atomic idempotent activation operation without giving direct write privileges
-to the ordinary RSVP runtime role.
+manifest or database write. The admin route and explicit preview action are
+added in Step 8.2 below. A later activation bullet must add explicit
+confirmation and a single atomic idempotent operation without giving direct
+write privileges to the ordinary RSVP runtime role.
+
+### Admin preview — Step 8.2
+
+`/admin/invitations` is protected at page render and in its Server Action by
+Clerk plus `RSVP_ADMIN_EMAILS`. Opening the page does not contact Sheets or the
+database. An administrator must explicitly request a preview; the server then
+reads the Household UUID source and minimized database snapshot and compares
+them with the Step 8.1 planner. The page shows household mapping IDs, labels,
+counts and blockers, without named invitees, contact details, answers, tokens,
+hashes or raw snapshots. The response DTO is server-produced and does not accept
+an ID from the browser.
+
+This screen is review-only: it has no confirmation or activation control and
+does not create links, QR codes, tokens, database writes or communications.
+Proceeding to activation remains a separate roadmap bullet requiring its own
+review and atomic database operation.

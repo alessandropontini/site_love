@@ -3,6 +3,12 @@ const assert = require("node:assert/strict");
 const { previewImportedHouseholdActivation } = require(
   process.env.SYNC_TEST_BUILD + "/rsvp/imported-household-activation.js"
 );
+const { loadImportedHouseholdActivationPreview } = require(
+  process.env.SYNC_TEST_BUILD + "/rsvp/imported-household-activation-preview.js"
+);
+const { headers, householdHeaders } = require(
+  process.env.SYNC_TEST_BUILD + "/model.js"
+);
 
 const ids = {
   source: "fictional-source",
@@ -125,4 +131,89 @@ test("any parser error prevents activation and absent rows are not silently elig
   const preview = previewImportedHouseholdActivation(parsed, snapshot, ids.source);
   assert.equal(preview.eligible, false);
   assert(preview.households[0].blockers.includes("Fixture parser error."));
+});
+
+test("admin preview returns only the minimal household review DTO", async () => {
+  const { snapshot } = fixture();
+  const guestValues = {
+    "Guest name": "Fictional Rowan",
+    "Guest type": "Adult",
+    Group: "Fictional group",
+    "List owner": "Ale",
+    "Party / family": "Fictional household",
+    "Planning status": "On list",
+    Invitation: "",
+    RSVP: "",
+    Priority: "Normal",
+    Table: "",
+    "Dietary requirements": "Fictional private note",
+    Notes: "Fictional source note",
+    "Sync UUID": ids.guestA,
+    "Household UUID": ids.externalHousehold,
+    "Host Sync UUID": ""
+  };
+  const householdValues = {
+    "Household UUID": ids.externalHousehold,
+    "Party / family": "Fictional household",
+    "List owner": "Ale",
+    "Contact guest UUID": ids.guestA,
+    "Contact email": "fictional@example.invalid",
+    "Contact phone": "+15555550123",
+    Language: "en"
+  };
+  const result = await loadImportedHouseholdActivationPreview({
+    sourceId: ids.source,
+    readSheets: async () => ({
+      guestList: [
+        [...headers, "Household UUID", "Host Sync UUID"],
+        [...headers.map((header) => guestValues[header] ?? ""), ids.externalHousehold, ""]
+      ],
+      households: [
+        householdHeaders,
+        householdHeaders.map((header) => householdValues[header] ?? "")
+      ]
+    }),
+    snapshot: async () => ({
+      data: {
+        ...snapshot,
+        members: snapshot.members.slice(0, 1),
+        households: snapshot.households.map((household) => ({ ...household, namedCount: 1 })),
+        inviteeCount: 1
+      },
+      hash: "fictional-snapshot-hash"
+    })
+  });
+
+  assert.equal(result.eligible, true);
+  assert.equal(result.households[0].householdId, ids.household);
+  assert.equal(result.households[0].externalHouseholdId, ids.externalHousehold);
+  const serialized = JSON.stringify(result);
+  for (const privateValue of [
+    "Fictional Rowan",
+    "fictional@example.invalid",
+    "+15555550123",
+    "Fictional private note",
+    "Fictional source note",
+    "token"
+  ]) assert.equal(serialized.includes(privateValue), false);
+});
+
+test("admin preview requests each read source once and exposes no mutation dependency", async () => {
+  const calls = { sheets: 0, snapshot: 0 };
+  const { snapshot } = fixture();
+  const dependencies = {
+    sourceId: ids.source,
+    readSheets: async () => {
+      calls.sheets += 1;
+      return { guestList: [], households: [] };
+    },
+    snapshot: async () => {
+      calls.snapshot += 1;
+      return { data: snapshot, hash: "fictional-snapshot-hash" };
+    }
+  };
+
+  await loadImportedHouseholdActivationPreview(dependencies);
+  assert.deepEqual(calls, { sheets: 1, snapshot: 1 });
+  assert.equal(Object.keys(dependencies).some((key) => /apply|write|activate/i.test(key)), false);
 });

@@ -4,6 +4,12 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Step 8.2 — preview amministrativa degli inviti importati
+- Aggiunta `/admin/invitations`, protetta da Clerk e allowlist, con caricamento manuale: la pagina non legge Sheets o database all'apertura.
+- Mostrati mapping e conteggi per la revisione; il DTO esclude nomi degli invitati, contatti, dati RSVP, hash/token e snapshot grezzi.
+- La schermata è esclusivamente read-only: nessuna conferma o attivazione, generazione QR/token o comunicazione.
+- Aggiunti test sintetici del servizio e della minimizzazione del DTO. Nessuna sorgente o database reale è stato consultato.
+
 ### Step 8.1 — preview di attivazione degli household importati
 - Aggiunto un piano read-only che seleziona gli household soltanto tramite mapping approvati Household UUID e confronta il roster persistito con quello sorgente.
 - Bloccati household esclusi, mapping o roster ambigui/divergenti, token o risposte già presenti e stati incompatibili; il modello non crea household, token o QR.

@@ -281,9 +281,11 @@ failure insertion cannot overwrite an already committed SUCCESS.
 That command inserts new households and is not an activation tool for existing
 imported records. The Step 8.1 read-only model now previews eligible mapped
 households and blocks roster or state conflicts; it does not activate records.
-Admin review/confirmation and an atomic idempotent issuance operation that
-targets the same existing household remain to be implemented. Token and QR
-generation must stay private and must not send invitations automatically.
+Step 8.2 adds the protected `/admin/invitations` review screen; it loads data
+only after an explicit Preview request and returns a minimized review DTO.
+Confirmation and an atomic idempotent issuance operation that targets the same
+existing household remain to be implemented. Token and QR generation must stay
+private and must not send invitations automatically.
 
 ### Backup and rollback
 

@@ -8,8 +8,9 @@ state applicate a Neon da questo lavoro e nessun mapping reale è stato eseguito
 Le note di stato storiche più sotto descrivono la data indicata e non prevalgono
 sul runtime documentato sopra.
 
-Lo Step 8 è iniziato con una preview read-only degli household importati. Non
-offre ancora una schermata amministrativa né attiva inviti, token o QR.
+Lo Step 8 include una preview read-only degli household importati e la pagina
+admin `/admin/invitations`. La pagina carica Sheets e database solo dopo una
+richiesta esplicita dell'amministratore; non attiva inviti, token o QR.
 
 Stato strutturale registrato al 30 ottobre 2026: struttura approvata e creata nel foglio originale. Households contiene le sette intestazioni previste; Guest List contiene Household UUID e Host Sync UUID nelle colonne P e Q. Nessun nucleo o identificativo assegnato: le celle dati nuove erano vuote alla verifica. Verificati intestazioni, formato e convalide tramite rilettura API. La modalità non è attivata nel runtime e non è integrata con Preview/Apply. Nessuna migrazione applicata. Il codice nome/cognome resta invariato.
 
@@ -128,8 +129,22 @@ e household non disabilitati. Non seleziona record per nome o etichetta e non
 crea household, token, QR, ricevute di attivazione o scritture DB.
 
 La funzione viene verificata con fixture sintetiche nella suite guest-sync/RSVP.
-Interfaccia admin, conferma amministrativa, transazione di attivazione, token e
-QR privati restano scope successivi e separati.
+La preview amministrativa è descritta allo Step 8.2; conferma, transazione di
+attivazione, token e QR privati restano scope successivi e separati.
+
+## Step 8.2 — preview amministrativa
+
+La route `/admin/invitations` verifica Clerk e allowlist prima di mostrare la
+pagina; la Server Action ripete il controllo prima di leggere i dati. L'apertura
+della route è priva di query a servizi esterni. Solo il comando esplicito
+`Preview imported invitations` legge le due schede Household UUID e lo snapshot
+DB, quindi passa il risultato al planner 8.1.
+
+La schermata restituisce etichetta e UUID del household, ID RSVP esistente,
+conteggi e motivi di blocco. Nomi dei singoli invitati, email, telefoni, risposte,
+token/hash e snapshot completi non fanno parte del DTO serializzato al browser.
+Non esiste un comando di conferma: il bullet successivo progetterà la conferma e
+l'operazione di attivazione atomica. Il test usa sorgenti e snapshot sintetici.
 
 ## Verifica dello step 4 — 31 ottobre 2026
 
