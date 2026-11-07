@@ -1,9 +1,9 @@
 # Save the Date — modello di pianificazione
 
-Questo documento descrive il lavoro del punto 7. Il planner è una verifica
-read-only dell'associazione UUID e del roster. Il draft bilingue usa la data,
-il luogo e i nomi già configurati nel sito e offre una scelta di canale manuale;
-non legge recapiti, registra esiti o invia comunicazioni.
+Questo documento descrive il lavoro del punto 7. Planner, draft bilingue,
+workflow con ricevuta e journal SQL sono implementati come componenti server-side
+con test sintetici. L'adapter DB e la pagina admin Clerk/allowlist sono ancora
+aperti. Non vengono inviati messaggi.
 
 ## Contratto di associazione
 
@@ -22,12 +22,11 @@ non crea household o invitee e non modifica mapping o membership.
 
 ## Passi successivi
 
-1. Mostrare planner e draft nell'area privata, con controllo amministrativo di
-   household, lingua, canale e testo prima dell'uso.
-2. Registrare soltanto l'esito dichiarato dall'amministratore tramite un evento
-   atomico, idempotente e append-only; mantenere il runtime RSVP senza privilegi
-   diretti di scrittura sulle nuove tabelle.
-3. Aggiungere l'interfaccia Clerk/allowlist con conferma e recovery del retry.
+1. Collegare il workflow al database tramite `site_love_sync`, mantenendo
+   `site_love_app` privo di accesso alle tabelle e alla funzione.
+2. Mostrare planner e draft nell'area Clerk/allowlist, con controllo di household,
+   lingua, canale e testo, conferma esplicita e recovery del retry.
+3. Aggiungere test UI e verifiche locali della route protetta.
 
 ## Draft e canali
 
@@ -56,7 +55,21 @@ reset correttivo esplicito `NOT_SENT`). Prima di verificare scadenza e sorgente,
 il workflow controlla se lo stesso evento è già stato registrato: un timeout
 dopo il commit può così essere recuperato senza duplicare la transizione. In
 questo bullet la persistenza è ancora un'interfaccia iniettata e testata con
-fixture; migrazione e adapter SQL sono il bullet successivo.
+fixture. La migration 012 aggiunge lo stato e il journal atomico con lock e
+grants minimi; la connessione dell'applicazione e la pagina Clerk/allowlist
+restano il prossimo bullet. Nessuna migration è stata applicata a Neon.
+
+## Persistenza atomica — Step 7.4
+
+`rsvp.record_save_the_date(jsonb)` verifica modalità Household UUID, mapping
+esatto, contatto nominativo, esclusioni e versione attesa sotto il lock condiviso
+con sync e riconciliazione. Stato ed evento append-only vengono scritti nella
+stessa transazione. Lo stesso ID e request hash restituiscono il risultato
+registrato; riuso con contenuto diverso e versioni stale falliscono. La funzione
+non aggiorna household, invitees, token o risposte. `site_love_sync` può leggere i
+metadati ed eseguire la funzione, ma non scrivere direttamente le tabelle;
+`site_love_app` non può accedere agli oggetti Save the Date. Migration e grant
+sono verificati con PGlite su dati sintetici, non applicati a Neon.
 
 Gli artefatti storici del branch `docs/household-uuid-plan` sono riferimenti
 funzionali, non una base da cherry-pickare: il loro schema SQL 012 dipende da una

@@ -19,6 +19,9 @@ Non sostituisce una verifica legale della situazione concreta.
 - lingua, scadenza e timestamp tecnici;
 - token casuale soltanto come hash server-side;
 - audit tecnico privo del contenuto della risposta.
+- stato e storico operativo Save the Date: household/contact UUID, attore admin,
+  canale, lingua, versione template, transizione e commitment HMAC; nessun
+  destinatario, testo del messaggio o prova automatica di consegna.
 
 Il form non raccoglie telefono, indirizzo, documento, data di nascita o testo
 libero su allergie, disabilità o salute. Le esigenze particolari vengono
@@ -89,7 +92,7 @@ e non richiedono servizi fotografici o tracker esterni quando vengono aperte.
 ## Conservazione approvata
 
 Data matrimonio: 13 maggio 2028. Tutti i dati personali RSVP, email, audit,
-manifest, QR operativi, export e backup saranno cancellati entro l'11 agosto
+stati/eventi Save the Date, manifest, QR operativi, export e backup saranno cancellati entro l'11 agosto
 2028, 90 giorni dopo l'evento. Impostare un promemoria operativo: il codice non
 deve fingere che la cancellazione sia automatica.
 

@@ -179,7 +179,7 @@ do not weaken `allowedOrigins` to bypass that protection.
 
 ## Database setup and permissions
 
-Back up and test restore first. Apply migrations 001–011 in numeric order on an
+Back up and test restore first. Apply migrations 001–012 in numeric order on an
 isolated development branch with the schema owner, not a runtime credential.
 Create the dedicated login role `site_love_sync` through Neon role management
 before applying 008, or provision a restricted PostgreSQL login using a secure
@@ -222,6 +222,21 @@ operation is idempotent for the same exact mapping and roster and never changes
 invitation or RSVP fields. It does not determine or approve the mapping: compare
 the IDs against a separately reviewed source before calling it. No runtime role
 can execute the function. No records are reconciled by migration 011 itself.
+
+Migration 012 adds private manual Save the Date state and an append-only event
+journal. If `site_love_sync` exists, it receives `SELECT` on those two metadata
+tables and `EXECUTE` on `rsvp.record_save_the_date(jsonb)`; it has no direct
+write privilege. `site_love_app` cannot read or invoke these objects. The
+function revalidates Household UUID mode, the exact source/external/internal
+mapping, named contact membership and exclusions while holding the sync lock.
+It uses an expected version and event UUID to reject stale updates and make an
+identical retry idempotent. Current state and history commit in one transaction.
+The journal contains status, channel/language/template, actor and HMAC
+commitments only; it does not contain the message or destination. The server is
+responsible for Clerk/allowlist authorization and attests the actor; SQL does
+not verify that a human communication was delivered. Apply migration 012 to
+Neon only through a separately approved release procedure. The local PGlite
+test runs all migrations with fictional data and verifies RSVP fields and grants.
 
 Migration 008:
 

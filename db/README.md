@@ -69,3 +69,16 @@ column. It does not update invitation or RSVP state. Runtime roles receive no
 execute or audit-table access. Use only with an independently reviewed mapping
 and an approved environment/backup procedure; the migration does not reconcile
 any records by itself.
+
+`012_save_the_date_tracking.sql` adds a versioned current state and an
+append-only event journal for manually prepared Save the Date outcomes. Both
+are keyed by the exact `(source_id, external_household_id)` mapping and retain
+only household/contact UUIDs, server-asserted admin actor, channel/language,
+template, status transitions and HMAC commitments. Message text, destination
+values, tokens and RSVP answers are not stored. The function validates the
+Household UUID mapping and named contact and commits state plus event atomically.
+`site_love_sync` receives SELECT and function EXECUTE only; neither it nor
+`site_love_app` receives direct write privileges. The SQL function does not
+prove that a human sent a message; the Clerk-protected server action attests the
+administrator's declaration. PGlite covers the migration and grants with
+synthetic data. This repository change does not apply migration 012 to Neon.

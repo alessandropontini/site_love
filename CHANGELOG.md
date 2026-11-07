@@ -4,6 +4,11 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Step 7.4 — journal SQL Save the Date
+- Aggiunta la migration 012 con stato versionato ed eventi append-only, legati al mapping Household UUID e al contatto nominativo.
+- La funzione atomica valida modalità, mapping, esclusioni, replay e versione; `site_love_sync` riceve solo SELECT/EXECUTE e il runtime RSVP resta escluso.
+- Test PGlite fittizi verificano la migration e i grant, inclusa la preservazione di household, invitee, token hash e risposta. Nessuna migration è stata applicata a Neon.
+
 ### Step 7.3 — ricevuta privata Save the Date
 - Aggiunta ricevuta HMAC legata ad amministratore, mapping, sorgente, snapshot, canale, lingua e draft; i dati sorgente sono vincolati con commitment HMAC senza entrare nella ricevuta.
 - Aggiunti controlli di attore, integrità, scadenza, cambi sorgente/snapshot e recupero replay prima della scadenza. Test con dipendenze fittizie; nessun esito è scritto da questo bullet.
