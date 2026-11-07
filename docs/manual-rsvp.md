@@ -20,8 +20,19 @@ Dopo il primo tentativo il payload viene mantenuto solo nella memoria della
 pagina. Se l'esito è incerto, i campi restano bloccati e l'unica azione è
 ritentare lo stesso payload con lo stesso ID idempotente. Un errore certo
 richiede di ricaricare il nucleo e rifare la revisione. Non viene scritto
-payload o dato personale in URL, storage browser o repository. Il riepilogo
-dashboard e i grant DB 015 restano fuori da questo bullet.
+payload o dato personale in URL, storage browser o repository. La presentazione
+del riepilogo in dashboard e i grant DB restano bullet separati.
+
+## Grant read-only audit — Step 8.6d
+
+La migration `015_manual_rsvp_dashboard_read.sql` revoca al ruolo
+`site_love_sync` la lettura diretta di `manual_response_events` e concede
+soltanto `manual_response_dashboard_events()`. La funzione restituisce household
+ID, actor ID, provenienza, motivo strutturato, revisione e timestamp; non
+restituisce hash, nomi, email, risposte o token. `site_love_app` e `PUBLIC` non
+possono leggere il journal né invocare la funzione. La UI di riepilogo e la
+verifica browser restano separate. La migration è verificata solo con PGlite e
+fixture sintetiche e non è stata applicata a Neon.
 
 ## Contratto database — Step 8.6a
 
@@ -72,8 +83,8 @@ retry dello stesso input produce la stessa firma. Gli errori SQL e di
 connessione vengono convertiti in codici sicuri. La funzione non invia email o
 messaggi.
 
-La UI di preview/revisione, il blocco del payload dopo un tentativo, il pulsante
-di retry identico, i riepiloghi/provenienza in dashboard e il walkthrough
-Clerk autenticato restano separati. Test PGlite e fixture fittizie non
-sostituiscono una verifica PostgreSQL multi-connessione. Le migration 014 e
-012–013 non sono state applicate a Neon.
+La UI di preview/revisione, il blocco del payload e il retry identico sono
+descritti nella sezione Step 8.6c. I riepiloghi di provenienza in dashboard e il
+walkthrough Clerk autenticato restano separati. Test PGlite e fixture fittizie
+non sostituiscono una verifica PostgreSQL multi-connessione. Le migration
+012–015 non sono state applicate a Neon.

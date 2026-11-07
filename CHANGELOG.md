@@ -4,6 +4,10 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Step 8.6d — grant ristretto per audit RSVP offline
+- Aggiunta migration 015: revoca la lettura diretta del journal `manual_response_events` dal ruolo `site_love_sync` e concede una sola funzione read-only con campi di audit minimizzati.
+- Il ruolo runtime `site_love_app` e `PUBLIC` non possono leggere il journal né invocare la funzione. Test PGlite coprono campi ammessi, grants e diniego; migration non applicata a Neon. La presentazione in dashboard resta separata.
+
 ### Step 8.6c — interfaccia admin per risposte RSVP offline
 - Aggiunta `/admin/rsvp/manual` protetta da Clerk/allowlist, con selezione di household esistenti, caricamento roster su azione esplicita e revisione di identità e risposte correnti.
 - Il form lascia l'email vuota, richiede provenienza, motivo compatibile con lo stato, attestazione e conferma esplicita; conserva gli ID esistenti e non invia comunicazioni.

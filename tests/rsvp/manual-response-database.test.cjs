@@ -62,6 +62,20 @@ test("manual RSVP journal is atomic, replay-safe and metadata-only", {
       await db.exec("begin; set role site_love_sync;");
       try {
         assert.deepEqual(await record(initial), { revision: 1, replayed: false });
+        const dashboardEvents = (await db.query(
+          "select * from rsvp.manual_response_dashboard_events()"
+        )).rows;
+        assert.equal(dashboardEvents.length, 1);
+        assert.deepEqual(Object.keys(dashboardEvents[0]).sort(), [
+          "actor_id", "created_at", "household_id", "provenance", "recording_reason", "revision"
+        ]);
+        assert.equal(dashboardEvents[0].household_id, ids.household);
+        assert.equal(dashboardEvents[0].actor_id, actor);
+        assert.equal(JSON.stringify(dashboardEvents).includes(initial.requestHash), false);
+        assert.equal(JSON.stringify(dashboardEvents).includes("fictional@example.test"), false);
+        await db.exec("savepoint deny_journal_read;");
+        await assert.rejects(db.query("select * from rsvp.manual_response_events"), /permission denied/);
+        await db.exec("rollback to savepoint deny_journal_read;");
         await db.exec("savepoint deny_direct_write;");
         await assert.rejects(db.exec("delete from rsvp.manual_response_events"), /permission denied/);
         await db.exec("rollback to savepoint deny_direct_write;");
@@ -162,6 +176,9 @@ test("manual RSVP journal is atomic, replay-safe and metadata-only", {
         await db.exec("savepoint deny_lookup;");
         await assert.rejects(db.query("select rsvp.admin_household($1)", [ids.household]), /permission denied/);
         await db.exec("rollback to savepoint deny_lookup;");
+        await db.exec("savepoint deny_dashboard_events;");
+        await assert.rejects(db.query("select * from rsvp.manual_response_dashboard_events()"), /permission denied/);
+        await db.exec("rollback to savepoint deny_dashboard_events;");
       } finally {
         await db.exec("rollback;");
         await db.exec("reset role;");

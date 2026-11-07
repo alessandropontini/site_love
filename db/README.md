@@ -113,9 +113,10 @@ correction. The journal contains actor, provenance, reason, revision and a
 server-computed HMAC commitment, never response content, contact email or
 token. The Clerk-protected Server Action derives the actor and binds every
 validated request field to that HMAC; SQL cannot verify a Clerk session. The
-`site_love_sync` role can execute the restricted functions and read the
-metadata-only journal, but cannot directly write it; `site_love_app` remains
-denied. Clerk/allowlist-protected server actions now call this adapter, while
-the admin form is still a separate step. The migration has only been tested
-locally with fictional data and must not be applied to Neon without separate
-approval.
+`site_love_sync` role can execute the restricted write/read functions, but
+cannot directly read or write the journal after migration 015; the read
+function returns only household ID, actor, provenance, reason, revision and
+timestamp. `site_love_app` and `PUBLIC` remain denied. Clerk/allowlist-protected
+server actions call the write adapter and the admin form uses those actions;
+dashboard presentation of the metadata remains separate. Migrations 014–015 have only been tested locally with
+fictional data and must not be applied to Neon without separate approval.

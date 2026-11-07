@@ -46,7 +46,7 @@ Il repository documenta esplicitamente gli step 1–3, 4, 5 e 6, ma non contiene
 | 5. Riconciliazione dei nuclei Neon esistenti | **PARZIALE: procedura pronta, mapping reale non eseguito** | Migrazione 011 e funzione owner-only per mapping espliciti, roster esatto e audit metadata-only; test PGlite. | Nessun mapping live è stato approvato o scritto. Per un'operazione reale servono ambiente e backup verificati e una mappa privata approvata. |
 | 6. Preview/Apply amministrativo della sincronizzazione | **COMPLETA** nei contratti legacy e Household UUID | `app/admin/guests/GuestListSynchronization.tsx`; `lib/guest-sync/workflow.ts`; SQL 008–010; test `engine`, `database`, `google`, `auth`, `exclusions`, `presentation`, `households`. | I test locali non verificano Clerk/browser autenticati o concorrenza multi-connessione Neon. |
 | 7. Save the Date | **IMPLEMENTAZIONE COMPLETA nei bullet 7.1–7.5c** | Planner read-only per mapping esatto, draft bilingue/canali manuali, ricevuta HMAC, migration 012 atomica/idempotente con grant minimi, adapter DB, azioni server Clerk/allowlist e pagina di revisione/conferma. Test PGlite e fixture sintetiche. Il vecchio commit `179bfd4` resta un riferimento incompatibile non integrato. | Walkthrough browser Clerk autenticato da eseguire con ambiente/servizi di test. Nessun invio automatico o migration live. |
-| 8. Emissione inviti/QR, dashboard RSVP e risposte offline | **PARZIALE: 8.1–8.6c implementati; walkthrough e grant dashboard aperti** | Generatore per nuovi nuclei, route RSVP personale, dashboard/export online, preview read-only, transazione SQL atomica, conferma Clerk/allowlist e handoff privato URL/QR in memoria/browser download. Migration 014 fornisce la scrittura offline atomica; adapter, Server Actions e form ricavano actor da Clerk, richiedono allowlist, conferma e HMAC del payload; retry incerto usa lo stesso payload idempotente. | Walkthrough Clerk e grant 015 vanno valutati separatamente; test SQL multi-connessione e gate backup/rollback restano aperti. QR e token reali non generati; migration 013–014 non applicate. |
+| 8. Emissione inviti/QR, dashboard RSVP e risposte offline | **PARZIALE: 8.1–8.6d implementati; display audit, walkthrough e gate operativi aperti** | Generatore per nuovi nuclei, route RSVP personale, dashboard/export online, preview read-only, transazione SQL atomica, conferma Clerk/allowlist e handoff privato URL/QR in memoria/browser download. Migration 014 implementa la scrittura offline; adapter e form richiedono Clerk/allowlist, conferma, HMAC e retry idempotente. Migration 015 revoca SELECT diretto sul journal e concede al ruolo sync solo una funzione read-only con campi metadata minimizzati. | Integrare il riepilogo audit nella dashboard e fare walkthrough Clerk; test PostgreSQL multi-connessione e gate backup/rollback restano aperti. QR e token reali non generati; migration 013–015 non applicate. |
 
 ## Architettura e componenti presenti
 
@@ -74,8 +74,9 @@ Il repository documenta esplicitamente gli step 1–3, 4, 5 e 6, ma non contiene
 | `012_save_the_date_tracking.sql` | Stato Save the Date versionato, eventi atomici append-only, validazione mapping/contact, replay e grant minimi al ruolo sync. |
 | `013_imported_household_invitation_activation.sql` | Attiva un household importato con mapping esatto, roster persistito, stato/risposte verificati, hash-only, journal idempotente e grants minimi. |
 | `014_manual_rsvp.sql` | Contratto SQL per risposte offline confermate: revisione condivisa, roster esatto, provenienza e motivo strutturato, audit atomico e journal replay-safe metadata-only; invocato da Server Actions Clerk-protette. |
+| `015_manual_rsvp_dashboard_read.sql` | Revoca al ruolo sync la lettura diretta del journal e concede una funzione read-only limitata ai metadati di audit; runtime e `PUBLIC` restano negati. |
 
-Le migration 012–014 presenti nel branch di lavoro sono reimplementazioni adattate ai contratti correnti, verificate localmente e non applicate a Neon. I commit storici `179bfd4`, `0f26498`, `59025e7` e `51fb37a` non sono integrati né pubblicati su GitHub; il loro codice 012–015 resta nella storia locale alternativa.
+Le migration 012–015 presenti nel branch di lavoro sono reimplementazioni adattate ai contratti correnti, verificate localmente e non applicate a Neon. I commit storici `179bfd4`, `0f26498`, `59025e7` e `51fb37a` non sono integrati né pubblicati su GitHub; il loro codice 012–015 resta nella storia locale alternativa.
 
 I commit storici 012–015 si basano anche su una coppia di migrazioni diversa:
 `010_guest_sync_household_foundation.sql` e
@@ -109,8 +110,8 @@ La riconciliazione non può usare nomi o numeri di riga. La migrazione 011 forni
 - La route RSVP risolve il token lato server. La Server Action valida i campi, applica Turnstile se configurato, rate limit e concorrenza ottimistica; il DB evita risposte identiche e non trasforma errori di servizio in successo.
 - `/admin/rsvp` consulta stato e riepiloghi; export CSV protetto applica formula-injection defense e audit.
 - La migration 014 fornisce il contratto DB locale per inserire/correggere risposte offline, distinguendo provenienza, attore e motivo strutturato, con audit metadata-only e revisione condivisa. Non invia notifiche.
-- Adapter e Server Actions proteggono lettura e scrittura con Clerk/allowlist, derivano l'actor dalla sessione e firmano HMAC il payload; email e risposte non sono inferite da Sheets. La UI di preview/revisione e retry esplicito non è ancora implementata.
-- Riepilogo di provenienza in dashboard e walkthrough browser Clerk restano aperti. Nessun messaggio è inviato dall'azione.
+- Adapter e Server Actions proteggono lettura e scrittura con Clerk/allowlist, derivano l'actor dalla sessione e firmano HMAC il payload; il form admin consente preview/revisione, attestazione e retry identico in memoria. Email e risposte non sono inferite da Sheets.
+- Migration 015 limita la lettura dell'audit a una funzione metadata-only concessa al ruolo sync; il ruolo runtime resta negato. Riepilogo di provenienza/storico nella dashboard e walkthrough browser Clerk restano aperti. Nessun messaggio è inviato.
 - L’attivazione inviti importati va separata dal generatore: lookup per Household UUID, verifica roster/stato, token singolo, QR privato, atomicità, replay-safety e gestione revoca/riemissione.
 
 ## Sicurezza, autorizzazioni e idempotenza
@@ -135,11 +136,12 @@ Neon, Sheets o Clerk.
 Alcuni test del lifecycle storico esistono solo nella storia locale alternativa
 e non verificano la base attuale.
 
-I bullet 7 e 8.1–8.6c hanno test locali sintetici per planner, receipt,
-autorizzazione, SQL atomico/replay, QR in memoria e revisione del draft offline.
+I bullet 7 e 8.1–8.6d hanno test locali sintetici per planner, receipt,
+autorizzazione, SQL atomico/replay, QR in memoria, revisione offline e grant
+read-only minimizzati del journal.
 Non sono stati eseguiti test con Neon/Sheets/Clerk live, concorrenza
 multi-connessione o walkthrough browser autenticato. Il grant/dashboard RSVP
-resta aperto. La review indipendente Codex per gli Step 8.4–8.6c è
+resta aperto. La review indipendente Codex per gli Step 8.4–8.6d è
 `INFRASTRUCTURE BLOCKED`: Codex CLI non è installato nel checkout.
 
 ## Dipendenze tecniche
@@ -170,8 +172,8 @@ resta aperto. La review indipendente Codex per gli Step 8.4–8.6c è
 4. Conservare e confrontare i commit locali 012–015 con la base runtime/reconciliation 010–011 corrente. Non integrare la vecchia coppia 010–011 né sovrascrivere Step 8.1–8.2.
 5. **Step 7.1–7.5c implementati:** planner, draft, ricevuta HMAC, journal SQL atomico, adapter DB, azioni admin Clerk/allowlist e pagina di revisione/conferma sono verificati con fixture e build. Il browser Clerk autenticato resta da provare in ambiente di test.
 6. **Step 8.1–8.5 implementati:** preview, interfaccia admin, transazione SQL atomica, preparazione con receipt firmata, conferma Clerk/allowlist, replay e handoff privato URL/QR generato nel browser. Il raw token resta nella memoria della pagina e non è recuperabile dopo refresh/chiusura; nessuna comunicazione automatica.
-7. **8.6a–8.6c implementati:** contratto SQL 014, adapter, azioni Clerk e form admin per dati offline; validazione, HMAC, retry identico e fixture sintetiche. Migration non applicata a Neon.
-8. Valutare separatamente i grant di lettura audit/dashboard (015), senza concedere scritture dirette al ruolo runtime.
+7. **8.6a–8.6d implementati:** migration 014, adapter, azioni Clerk, form admin e migration 015 per lettura audit metadata-only; fixture sintetiche e grant/deny testati localmente. Migration non applicate a Neon.
+8. Integrare il riepilogo di provenienza/storico nella dashboard RSVP tramite il contratto read-only 015.
 9. Chiudere con test SQL PostgreSQL multi-connessione, browser Clerk autenticato fittizio e gate backup/rollback. Nessun deploy o dato reale.
 
 ## Validazione dell’audit
@@ -179,8 +181,9 @@ resta aperto. La review indipendente Codex per gli Step 8.4–8.6c è
 L'audit iniziale era una verifica statica di sorgenti, SQL, test e guide su
 `8e5bbdd5`. I successivi bullet Step 8.3–8.5 sono stati verificati con la suite
 guest-sync/RSVP, lint, TypeScript, build webpack e `git diff --check`, usando
-solo fixture sintetiche. Step 8.6a–8.6c è stato verificato con 173 test
-PGlite/fixture sintetiche, lint, TypeScript, build webpack e `git diff --check`. Il build standard
+solo fixture sintetiche. Step 8.6a–8.6d è stato verificato con 173 test
+PGlite/fixture sintetiche, lint, TypeScript, build webpack (UI nel bullet 8.6c)
+e `git diff --check`. Il build standard
 Turbopack ha fallito in questo ambiente durante il caricamento del database di
 persistence; `next build --webpack` è passato. Non sono state eseguite letture o scritture live su
 Sheets o Neon, generate QR per invitati reali, inviate comunicazioni, né fatti
