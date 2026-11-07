@@ -309,3 +309,19 @@ PNG is not written to the repository, server, database or manifest and is not
 sent. Refreshing or closing the page discards the URL and QR; a downloaded
 image must be protected by the administrator. The local test generates only a
 synthetic fixture QR in memory and verifies the PNG bytes and URL restrictions.
+
+### Native PostgreSQL and backup validation
+
+`.github/workflows/rsvp-postgres-validation.yml` runs the disposable integration
+test in `scripts/test-rsvp-postgres-integration.sh` on the roadmap branch and
+its pull requests. GitHub Actions starts a temporary PostgreSQL 16 service; the
+test applies migrations 001–015, seeds one fictional mapped household, submits
+the same activation through two independent `psql` connections, and requires
+one committed result plus one idempotent replay. It then runs the repository's
+RSVP backup command, restores that dump into another temporary database, and
+compares the existing IDs, mapping, status, fixture hash and audit row.
+
+This proves native PostgreSQL concurrency behavior and the local dump/restore
+path with synthetic data. It does not connect to Neon or Clerk, apply a live
+migration, or replace the required restore check on a separate Neon test branch
+before production use.

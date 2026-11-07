@@ -4,6 +4,10 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Step 8 — verifica PostgreSQL nativo e backup/restore sintetico
+- Aggiunto un workflow GitHub Actions con PostgreSQL 16 temporaneo: applica le migrazioni 001–015, lancia due attivazioni concorrenti su un household fittizio e verifica una sola attivazione con un replay.
+- Il workflow usa il backup RSVP già presente, ripristina in un database effimero e confronta ID, mapping, stato, hash fittizio e journal; non usa Neon, Sheets o credenziali.
+
 ### Step 8.6e — storico offline nella dashboard RSVP
 - Aggiunta alla dashboard admin una tabella con household, ID admin Clerk, provenienza, motivo, revisione e timestamp, letta solo dalla funzione read-only 015 dopo il controllo Clerk/allowlist.
 - L'area RSVP principale resta disponibile se il journal non è raggiungibile e mostra un avviso; aggiunti test sintetici sull'adapter e sul rifiuto di campi non previsti.
