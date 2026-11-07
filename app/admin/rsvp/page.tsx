@@ -8,6 +8,8 @@ import {
   mealPreferenceLabels
 } from "@/lib/rsvp/display";
 import { getAdminRsvpDashboard } from "@/lib/rsvp/db";
+import { readManualResponseDashboardEvents } from "@/lib/rsvp-admin/db";
+import type { ManualResponseDashboardEvent } from "@/lib/rsvp-admin/persistence";
 import type { Attendance } from "@/lib/rsvp/types";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +25,16 @@ const guestTypeLabels = {
   named: "Named guest",
   plus_one: "+1"
 } as const;
+const manualProvenanceLabels: Record<ManualResponseDashboardEvent["provenance"], string> = {
+  phone: "Phone",
+  message: "Message",
+  paper: "Paper",
+  in_person: "In person"
+};
+const manualReasonLabels: Record<ManualResponseDashboardEvent["recordingReason"], string> = {
+  initial_offsite_response: "Initial offline response",
+  correction: "Correction"
+};
 
 function formatDate(value: string | null) {
   if (!value) {
@@ -55,6 +67,12 @@ export default async function AdminRsvpPage() {
   }
 
   const { dashboard } = result;
+  const manualAudit = await readManualResponseDashboardEvents()
+    .then((events) => ({ status: "ready" as const, events }))
+    .catch(() => ({ status: "unavailable" as const, events: [] }));
+  const householdNames = new Map(
+    dashboard.rows.map((row) => [row.householdId, row.householdName])
+  );
 
   return (
     <main className={styles.page}>
@@ -129,6 +147,41 @@ export default async function AdminRsvpPage() {
               <dd>{dashboard.summary.householdsInvitedByBoth}</dd>
             </div>
           </dl>
+        </section>
+
+        <section className={styles.tableCard} aria-labelledby="offline-history-heading">
+          <div className={styles.tableIntro}>
+            <h2 id="offline-history-heading">Offline response history</h2>
+            <p>Admin audit metadata only. It does not include RSVP answers, email, token, or request hash.</p>
+          </div>
+          {manualAudit.status === "unavailable" ? (
+            <p className={styles.historyUnavailable} role="status">
+              Offline response history is unavailable. The RSVP response dashboard remains available.
+            </p>
+          ) : manualAudit.events.length === 0 ? (
+            <p className={styles.empty}>No offline responses have been recorded.</p>
+          ) : (
+            <div className={styles.tableScroll}>
+              <table className={styles.table}>
+                <thead><tr>
+                  <th>Household</th><th>Admin Clerk ID</th><th>Received by</th>
+                  <th>Reason</th><th>Revision</th><th>Recorded</th>
+                </tr></thead>
+                <tbody>
+                  {manualAudit.events.map((event) => (
+                    <tr key={`${event.householdId}-${event.revision}`}>
+                      <td>{householdNames.get(event.householdId) ?? "Household not currently listed"}</td>
+                      <td><code>{event.actorId}</code></td>
+                      <td>{manualProvenanceLabels[event.provenance]}</td>
+                      <td>{manualReasonLabels[event.recordingReason]}</td>
+                      <td>{event.revision}</td>
+                      <td>{formatDate(event.createdAt)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </section>
 
         <section className={styles.tableCard}>

@@ -29,3 +29,7 @@ export function readManualResponseHousehold(id: string) {
 export function recordManualResponse(request: ManualResponseRequest) {
   return store().record(request);
 }
+
+export function readManualResponseDashboardEvents() {
+  return store().dashboardEvents();
+}

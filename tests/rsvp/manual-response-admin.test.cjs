@@ -173,3 +173,40 @@ test("database adapter uses only the restricted functions and validates their re
   assert.match(calls[1].statement, /rsvp\.record_manual_response\(\$1::jsonb\)/);
   assert.deepEqual(JSON.parse(calls[1].parameters[0]), request);
 });
+
+test("dashboard adapter reads only minimized offline audit metadata through the restricted function", async () => {
+  const calls = [];
+  const store = createManualResponseStore(async (statement, parameters) => {
+    calls.push({ statement, parameters });
+    return [{
+      household_id: ids.household,
+      actor_id: "fictional-clerk-admin",
+      provenance: "paper",
+      recording_reason: "correction",
+      revision: 2,
+      created_at: "2026-11-07T12:00:00.000Z"
+    }];
+  });
+
+  assert.deepEqual(await store.dashboardEvents(), [{
+    householdId: ids.household,
+    actorId: "fictional-clerk-admin",
+    provenance: "paper",
+    recordingReason: "correction",
+    revision: 2,
+    createdAt: "2026-11-07T12:00:00.000Z"
+  }]);
+  assert.equal(calls[0].statement, "select * from rsvp.manual_response_dashboard_events()");
+  assert.deepEqual(calls[0].parameters, []);
+
+  const invalid = createManualResponseStore(async () => [{
+    household_id: ids.household,
+    actor_id: "fictional-clerk-admin",
+    provenance: "paper",
+    recording_reason: "correction",
+    revision: 2,
+    created_at: "2026-11-07T12:00:00.000Z",
+    request_hash: "a".repeat(64)
+  }]);
+  await assert.rejects(invalid.dashboardEvents(), (error) => error.name === "ZodError");
+});

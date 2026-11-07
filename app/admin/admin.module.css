@@ -333,6 +333,15 @@
   color: rgba(38, 27, 32, 0.64);
 }
 
+.historyUnavailable {
+  margin: 18px 22px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(155, 121, 72, 0.12);
+  color: #5d4323;
+  line-height: 1.5;
+}
+
 .primaryAction:focus-visible,
 .secondaryAction:focus-visible {
   outline: 3px solid #b88454;

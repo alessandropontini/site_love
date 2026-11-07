@@ -168,8 +168,8 @@ The local-only database contract for recording a response received off-site is
 documented in [manual RSVP](manual-rsvp.md). Migration 014 is not applied to
 Neon. The Clerk/allowlist-protected `/admin/rsvp/manual` screen supports
 household review, explicit confirmation, and same-payload retry after an
-uncertain result. Its dashboard grant review and authenticated browser
-walkthrough remain separate roadmap items.
+uncertain result. `/admin/rsvp` displays audit metadata through the restricted
+read-only contract. The authenticated browser walkthrough remains open.
 
 `npm run backup:rsvp` creates a custom-format `pg_dump` of the `rsvp` schema with owner-only permissions. Restore tests must target a separate Neon branch. A lost or shared link requires token rotation/reissue before launch; do not send the same compromised URL again.
 

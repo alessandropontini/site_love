@@ -4,6 +4,10 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Step 8.6e — storico offline nella dashboard RSVP
+- Aggiunta alla dashboard admin una tabella con household, ID admin Clerk, provenienza, motivo, revisione e timestamp, letta solo dalla funzione read-only 015 dopo il controllo Clerk/allowlist.
+- L'area RSVP principale resta disponibile se il journal non è raggiungibile e mostra un avviso; aggiunti test sintetici sull'adapter e sul rifiuto di campi non previsti.
+
 ### Step 8.6d — grant ristretto per audit RSVP offline
 - Aggiunta migration 015: revoca la lettura diretta del journal `manual_response_events` dal ruolo `site_love_sync` e concede una sola funzione read-only con campi di audit minimizzati.
 - Il ruolo runtime `site_love_app` e `PUBLIC` non possono leggere il journal né invocare la funzione. Test PGlite coprono campi ammessi, grants e diniego; migration non applicata a Neon. La presentazione in dashboard resta separata.

@@ -30,9 +30,17 @@ La migration `015_manual_rsvp_dashboard_read.sql` revoca al ruolo
 soltanto `manual_response_dashboard_events()`. La funzione restituisce household
 ID, actor ID, provenienza, motivo strutturato, revisione e timestamp; non
 restituisce hash, nomi, email, risposte o token. `site_love_app` e `PUBLIC` non
-possono leggere il journal né invocare la funzione. La UI di riepilogo e la
-verifica browser restano separate. La migration è verificata solo con PGlite e
+possono leggere il journal né invocare la funzione. La migration è verificata solo con PGlite e
 fixture sintetiche e non è stata applicata a Neon.
+
+## Riepilogo in dashboard — Step 8.6e
+
+`/admin/rsvp` carica gli eventi dopo Clerk/allowlist usando
+`GUEST_SYNC_DATABASE_URL` e la sola funzione read-only 015. La tabella mostra
+household, ID admin Clerk, provenienza, motivo, revisione e data; non mostra
+hash o contenuto della risposta. Se la lettura audit fallisce, la dashboard
+RSVP principale resta disponibile con un avviso esplicito. Il test browser con
+Clerk autenticato non è stato eseguito.
 
 ## Contratto database — Step 8.6a
 
