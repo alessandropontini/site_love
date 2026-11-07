@@ -207,3 +207,14 @@ Il checkout e la punta remota vanno sempre verificati di nuovo: questo SHA è un
 riferimento storico per il checkpoint, non una garanzia che il branch non sia
 avanzato dopo il 7 novembre. La guida operativa per sessioni successive è
 [`docs/project-handoff.md`](project-handoff.md).
+
+### Roadmap di completamento — 7 novembre 2026
+
+Il runbook per Clerk e Neon e l'architettura delle attività residue sono in
+[`step-8-manual-validation-runbook.md`](step-8-manual-validation-runbook.md) e
+[`step-8-architecture-roadmap.md`](step-8-architecture-roadmap.md). La roadmap
+conferma i due gate manuali: walkthrough con Clerk di test e restore/rollback
+su branch Neon isolato. Non è definito un bullet funzionale 8.7 già approvato.
+La revoca/riemissione token è una proposta locale testabile, ma prima del codice
+richiede una decisione su household con RSVP già registrato, motivazioni,
+consegna e audit. Nessun servizio reale è stato usato per questa documentazione.

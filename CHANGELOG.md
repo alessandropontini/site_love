@@ -4,6 +4,10 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Architettura e roadmap di completamento Step 8
+- Documentati flusso attuale, verifiche locali possibili, gate Clerk/Neon e proposta separata per revoca/riemissione degli inviti, con decisioni di prodotto e criteri di chiusura.
+- Nessuna nuova funzionalità è stata introdotta; la rotazione token resta una proposta e richiede decisione prima dell'implementazione.
+
 ### Runbook verifiche manuali Step 8
 - Preparata una procedura per walkthrough Clerk/allowlist con account di test e restore/rollback su branch Neon isolato, con risultati attesi, criteri di esito e gestione sicura degli artefatti.
 - Le procedure non contattano servizi né concedono autorizzazione per Clerk, Neon, Sheets o dati reali; i due gate restano separati e non eseguiti.

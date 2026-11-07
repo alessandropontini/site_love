@@ -57,3 +57,9 @@ The owner-facing preparation for those two manual checks is in
 [`step-8-manual-validation-runbook.md`](step-8-manual-validation-runbook.md).
 It is procedural only: it does not configure Clerk, connect to Neon/Sheets,
 create test data, or authorize a live operation.
+
+The current architecture, locally developable scopes, and proposed follow-up
+for token revocation/reissue are in
+[`step-8-architecture-roadmap.md`](step-8-architecture-roadmap.md). The
+revocation/reissue item is not approved implementation scope; document the
+product rules first. There is no other defined Step 8.7 feature.
