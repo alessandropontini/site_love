@@ -34,7 +34,7 @@ by its owner.
 
 ## Completed verification evidence
 
-- Guest-sync/RSVP/Save-the-Date suite: 174 passed, 0 failed, 0 skipped using fictional fixtures and PGlite.
+- Guest-sync/RSVP/Save-the-Date suite: 177 passed, 0 failed, 0 skipped using fictional fixtures and PGlite, including the server-side imported activation sandbox E2E.
 - `npm run lint`: passed.
 - `npx tsc --noEmit`: passed.
 - `npm run build -- --webpack`: passed on the application checkpoint before the PostgreSQL workflow commit; that later commit changed only test infrastructure and documentation.
@@ -80,3 +80,8 @@ for token revocation/reissue are in
 [`step-8-architecture-roadmap.md`](step-8-architecture-roadmap.md). The
 revocation/reissue item is not approved implementation scope; document the
 product rules first. There is no other defined Step 8.7 feature.
+
+The server-side sandbox E2E is documented in
+[`step-8-e2e-sandbox.md`](step-8-e2e-sandbox.md). It exercises the action
+workflow and SQL with injected synthetic authorization, fixture Sheets and
+PGlite; it is not browser or live Clerk evidence.

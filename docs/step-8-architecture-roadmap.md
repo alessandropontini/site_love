@@ -39,7 +39,7 @@ non attestano una sessione Clerk reale o un branch Neon.
 | Ambito | Fattibile ora | Limite |
 | --- | --- | --- |
 | Revisione statica di route, Server Actions, grants, log e gestione errori | Sì, in sola lettura | Non equivale a review Codex indipendente né a prova browser. Codex CLI resta `INFRASTRUCTURE BLOCKED` in questo checkout. |
-| Test sintetici di replay, dati incompatibili, conservazione ID e sicurezza dei token | Sì, in locale/CI | Usare solo fixture; non validano permessi configurati su Neon live. |
+| Test sintetici di replay, dati incompatibili, conservazione ID e sicurezza dei token | Sì, in locale/CI; il sandbox E2E server-side è stato aggiunto e passa | Usa Clerk/Sheets sintetici e PGlite; non valida un browser Clerk o permessi configurati su Neon live. |
 | Procedura di walkthrough Clerk e restore/rollback | Sì, documentata in `step-8-manual-validation-runbook.md` | L'esecuzione richiede istanza Clerk e branch Neon separati; il restore scrive sulla destinazione. |
 | Revoca e riemissione di un invito | Architettura e test fittizi sono sviluppabili | È un'estensione non implementata; prima va decisa la regola per household che hanno già una risposta e per link condivisi. |
 | Walkthrough browser autenticato reale | No, non senza istanza/account di test Clerk | Un mock locale non conta come autenticazione Clerk reale. |
@@ -92,11 +92,12 @@ storico. Questa raccomandazione non è una decisione già presa.
 | Ordine | Attività | Tipo | Criterio di chiusura |
 | --- | --- | --- | --- |
 | 0 | Pubblicare il runbook manuale e questa architettura sul branch task; verificare lo SHA remoto | Documentazione Git | Commit presente sul branch GitHub; non basta un commit locale. |
-| 1 | Walkthrough Clerk con utenti fittizi allowlisted e non allowlisted | Manuale, autenticazione | Route e azioni server rifiutano anonimo/non allowlisted; admin autorizzato accede; nessun dato o token esposto. |
-| 2 | Restore e rollback su branch Neon di test isolato con fixture sintetiche | Manuale, database | Backup restaurato; household/invitees/mapping/risposte/journal sintetici coerenti; rollback previsto e provato. Richiede approvazione prima della scrittura. |
-| 3 | Decidere e registrare le regole di revoca/riemissione | Decisione di prodotto | Regole per RSVP esistente, motivazione, consegna privata e audit approvate. |
-| 4 | Implementare revoca/riemissione come bullet indipendente | Codice e migrazione | Test fixture per atomicità, replay, concorrenza, token precedente invalido, nuovo token hash-only e preservazione completa degli ID/risposte; lint, TypeScript, build e test PostgreSQL sintetici. Migrazione solo nel repository/CI. |
-| 5 | Valutare applicazione delle migrazioni a un ambiente reale | Operazione separata | Ambiente, branch, backup, rollback e migrazioni approvati esplicitamente; non incluso nell'autorizzazione attuale. |
+| 1 | E2E server-side in sandbox PGlite | **COMPLETATO in locale** | Planner/receipt/azioni admin collegate a fixture Sheets e SQL 001–015; hash-only, replay, ID e audit verificati. Non è un E2E browser Clerk. Procedura in `step-8-e2e-sandbox.md`. |
+| 2 | Walkthrough Clerk con utenti fittizi allowlisted e non allowlisted | Manuale, autenticazione | Route e azioni server rifiutano anonimo/non allowlisted; admin autorizzato accede; nessun dato o token esposto. |
+| 3 | Restore e rollback su branch Neon di test isolato con fixture sintetiche | Manuale, database | Backup restaurato; household/invitees/mapping/risposte/journal sintetici coerenti; rollback previsto e provato. Richiede approvazione prima della scrittura. |
+| 4 | Decidere e registrare le regole di revoca/riemissione | Decisione di prodotto | Regole per RSVP esistente, motivazione, consegna privata e audit approvate. |
+| 5 | Implementare revoca/riemissione come bullet indipendente | Codice e migrazione | Test fixture per atomicità, replay, concorrenza, token precedente invalido, nuovo token hash-only e preservazione completa degli ID/risposte; lint, TypeScript, build e test PostgreSQL sintetici. Migrazione solo nel repository/CI. |
+| 6 | Valutare applicazione delle migrazioni a un ambiente reale | Operazione separata | Ambiente, branch, backup, rollback e migrazioni approvati esplicitamente; non incluso nell'autorizzazione attuale. |
 
 Gli ordini 1 e 2 possono essere eseguiti separatamente; il punto 3 non deve
 ritardare la chiusura dei gate esistenti. Il punto 4 non va iniziato prima della

@@ -327,3 +327,15 @@ migration, or replace the required restore check on a separate Neon test branch
 before production use. The GitHub Actions run on commit
 [`20068ddd8c9d4bf6d4806f72343c3aff039fd8b2`](https://github.com/alessandropontini/site_love/actions/runs/42381118585)
 passed on 7 November 2026.
+
+### Server-side activation sandbox E2E
+
+`scripts/test-imported-activation-sandbox.sh` links the real activation planner,
+receipt and admin action workflow to fictional Sheets rows and the actual SQL
+activation function in a temporary PGlite database. It verifies hash-only
+storage, stable identities, replay and authorization-before-reads. The test
+injects a synthetic actor at the action factory; it does not exercise Next.js,
+the browser or a real Clerk session. See
+[`step-8-e2e-sandbox.md`](step-8-e2e-sandbox.md). The full local guest-sync/RSVP
+suite passed with 177 synthetic tests on 7 November 2026. The Clerk browser
+walkthrough and Neon test-branch restore/rollback remain separate open gates.

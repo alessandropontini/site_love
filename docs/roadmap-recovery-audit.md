@@ -132,14 +132,17 @@ checkpoint dello Step 7.4 registrava 140 test; la suite pre-8.6a conteneva 160
 test locali. La suite guest-sync/RSVP/Save-the-Date del checkpoint 8.6b
 conteneva 169 test passati; i checkpoint 8.6c–8.6e aggiungono test del form,
 del contratto/grant SQL e dell'adapter per 174 test totali con PGlite e fixture
-sintetiche. Non sono test live di Neon, Sheets o Clerk.
+sintetiche. Il sandbox E2E server-side aggiunto dopo l'audit porta la suite a
+177 test, senza trasformarla in un test live di Neon, Sheets o Clerk.
 Alcuni test del lifecycle storico esistono solo nella storia locale alternativa
 e non verificano la base attuale.
 
 I bullet 7 e 8.1–8.6e hanno test locali sintetici per planner, receipt,
 autorizzazione, SQL atomico/replay, QR in memoria, revisione offline, grant
 read-only minimizzati del journal e adapter dashboard.
-Non sono stati eseguiti test con Neon/Sheets/Clerk live, concorrenza
+Il test `tests/rsvp/imported-household-activation-e2e.test.cjs` collega il
+workflow admin a fixture Sheets e alla funzione SQL in PGlite; non avvia Next.js
+né browser. Non sono stati eseguiti test con Neon/Sheets/Clerk live, concorrenza
 multi-connessione o walkthrough browser autenticato. La review indipendente
 Codex per gli Step 8.4–8.6e è
 `INFRASTRUCTURE BLOCKED`: Codex CLI non è installato nel checkout.

@@ -1,11 +1,12 @@
-Warning: truncated output (original token count: 6703)
-Total output lines: 284
-
 # Changelog
 
 Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggruppate per attività, non per commit.
 
 ## Unreleased
+
+### Sandbox E2E server-side per attivazione household importati
+- Aggiunto un test verticale che attraversa planner, ricevuta, azioni admin e funzione SQL 013 in PGlite con fixture sintetiche; verifica replay, hash-only, identità/storico preservati e rifiuto admin prima delle letture.
+- Aggiunto uno script fail-closed che rifiuta configurazioni live di Neon, Sheets, Clerk, Turnstile ed email; nessuna dipendenza è stata aggiunta. Test browser Clerk e Neon live restano non coperti.
 
 ### Architettura e roadmap di completamento Step 8
 - Documentati flusso attuale, verifiche locali possibili, gate Clerk/Neon e proposta separata per revoca/riemissione degli inviti, con decisioni di prodotto e criteri di chiusura.
@@ -115,7 +116,36 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 - Require the complete, duplicate-free guest UUID set for an internal household; reject excluded households, mismatched rosters, reused mappings, and changes after a source leaves legacy mode.
 - Verify with fictional PGlite data that RSVP/token fields remain unchanged, the operation is idempotent, and runtime roles cannot execute it. No live Neon mapping was performed.
 
-### Household…703 tokens truncated…ed dependency updates, including Next.js 16.4.3,
+### Household UUID runtime — Step 9C.3
+- Add migration 010 with an explicit source-mode registry, one-to-one Household UUID mapping, composite member foreign key, and contract v3 snapshot/transactional Apply.
+- Create new UUID households disabled and keyed by external household UUID; block unmapped existing guests, cross-household moves, source-mode mismatches, and use of old Apply signatures.
+- Enable the administrative Apply confirmation for the explicitly configured UUID mode and document operator-only legacy reconciliation. No Neon migration or real Sheet operation was performed.
+
+### Household UUID Preview integration — Step 9C.2
+- Integrate the explicitly selected two-tab Household UUID source with Preview planning while keeping legacy mode as the default.
+- Bind mode and both source tabs to the signed preview receipt; re-read and validate them before Apply. UUIDs, not labels, keep same-name households separate.
+- Block ambiguous/unmapped Neon households and roster, identity, issued-invitation or RSVP conflicts; do not auto-adopt records by name. No Neon writes or migrations are included; transactional Household UUID database runtime remains Step 9C.3.
+- Add fictional planning and stale-source tests. See `docs/households-design.md`.
+
+### Household UUID preparation — Step 9C.1
+- Add a read-only two-tab Google Sheets reader and an explicitly selected Household UUID parser with structural and relationship validation.
+- Keep the legacy single-tab sync unchanged; validate but omit contact email and phone from the parsed model.
+- Add fictional parser/Google adapter coverage. No database migration, Preview/Apply integration, live Sheet/Neon access, invitation or QR operation was performed.
+- See `docs/households-design.md` for the exact scope and remaining 9C.2/9C.3 work.
+
+### Roadmap recovery audit — Step 9B
+- Audit the current guest sync, household identity, invitation and RSVP code against the available roadmap evidence.
+- Record missing Household UUID runtime support, Save the Date, imported-household invitation activation, offline RSVP entry and migrations 010–015; no features or external data were changed.
+- See `docs/roadmap-recovery-audit.md` for evidence, test coverage, risks and the proposed reconstruction order.
+
+### Durable Work checkpoints across devices
+- Authorize automatic validated commits and pushes to a SITE LOVE task branch after each completed implementation step, including Work sessions launched from a phone.
+- Verify the remote SHA before declaring completion; keep merges, deployments, production or guest-data changes, and force pushes outside this standing authorization.
+- Document unavailable GitHub/review/test checks as blockers instead of relying on ephemeral Work checkouts.
+
+
+### Validated dependency lockfile
+- Record the existing resolved dependency updates, including Next.js 16.4.3,
   sharp 0.35.5 and Zod 4.6.7, within the unchanged package.json ranges.
 - Validate the installed versions with 97 guest-sync tests, TypeScript, lint
   and production build. Ignore the local TypeScript incremental build cache.
