@@ -4,6 +4,10 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Step 7.1 — planner Save the Date read-only
+- Aggiunto il controllo di eleggibilità su mapping Household UUID esplicito, roster, contatto nominativo, lingua e household esclusi, senza generare testi o leggere recapiti.
+- Aggiunte fixture sintetiche per mapping mancanti/ambigui, roster divergenti e contatti non validi. Nessuna sorgente o database reale è stata consultata.
+
 ### Riconciliazione artefatti roadmap 012–015
 - Recuperati nella storia Git locale i commit storici `179bfd4`–`51fb37a`, non pubblicati su GitHub e basati su migrazioni Household UUID 010–011 differenti da quelle del branch di lavoro.
 - Aggiornato l'audit per distinguere gli artefatti assenti dal branch remoto da quelli esistenti nel branch locale alternativo; nessun codice storico è stato portato o applicato.
