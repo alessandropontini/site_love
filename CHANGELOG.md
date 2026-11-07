@@ -4,6 +4,11 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Step 8.1 — preview di attivazione degli household importati
+- Aggiunto un piano read-only che seleziona gli household soltanto tramite mapping approvati Household UUID e confronta il roster persistito con quello sorgente.
+- Bloccati household esclusi, mapping o roster ambigui/divergenti, token o risposte già presenti e stati incompatibili; il modello non crea household, token o QR.
+- Aggiunte fixture fittizie alla suite guest-sync/RSVP. L'interfaccia admin e l'attivazione transazionale restano bullet successivi.
+
 ### Roadmap household e inviti
 - Riallineare l'audit ai commit Household UUID 9C.1–9C.3 e alla procedura tecnica di riconciliazione 011, distinguendo la disponibilità del codice dai mapping reali non eseguiti.
 - Confermare l'attivazione degli household importati come prossimo lavoro funzionale dello Step 8; nessun dato o servizio esterno è stato consultato o modificato.

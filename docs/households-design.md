@@ -1,5 +1,16 @@
 # STEP 4 — Nuclei familiari: proposta di schema e implementazione
 
+## Stato aggiornato — 7 novembre 2026
+
+Il runtime Household UUID (9C.1–9C.3) e la procedura tecnica di mapping owner-only
+(migrazione 011) sono implementati e testati localmente. Le migrazioni non sono
+state applicate a Neon da questo lavoro e nessun mapping reale è stato eseguito.
+Le note di stato storiche più sotto descrivono la data indicata e non prevalgono
+sul runtime documentato sopra.
+
+Lo Step 8 è iniziato con una preview read-only degli household importati. Non
+offre ancora una schermata amministrativa né attiva inviti, token o QR.
+
 Stato strutturale registrato al 30 ottobre 2026: struttura approvata e creata nel foglio originale. Households contiene le sette intestazioni previste; Guest List contiene Household UUID e Host Sync UUID nelle colonne P e Q. Nessun nucleo o identificativo assegnato: le celle dati nuove erano vuote alla verifica. Verificati intestazioni, formato e convalide tramite rilettura API. La modalità non è attivata nel runtime e non è integrata con Preview/Apply. Nessuna migrazione applicata. Il codice nome/cognome resta invariato.
 
 ## Step 9C.1 — lettura e validazione preparatoria
@@ -105,6 +116,20 @@ idempotente, modalità aggiornabile solo dopo mapping completo, campi token/RSVP
 invariati e permessi runtime negati. La migrazione non è stata applicata a Neon;
 branch/ambiente, backup e mappa approvata restano prerequisiti separati per una
 eventuale operazione reale.
+
+## Step 8.1 — preview di attivazione degli household importati
+
+`lib/rsvp/imported-household-activation.ts` produce un piano puro e read-only.
+Per ogni Household UUID richiede modalità sorgente registrata, un solo mapping
+esplicito verso un household esistente, roster Sync UUID completo e identico,
+coerenza degli invitee nominativi e corrispondenza di nome, owner e permesso +1.
+Blocca esclusioni, mapping ambigui, risposte o attività RSVP, token già presenti
+e household non disabilitati. Non seleziona record per nome o etichetta e non
+crea household, token, QR, ricevute di attivazione o scritture DB.
+
+La funzione viene verificata con fixture sintetiche nella suite guest-sync/RSVP.
+Interfaccia admin, conferma amministrativa, transazione di attivazione, token e
+QR privati restano scope successivi e separati.
 
 ## Verifica dello step 4 — 31 ottobre 2026
 

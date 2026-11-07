@@ -179,7 +179,7 @@ do not weaken `allowedOrigins` to bypass that protection.
 
 ## Database setup and permissions
 
-Back up and test restore first. Apply migrations 001–010 in numeric order on an
+Back up and test restore first. Apply migrations 001–011 in numeric order on an
 isolated development branch with the schema owner, not a runtime credential.
 Create the dedicated login role `site_love_sync` through Neon role management
 before applying 008, or provision a restricted PostgreSQL login using a secure
@@ -279,12 +279,11 @@ failure insertion cannot overwrite an already committed SUCCESS.
 
 **Do not run the existing `create:rsvp-invitations` generator on imported people.**
 That command inserts new households and is not an activation tool for existing
-imported records. Doing so would duplicate them. Before official invitation
-issuance, implement/review an activation workflow that targets existing household
-UUIDs, validates the roster, creates one private token/hash and QR, and activates
-that same household atomically. This batch feature deliberately does not implement
-or execute token/QR issuance. It remains a production operational prerequisite if
-invitations will be issued after importing through this feature.
+imported records. The Step 8.1 read-only model now previews eligible mapped
+households and blocks roster or state conflicts; it does not activate records.
+Admin review/confirmation and an atomic idempotent issuance operation that
+targets the same existing household remain to be implemented. Token and QR
+generation must stay private and must not send invitations automatically.
 
 ### Backup and rollback
 
@@ -354,12 +353,15 @@ Validation evidence: [guest-list-sync-validation.md](guest-list-sync-validation.
   invitation activation before production use. No production deploy or migration
   is implied by merging this code.
 
-## Proposed household evolution
+## Household UUID synchronization
 
-See [Household design proposal](households-design.md) for the next stage: stable
-household UUIDs, a separate Households sheet and explicit migration rules.
-This is a proposal, not the active synchronization contract; current batches
-still use the existing grouping and reconciliation protections.
+The Household UUID runtime reads Guest List and Households explicitly and uses
+the source-scoped mapping described in
+[the household design](households-design.md). Migration 010 adds the runtime
+contract and migration 011 provides a separate owner-only mapping procedure.
+These migrations have local fixture coverage; do not assume they have been
+applied to a Neon branch. The legacy grouping remains available only through its
+explicit legacy mode.
 
 
 ## Existing test-household reconciliation

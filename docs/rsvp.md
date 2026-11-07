@@ -211,3 +211,19 @@ audit, tokens, deadlines and existing household relationships. Replied household
 changes and issued-roster changes conflict; absent source records are retained.
 Do not run the current invitation generator for imported households: activation
 of existing UUIDs needs a separately reviewed issuance workflow.
+
+### Imported-household activation — Step 8.1
+
+The first implementation is a read-only preview model in
+`lib/rsvp/imported-household-activation.ts`. It requires the registered
+Household UUID source mode and an explicit one-to-one source Household UUID →
+existing `rsvp.households.id` mapping. It compares the complete source Sync UUID
+roster and named invitee mapping with the database snapshot, then blocks
+excluded households, token or RSVP activity, non-disabled status and source /
+database roster or invitation metadata drift.
+
+This preview neither issues invitations nor creates or exposes a token, QR,
+manifest or database write. It is not an admin action yet. Later bullets must
+add independent review, explicit Clerk/allowlist confirmation and a single
+atomic idempotent activation operation without giving direct write privileges
+to the ordinary RSVP runtime role.
