@@ -4,6 +4,12 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Step 8.6c — interfaccia admin per risposte RSVP offline
+- Aggiunta `/admin/rsvp/manual` protetta da Clerk/allowlist, con selezione di household esistenti, caricamento roster su azione esplicita e revisione di identità e risposte correnti.
+- Il form lascia l'email vuota, richiede provenienza, motivo compatibile con lo stato, attestazione e conferma esplicita; conserva gli ID esistenti e non invia comunicazioni.
+- In caso di esito incerto i campi si bloccano e si può ritentare solo il payload identico mantenuto in memoria. Aggiunte fixture sintetiche per draft, motivo, IDs e validazione; riepilogo dashboard/grant 015 restano separati.
+- Separato lo schema condiviso dal modulo HMAC Node per mantenere la firma esclusivamente server-side e non includere `node:crypto` nel bundle client.
+
 ### Step 8.6b — adapter e azioni amministrative RSVP offline
 - Aggiunto adapter server-only sul ruolo DB dedicato e due Server Actions: lettura di un household per ID interno e registrazione con autorizzazione Clerk/allowlist verificata a ogni chiamata.
 - L'attore deriva dalla sessione Clerk; Zod valida l'RSVP e richiede conferma amministrativa e attestazione che l'email sia stata fornita dal rispondente. Un HMAC lega attore, operazione, provenienza, motivo, attestazione e payload; gli errori DB sono sanitizzati. Nessuna comunicazione viene inviata.

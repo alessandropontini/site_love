@@ -1,5 +1,28 @@
 # Risposte RSVP raccolte offline
 
+## Interfaccia di revisione e registrazione — Step 8.6c
+
+La pagina protetta `/admin/rsvp/manual` mostra una scelta sintetica dei nuclei
+già presenti nella dashboard RSVP. Il caricamento del roster avviene solo dopo
+un'azione esplicita e usa la Server Action 8.6b, che ripete l'autorizzazione
+Clerk e la verifica della allowlist. Il form non copia l'email già registrata:
+chiede l'indirizzo fornito dal rispondente e una relativa attestazione.
+Lo schema Zod condiviso con il server è separato dal modulo HMAC Node; il
+segreto e la firma restano esclusivamente sul server.
+
+La revisione presenta gli invitati nominativi e le risposte correnti, conserva
+gli ID permanenti e l'eventuale ID del +1, e richiede provenienza, motivo e
+conferma esplicita. Il motivo selezionabile dipende da revisione e stato
+risposte. Non sono raccolti nomi o età dei bambini; nessuna comunicazione viene
+inviata.
+
+Dopo il primo tentativo il payload viene mantenuto solo nella memoria della
+pagina. Se l'esito è incerto, i campi restano bloccati e l'unica azione è
+ritentare lo stesso payload con lo stesso ID idempotente. Un errore certo
+richiede di ricaricare il nucleo e rifare la revisione. Non viene scritto
+payload o dato personale in URL, storage browser o repository. Il riepilogo
+dashboard e i grant DB 015 restano fuori da questo bullet.
+
 ## Contratto database — Step 8.6a
 
 La migration `014_manual_rsvp.sql` introduce due funzioni ristrette sul ruolo
