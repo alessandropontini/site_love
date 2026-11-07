@@ -123,7 +123,7 @@ Nel branch di lavoro sono presenti test Node in `tests/guest-sync/` e
 `tests/rsvp/` per parser/piano, UUID, Google adapter, allowlist Clerk, workflow,
 replay, mapping Household UUID e migrazioni SQL 008–013. Il precedente
 checkpoint dello Step 7.4 registrava 140 test; la suite corrente dopo gli Step
-8.3–8.5 supera 160 test locali. Non sono test live di Neon, Sheets o Clerk.
+8.3–8.5 contiene 160 test locali. Non sono test live di Neon, Sheets o Clerk.
 Alcuni test del lifecycle storico esistono solo nella storia locale alternativa
 e non verificano la base attuale.
 
