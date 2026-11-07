@@ -44,7 +44,7 @@ Il repository documenta esplicitamente gli step 1–3, 4, 5 e 6, ma non contiene
 | 5. Riconciliazione dei nuclei Neon esistenti | **PARZIALE: procedura pronta, mapping reale non eseguito** | Migrazione 011 e funzione owner-only per mapping espliciti, roster esatto e audit metadata-only; test PGlite. | Nessun mapping live è stato approvato o scritto. Per un'operazione reale servono ambiente e backup verificati e una mappa privata approvata. |
 | 6. Preview/Apply amministrativo della sincronizzazione | **COMPLETA** nei contratti legacy e Household UUID | `app/admin/guests/GuestListSynchronization.tsx`; `lib/guest-sync/workflow.ts`; SQL 008–010; test `engine`, `database`, `google`, `auth`, `exclusions`, `presentation`, `households`. | I test locali non verificano Clerk/browser autenticati o concorrenza multi-connessione Neon. |
 | 7. Save the Date | **IMPLEMENTAZIONE COMPLETA nei bullet 7.1–7.5c** | Planner read-only per mapping esatto, draft bilingue/canali manuali, ricevuta HMAC, migration 012 atomica/idempotente con grant minimi, adapter DB, azioni server Clerk/allowlist e pagina di revisione/conferma. Test PGlite e fixture sintetiche. Il vecchio commit `179bfd4` resta un riferimento incompatibile non integrato. | Walkthrough browser Clerk autenticato da eseguire con ambiente/servizi di test. Nessun invio automatico o migration live. |
-| 8. Emissione inviti/QR, dashboard RSVP e risposte offline | **PARZIALE; preview admin 8.1–8.2 completata, attivazione ancora aperta** | Generatore per nuovi nuclei, route RSVP personale, dashboard/export online e preview admin read-only per nuclei importati. Il commit locale `0f26498` aggiungeva un lifecycle per household esistenti, non integrato nel branch remoto. | L'attivazione richiesta deve selezionare il mapping esplicito e passare da Clerk/allowlist; il lifecycle storico usa un diverso contratto operativo e non è ancora una soluzione compatibile. Le risposte offline restano da integrare o reimplementare. |
+| 8. Emissione inviti/QR, dashboard RSVP e risposte offline | **PARZIALE: preview 8.1–8.2 e transazione 8.3 implementate; azioni/UI/QR privato aperti** | Generatore per nuovi nuclei, route RSVP personale, dashboard/export online, preview read-only e migration 013 atomica per attivare un record esistente tramite mapping UUID esatto. Il commit locale `0f26498` resta un riferimento storico non integrato. | Mancano Clerk/allowlist per preparazione e conferma, recovery con token mantenuto solo in memoria, handoff URL/QR fuori dal repository e walkthrough browser. Risposte offline ancora separate. |
 
 ## Architettura e componenti presenti
 
@@ -54,7 +54,7 @@ Il repository documenta esplicitamente gli step 1–3, 4, 5 e 6, ma non contiene
 - QR generati localmente in cartella privata esterna al repository. Save the Date ha planner, draft, ricevuta, journal SQL, adapter, azioni admin e pagina privata di revisione. `lib/rsvp/email.ts` serve le conferme del modulo RSVP.
 - Il contenuto grafico e gli asset non sono stati modificati né valutati visivamente.
 
-## Migrazioni SQL 001–012
+## Migrazioni SQL 001–013
 
 | File | Responsabilità verificata nel codice |
 | --- | --- |
@@ -70,6 +70,7 @@ Il repository documenta esplicitamente gli step 1–3, 4, 5 e 6, ma non contiene
 | `010_guest_sync_household_runtime.sql` | Modalità sorgente esplicita, mapping Household UUID, vincoli composti, snapshot e Apply contrattuale v3. |
 | `011_guest_sync_household_reconciliation.sql` | Funzione owner-only per registrare un mapping approvato a roster esatto, con journal metadata-only. |
 | `012_save_the_date_tracking.sql` | Stato Save the Date versionato, eventi atomici append-only, validazione mapping/contact, replay e grant minimi al ruolo sync. |
+| `013_imported_household_invitation_activation.sql` | Attiva un household importato con mapping esatto, roster persistito, stato/risposte verificati, hash-only, journal idempotente e grants minimi. |
 
 La migration 012 presente nel branch di lavoro è una reimplementazione compatibile, verificata con PGlite e non applicata a Neon. I commit storici `179bfd4`, `0f26498`, `59025e7` e `51fb37a` non sono integrati né pubblicati su GitHub; i contenuti storici 012–015 restano nella storia locale alternativa e non sono stati portati.
 
@@ -157,8 +158,8 @@ email e restore backup.
 2. Household UUID runtime 9C.1–9C.3 completato; la migrazione resta non applicata fuori dai test locali.
 3. Procedura tecnica di riconciliazione completata; mapping reale resta separato e non autorizzato da questo step.
 4. Conservare e confrontare i commit locali 012–015 con la base runtime/reconciliation 010–011 corrente. Non integrare la vecchia coppia 010–011 né sovrascrivere Step 8.1–8.2.
-5. **Step 7.1–7.5c implementati:** planner, draft, ricevuta HMAC, journal SQL atomico, adapter DB, azioni admin Clerk/allowlist e pagina di revisione/conferma sono verificati con fixture e build. Prossima funzione roadmap: Step 8, attivazione inviti per household importati; il browser Clerk autenticato resta da provare in ambiente di test.
-6. Completare l'attivazione richiesta per mapping UUID esplicito, riusando dal lifecycle storico solo i contratti compatibili: Clerk/allowlist, selezione `(source_id, external_household_id)`, preservazione di identità/risposte, token hash-only, atomicità, replay safety e output QR privato senza invio.
+5. **Step 7.1–7.5c implementati:** planner, draft, ricevuta HMAC, journal SQL atomico, adapter DB, azioni admin Clerk/allowlist e pagina di revisione/conferma sono verificati con fixture e build. Il browser Clerk autenticato resta da provare in ambiente di test.
+6. **Step 8.1–8.3 implementati:** preview, interfaccia read-only e transazione SQL atomica per il mapping UUID e token hash-only. Prossimi bullet: azioni Clerk/allowlist con conferma e replay 8.4; handoff URL/QR privato senza scrittura nel repo 8.5. Nessuna comunicazione automatica.
 7. Valutare separatamente le risposte offline (014) e i grant (015); verificare la parità con il runtime corrente prima di portarli. Chiudere con test SQL isolati, concorrenza PostgreSQL, browser autenticato fittizio e gate backup/rollback. Nessun deploy o dato reale.
 
 ## Validazione dell’audit

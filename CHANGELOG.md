@@ -4,6 +4,10 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Step 8.3 — transazione SQL per household importati
+- Aggiunta migration 013 per attivare un household esistente soltanto tramite mapping Household UUID esplicito, senza creare o sostituire identità.
+- La funzione serializza l'operazione, controlla mapping, roster persistito, esclusioni, token e attività RSVP, registra un evento idempotente e accetta solo il token hash. Test PGlite verificano replay, privilegi minimi e preservazione dei dati; migration non applicata a Neon.
+
 ### Step 7.5c — interfaccia privata di revisione Save the Date
 - Aggiunta `/admin/save-the-date`, con preview su richiesta, selezione del solo household eleggibile, draft readonly e conferma separata dello stato manuale.
 - La registrazione richiede una checkbox coerente con l'esito e dichiara che SITE LOVE non invia messaggi. Aggiunti test per le conferme e le transizioni consentite.

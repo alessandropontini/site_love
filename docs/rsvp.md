@@ -224,9 +224,9 @@ database roster or invitation metadata drift.
 
 This preview neither issues invitations nor creates or exposes a token, QR,
 manifest or database write. The admin route and explicit preview action are
-added in Step 8.2 below. A later activation bullet must add explicit
-confirmation and a single atomic idempotent operation without giving direct
-write privileges to the ordinary RSVP runtime role.
+added in Step 8.2 below. The activation persistence boundary is added in Step
+8.3; Clerk actions and the private one-time URL/QR handoff remain separate
+bullets.
 
 ### Admin preview — Step 8.2
 
@@ -241,5 +241,25 @@ an ID from the browser.
 
 This screen is review-only: it has no confirmation or activation control and
 does not create links, QR codes, tokens, database writes or communications.
-Proceeding to activation remains a separate roadmap bullet requiring its own
-review and atomic database operation.
+The atomic database boundary is documented in Step 8.3; the separately
+authorized Clerk confirmation and private link/QR handoff remain to be built.
+
+### Atomic persistence — Step 8.3
+
+`db/migrations/013_imported_household_invitation_activation.sql` adds
+`rsvp.activate_imported_household_invitation`. The caller supplies an
+idempotency event UUID, authenticated actor ID, source ID, external Household
+UUID, existing RSVP household UUID, expected response version and a SHA-256
+token hash. The database requires the registered Household UUID mode and exact
+one-to-one mapping, validates the persisted guest/invitee roster, checks active
+exclusions, and rejects any existing token, non-disabled state or RSVP
+activity. It serializes with guest sync, reconciliation and RSVP writes under
+the shared lock. A successful transaction updates only the existing household's
+token hash and status and appends a metadata-only event. Exact retries return a
+replay result; a reused event ID with different inputs is rejected. No
+household, invitee, membership, response, prior audit record or token is
+replaced. The function takes only the hash, never the bearer token. `site_love_sync`
+may execute it but cannot write the household or journal tables directly; the
+ordinary RSVP role has no execute grant. PGlite tests cover the transaction,
+replay, conflict cases, data preservation and grants using fictional fixtures.
+Migration 013 has not been applied to Neon.

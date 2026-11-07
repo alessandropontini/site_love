@@ -82,3 +82,17 @@ Household UUID mapping and named contact and commits state plus event atomically
 prove that a human sent a message; the Clerk-protected server action attests the
 administrator's declaration. PGlite covers the migration and grants with
 synthetic data. This repository change does not apply migration 012 to Neon.
+
+`013_imported_household_invitation_activation.sql` adds the atomic activation
+entrypoint for an existing imported household. It accepts only the exact
+source/external/internal UUID mapping, a server-generated token hash and an
+idempotency event ID. It rechecks Household UUID mode, persisted
+membership/name consistency, active exclusions, disabled/unissued state and
+absence of RSVP activity under the shared synchronization lock. It updates
+only `households.token_hash` and `households.status`, preserving IDs, invitees,
+membership, responses and existing audit rows. The append-only journal stores
+the actor, mapping and a request hash, never the bearer token. Only the
+server-only sync login may execute the function; it receives no direct table
+write or event-journal access, and `site_love_app` is denied. PGlite tests use
+fictional IDs and hashes. Do not apply migration 013 to Neon without separate
+approval.
