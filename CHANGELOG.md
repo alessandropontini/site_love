@@ -4,6 +4,10 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Step 7.5b — azioni admin Save the Date
+- Aggiunte azioni server per preview, preparazione e registrazione manuale, con Clerk/allowlist verificata a ogni chiamata.
+- Il preview restituisce solo mapping e stato minimizzati; errori database imprevisti non espongono query o dettagli di connessione. Test sintetici verificano autorizzazione, privacy e sanitizzazione.
+
 ### Step 7.5a — adapter database Save the Date
 - Aggiunto l'adapter server-side sul ruolo sync per leggere stato/storico e invocare la funzione SQL con request minimizzata.
 - Il lookup replay confronta l'hash della stessa richiesta; i riepiloghi non espongono contatto o attore. Aggiunti test dell'adapter con query simulate.

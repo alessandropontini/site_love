@@ -2,8 +2,9 @@
 
 Questo documento descrive il lavoro del punto 7. Planner, draft bilingue,
 workflow con ricevuta, journal SQL e adapter server-side sono implementati e
-verificati con fixture sintetiche. La pagina admin Clerk/allowlist e i relativi
-test UI restano aperti. Non vengono inviati messaggi.
+verificati con fixture sintetiche. Le azioni server Clerk/allowlist per preview,
+preparazione e registrazione manuale sono implementate; la pagina di revisione
+e i relativi test UI restano aperti. Non vengono inviati messaggi.
 
 ## Contratto di associazione
 
@@ -60,6 +61,19 @@ di recovery confronta l'hash della stessa richiesta prima dei controlli di
 scadenza del workflow. L'adapter è testato con query simulate; la connessione
 non è stata eseguita contro Neon. Restano la pagina Clerk/allowlist e i test UI.
 Nessuna migration è stata applicata a Neon.
+
+## Azioni amministrative — Step 7.5b
+
+`app/admin/save-the-date/actions.ts` delega a un servizio testabile che richiede
+Clerk e l'email verificata nella allowlist prima di ogni preview, preparazione o
+registrazione. Il preview è avviato esplicitamente e restituisce UUID di mapping,
+conteggi, blocchi e stato; non restituisce nomi o valori di contatto. La
+preparazione riceve un solo Household UUID e canale scelti dall'amministratore e
+restituisce il draft e la ricevuta firmata; la registrazione accetta solo la
+ricevuta e uno stato manuale. Errori non riconosciuti diventano
+`STD_UNAVAILABLE`, senza dettagli SQL o host. Test con sorgente e attore fittizi
+verificano l'autorizzazione prima delle letture, la minimizzazione e la gestione
+degli errori. Le azioni non inviano comunicazioni.
 
 ## Persistenza atomica — Step 7.4
 
