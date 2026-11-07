@@ -4,6 +4,11 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Handoff AI e stato verifiche Step 8
+- Registrato il passaggio di stato remoto `20068ddd8c9d4bf6d4806f72343c3aff039fd8b2`: GitHub Actions ha superato test PostgreSQL 16 concorrente e backup/restore con fixture sintetiche.
+- Aggiunta una guida di handoff per le prossime AI e riallineate le istruzioni di workflow sull'autorizzazione ai checkpoint GitHub; restano espliciti i gate Clerk e Neon non eseguiti.
+- Revisione statica non indipendente di proxy, allowlist, pagine e Server Actions RSVP: nessuna criticità rilevata nel perimetro ispezionato; il walkthrough Clerk autenticato resta necessario.
+
 ### Step 8 — verifica PostgreSQL nativo e backup/restore sintetico
 - Aggiunto un workflow GitHub Actions con PostgreSQL 16 temporaneo: applica le migrazioni 001–015, lancia due attivazioni concorrenti su un household fittizio e verifica una sola attivazione con un replay.
 - Il workflow usa il backup RSVP già presente, ripristina in un database effimero e confronta ID, mapping, stato, hash fittizio e journal; non usa Neon, Sheets o credenziali.

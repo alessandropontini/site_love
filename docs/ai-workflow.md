@@ -1,6 +1,6 @@
 # AI Workflow: Codex, validation, and documentation
 
-Codex is the only active AI development and review tool for SITE LOVE. CrewAI, OpenClaw, Ruflo, Claude Flow, MCP agent runtimes, and WASM agents are not part of the release path.
+Codex is the currently active AI development and review tool for SITE LOVE. If the owner later authorizes another AI to work on the repository, it must follow `AGENTS.md` and `docs/project-handoff.md`; it does not replace an independent Codex review required by the risk rules. CrewAI, OpenClaw, Ruflo, Claude Flow, MCP agent runtimes, and WASM agents are not part of the release path.
 
 ## Runtime boundary
 
@@ -27,7 +27,20 @@ Never add AI tools, provider SDKs, or orchestration packages to runtime or devel
    - assets or RSVP work: also record the required provenance, privacy, or endpoint evidence.
 5. Update `CHANGELOG.md` under `Unreleased` and every directly affected guide, README section, or architecture note. Say explicitly when no additional guide is affected.
 6. For the risk criteria below, run an independent Codex review automatically under the standing user authorization in `AGENTS.md`; do not wait for another user command. Continue permitted local work if review execution is blocked.
-7. Hand off a short summary, validation results, known limitations, and a proposed commit message. Do not commit, merge, or push unless the user asks.
+7. Hand off a short summary, validation results, known limitations, and the actual remote status. Follow the standing checkpoint authorization in `AGENTS.md`: for a requested SITE LOVE implementation/documentation task, commit and publish each completed scope to its task branch and verify the remote SHA. Never merge, deploy, or write live data without separate authorization.
+
+## Starting a new AI session or handing work to another AI
+
+Before changing the repository, the incoming AI must:
+
+1. Read `AGENTS.md`, `docs/project-handoff.md`, and `docs/roadmap-recovery-audit.md`, then read the feature guide named by the task (for Step 8, `docs/rsvp.md` and `docs/manual-rsvp.md`).
+2. Inspect the actual checkout, branch, `git status`, remote and current GitHub branch head. The dated handoff SHA is evidence, not a substitute for a fresh remote check.
+3. Preserve unrelated work, local assets and Bridget's changes. Do not use reset, force-push, or destructive cleanup to make a checkout look clean.
+4. Keep synthetic verification distinct from live-service verification: PGlite tests are not native PostgreSQL; the GitHub Actions PostgreSQL 16 run is native but does not verify Clerk or Neon.
+5. Keep the authorization limits in `AGENTS.md` and the current request in force. In particular, a test credential, external database write, migration, real guest lookup, invitation, merge, or deployment is not implied by a successful local/CI test.
+6. Update the changelog and directly affected guide, run proportionate checks, and publish a focused checkpoint before starting another project bullet. Verify its exact remote SHA.
+
+Do not invent a functional roadmap step when the audit documents only an operational gate or no next product objective. Record the unresolved decision and continue only with independent, explicitly scoped work.
 
 ## Risk-based independent review
 

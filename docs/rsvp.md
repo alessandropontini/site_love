@@ -324,4 +324,6 @@ compares the existing IDs, mapping, status, fixture hash and audit row.
 This proves native PostgreSQL concurrency behavior and the local dump/restore
 path with synthetic data. It does not connect to Neon or Clerk, apply a live
 migration, or replace the required restore check on a separate Neon test branch
-before production use.
+before production use. The GitHub Actions run on commit
+[`20068ddd8c9d4bf6d4806f72343c3aff039fd8b2`](https://github.com/alessandropontini/site_love/actions/runs/42381118585)
+passed on 7 November 2026.

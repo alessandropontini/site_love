@@ -8,7 +8,7 @@ This repository is `alessandropontini/site_love`, a private Next.js microsite na
 
 The home RSVP section is deliberately informational. The implemented invitation flow uses one personal QR code per invited household and an opaque route token at `/rsvp/[token]`, backed by server-side Neon storage when production services are configured. Do not publish guest data, response data, RSVP tokens, exports, backups, manifests, or generated QR codes in `public/`, client bundles, source-controlled configuration, or `localStorage`.
 
-Codex is the only active AI development and review tool. Work is validated in the interactive session with local checks and diff inspection. An additional independent Codex review runs automatically for releases and high-risk changes under the standing user authorization below; do not wait for a new user command. Final approval remains human.
+Codex is the currently active AI development and review tool. If the owner later authorizes another AI to work on the repository, it must follow this file, the current user request, and `docs/project-handoff.md`; it does not replace an independent Codex review required below. Work is validated in the interactive session with local checks and diff inspection. An additional independent Codex review runs automatically for releases and high-risk changes under the standing user authorization below; do not wait for a new user command. Final approval remains human.
 
 Ruflo has been removed. CrewAI and OpenClaw are retained only as inactive experiments and compatibility documentation; they are not part of the release path or merge gate. Do not reintroduce automatic multi-agent orchestration without an explicit project decision.
 
@@ -53,6 +53,8 @@ Ruflo has been removed. CrewAI and OpenClaw are retained only as inactive experi
 - `docs/visual-direction.md` — approved visual/design direction.
 - `docs/architecture.md` — architecture overview for maintainers and agents.
 - `docs/ai-workflow.md` — Codex usage and manual review workflow guidance.
+- `docs/project-handoff.md` — dated continuation notes for the current RSVP roadmap state; verify its branch SHA against GitHub before relying on it.
+- `docs/roadmap-recovery-audit.md` — recovered roadmap state, completed bullets and remaining gates.
 - `docs/multiagent-workflow.md` — risk-based independent review policy and report contract.
 - `docs/codex-multiagent-setup.md` — operational setup for an on-demand combined reviewer.
 - `docs/crewai-orchestration.md` and `docs/openclaw-orchestration.md` — inactive experiment status.
@@ -183,6 +185,7 @@ These invariants apply only if the dormant experience is intentionally edited or
 - Update the `Unreleased` section of `CHANGELOG.md` and every directly affected guide or README section before handoff. State explicitly when no additional guide is affected.
 - At handoff, return a short summary, validation results, known limitations, and the actual commit/remote status. The standing Work checkpoint authorization below permits scoped commits and pushes for requested implementation tasks; it does not permit merging, deploying, or writing production data.
 - Do not present simulated roles inside one response as independent review.
+- When another AI or a later session resumes the project, read `docs/project-handoff.md` as a dated index, then verify the actual branch tip and working tree on GitHub/local checkout. The handoff never overrides this file or newer repository state.
 
 ## Work remote checkpoints — standing authorization (6 November 2026)
 

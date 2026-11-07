@@ -174,7 +174,7 @@ Codex per gli Step 8.4–8.6e è
 6. **Step 8.1–8.5 implementati:** preview, interfaccia admin, transazione SQL atomica, preparazione con receipt firmata, conferma Clerk/allowlist, replay e handoff privato URL/QR generato nel browser. Il raw token resta nella memoria della pagina e non è recuperabile dopo refresh/chiusura; nessuna comunicazione automatica.
 7. **8.6a–8.6e implementati:** migration 014, adapter, azioni Clerk, form admin, migration 015 e storico audit in dashboard; fixture sintetiche e grant/deny testati localmente. Migration non applicate a Neon.
 8. Fare walkthrough con Clerk autenticato e dati sintetici nel browser.
-9. Chiudere con test SQL PostgreSQL multi-connessione, browser Clerk autenticato fittizio e gate backup/rollback. Nessun deploy o dato reale.
+9. **Parzialmente chiuso:** test SQL PostgreSQL multi-connessione e backup/restore con fixture completati nel workflow GitHub Actions descritto sotto. Restano il browser Clerk autenticato e il restore su un branch Neon di test; nessun deploy o dato reale.
 
 ## Validazione dell’audit
 
@@ -190,3 +190,20 @@ Sheets o Neon, generate QR per invitati reali, inviate comunicazioni, né fatti
 merge o deploy. La review indipendente Codex CLI resta
 `INFRASTRUCTURE BLOCKED` perché il comando non è disponibile in questo checkout;
 il runner ha inoltre segnalato un errore nel test del timeout del workflow multiagent (`125`).
+
+### Checkpoint PostgreSQL e handoff — 7 novembre 2026
+
+Il commit remoto `20068ddd8c9d4bf6d4806f72343c3aff039fd8b2` ha aggiunto il
+workflow [`RSVP PostgreSQL validation`](https://github.com/alessandropontini/site_love/actions/runs/42381118585), concluso `success`. Il job ha usato PostgreSQL 16, applicato le migrazioni 001–015, invocato due connessioni `psql` concorrenti con un solo risultato nuovo e un replay, e verificato il backup RSVP e il restore in un database temporaneo confrontando gli ID e il mapping sintetici. Nessun endpoint Neon o Sheets è stato configurato nel job.
+
+La revisione statica **non indipendente** eseguita sul codice admin il 7 novembre
+ha controllato `proxy.ts`, `lib/admin/auth.ts`, la verifica email dell'allowlist,
+le pagine RSVP/inviti, le Server Actions e i test di autorizzazione. Non sono
+emerse criticità nel perimetro esaminato. La revisione non equivale a un login
+browser Clerk autenticato; il Codex CLI indipendente non è disponibile e la
+review resta `INFRASTRUCTURE BLOCKED`.
+
+Il checkout e la punta remota vanno sempre verificati di nuovo: questo SHA è un
+riferimento storico per il checkpoint, non una garanzia che il branch non sia
+avanzato dopo il 7 novembre. La guida operativa per sessioni successive è
+[`docs/project-handoff.md`](project-handoff.md).
