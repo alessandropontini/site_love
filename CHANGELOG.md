@@ -4,6 +4,10 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Runbook verifiche manuali Step 8
+- Preparata una procedura per walkthrough Clerk/allowlist con account di test e restore/rollback su branch Neon isolato, con risultati attesi, criteri di esito e gestione sicura degli artefatti.
+- Le procedure non contattano servizi né concedono autorizzazione per Clerk, Neon, Sheets o dati reali; i due gate restano separati e non eseguiti.
+
 ### Handoff AI e stato verifiche Step 8
 - Registrato il passaggio di stato remoto `20068ddd8c9d4bf6d4806f72343c3aff039fd8b2`: GitHub Actions ha superato test PostgreSQL 16 concorrente e backup/restore con fixture sintetiche.
 - Aggiunta una guida di handoff per le prossime AI e riallineate le istruzioni di workflow sull'autorizzazione ai checkpoint GitHub; restano espliciti i gate Clerk e Neon non eseguiti.

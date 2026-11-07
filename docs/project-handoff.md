@@ -52,3 +52,8 @@ only remaining Step 8 checks require Clerk test access or Neon write access,
 which are outside the current authorization. An AI can continue independent
 static review or documentation work, but should not mark those gates complete
 or invent a functional Step 9 task without a documented scope.
+
+The owner-facing preparation for those two manual checks is in
+[`step-8-manual-validation-runbook.md`](step-8-manual-validation-runbook.md).
+It is procedural only: it does not configure Clerk, connect to Neon/Sheets,
+create test data, or authorize a live operation.
