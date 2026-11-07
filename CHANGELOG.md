@@ -4,6 +4,10 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Roadmap household e inviti
+- Riallineare l'audit ai commit Household UUID 9C.1–9C.3 e alla procedura tecnica di riconciliazione 011, distinguendo la disponibilità del codice dai mapping reali non eseguiti.
+- Confermare l'attivazione degli household importati come prossimo lavoro funzionale dello Step 8; nessun dato o servizio esterno è stato consultato o modificato.
+
 ### Operatore riconciliazione Household UUID — Step 5
 - Add migration 011 with an owner-only exact-roster reconciliation function and metadata-only audit events for existing source mappings.
 - Require the complete, duplicate-free guest UUID set for an internal household; reject excluded households, mismatched rosters, reused mappings, and changes after a source leaves legacy mode.
