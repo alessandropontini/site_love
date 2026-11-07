@@ -8,12 +8,29 @@ fresh check of GitHub.
 
 - Repository: `alessandropontini/site_love`.
 - Task branch: `feat/roadmap-recovery-20261106`.
-- Remote checkpoint at verification: `20068ddd8c9d4bf6d4806f72343c3aff039fd8b2`.
+- Remote checkpoint at verification: `20ea2c93630cc7506627c5549af63098ac569657`.
 - GitHub Actions run: [RSVP PostgreSQL validation](https://github.com/alessandropontini/site_love/actions/runs/42381118585), conclusion `success`.
 - Step 8 implementation bullets 8.1–8.6e are present. Step 8 is operationally **partial** until the external checks below are completed.
 
 Always query the current branch head before using this snapshot. The branch may
 advance, and a temporary Work checkout is not the owner's Mac checkout.
+
+The remote runbook checkpoint is
+[`fc56c9a81356e2f37ea76455c9824cdfb3d8459b`](https://github.com/alessandropontini/site_love/commit/fc56c9a81356e2f37ea76455c9824cdfb3d8459b).
+The architecture/roadmap checkpoint is
+[`20ea2c93630cc7506627c5549af63098ac569657`](https://github.com/alessandropontini/site_love/commit/20ea2c93630cc7506627c5549af63098ac569657).
+Both are on `feat/roadmap-recovery-20261106` and were verified at the GitHub
+branch ref. The local Git CLI could read/fetch the repository but could not
+push because it had no HTTPS username; these remote checkpoints were published
+through the connected GitHub integration. Their GitHub commit SHAs therefore
+differ from equivalent local commit objects. The committed tree content
+matches; a future AI should fetch the branch before making another commit and
+must preserve local-only changes.
+
+At the time of these checkpoints, the temporary checkout also had an
+uncommitted change to `public/hero/itinerary-tabletop-full.png`. It was not
+included in either remote commit and must be preserved or explicitly reconciled
+by its owner.
 
 ## Completed verification evidence
 
