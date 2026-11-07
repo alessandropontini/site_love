@@ -4,6 +4,10 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Step 8.5 — handoff privato URL/QR
+- Dopo l'attivazione confermata, l'admin può copiare l'URL RSVP privato e generare/scaricare un QR PNG su richiesta nel browser. Nessun QR viene scritto nel repository o inviato automaticamente.
+- Il renderer accetta soltanto URL RSVP same-origin HTTPS con token opaco nel path, senza query/hash; testano output PNG e rifiuto di host/path non validi con un URL sintetico.
+
 ### Step 8.4 — conferma amministrativa e retry
 - Aggiunte azioni Clerk/allowlist separate per preparazione e conferma esplicita del mapping selezionato; ogni richiesta admin riautentica prima di leggere Sheets o DB.
 - La preparazione genera un token da 256 bit e restituisce token/receipt firmata solo al browser; il server persiste esclusivamente l'hash. Il client conserva il token in memoria, mentre retry idempotenti recuperano il commit anche dopo timeout/expiry senza inviare comunicazioni.

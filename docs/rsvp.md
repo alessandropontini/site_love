@@ -285,7 +285,20 @@ successful commit, retrying the same receipt returns the journal match before
 expiry checks. The raw token remains in page memory during a pending/retry flow;
 closing or refreshing that page discards it, so keep the page open during an
 unverified confirmation. After confirmation the page reveals the private RSVP
-URL; it does not send a message or generate a QR. A changed source or any
+URL; Step 8.5 adds explicit browser-side QR generation. The flow does not send a message. A changed source or any
 incompatible database state blocks a new activation. These operations have
 only been exercised with fictional fixtures; neither Sheets nor Neon was
 contacted in local tests.
+
+### Private URL and QR handoff — Step 8.5
+
+After activation succeeds, the page keeps the RSVP URL in memory and offers an
+explicit copy action. QR rendering is a separate user action. The browser
+renders a 512-pixel PNG with high error correction into an in-memory data URL;
+the administrator may download it to a private location. The renderer accepts
+only the same origin over HTTPS (HTTP is allowed for localhost development), an
+exact `/rsvp/<43-character opaque token>` path, and no query or fragment. The
+PNG is not written to the repository, server, database or manifest and is not
+sent. Refreshing or closing the page discards the URL and QR; a downloaded
+image must be protected by the administrator. The local test generates only a
+synthetic fixture QR in memory and verifies the PNG bytes and URL restrictions.

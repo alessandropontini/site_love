@@ -247,6 +247,12 @@ genera PNG locali con correzione errore alta e crea un `manifest.csv` con link
 personali. Input e output dentro il repository vengono rifiutati. Manifest e QR
 vanno conservati cifrati e non caricati su Drive condivisi pubblicamente.
 
+Per i household già importati, usare il flusso separato `/admin/invitations`;
+non eseguire il generatore di nuovi household. Dopo una conferma autorizzata da
+Clerk, la pagina può generare il QR nel browser e scaricare un PNG senza
+scriverlo nel repository o inviarlo. Conservare QR e URL copiati in una
+posizione privata e ad accesso controllato.
+
 ## Checklist di lancio
 
 - [ ] Dominio definitivo e redirect canonico HTTPS funzionanti.

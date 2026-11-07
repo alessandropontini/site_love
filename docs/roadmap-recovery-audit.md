@@ -44,7 +44,7 @@ Il repository documenta esplicitamente gli step 1–3, 4, 5 e 6, ma non contiene
 | 5. Riconciliazione dei nuclei Neon esistenti | **PARZIALE: procedura pronta, mapping reale non eseguito** | Migrazione 011 e funzione owner-only per mapping espliciti, roster esatto e audit metadata-only; test PGlite. | Nessun mapping live è stato approvato o scritto. Per un'operazione reale servono ambiente e backup verificati e una mappa privata approvata. |
 | 6. Preview/Apply amministrativo della sincronizzazione | **COMPLETA** nei contratti legacy e Household UUID | `app/admin/guests/GuestListSynchronization.tsx`; `lib/guest-sync/workflow.ts`; SQL 008–010; test `engine`, `database`, `google`, `auth`, `exclusions`, `presentation`, `households`. | I test locali non verificano Clerk/browser autenticati o concorrenza multi-connessione Neon. |
 | 7. Save the Date | **IMPLEMENTAZIONE COMPLETA nei bullet 7.1–7.5c** | Planner read-only per mapping esatto, draft bilingue/canali manuali, ricevuta HMAC, migration 012 atomica/idempotente con grant minimi, adapter DB, azioni server Clerk/allowlist e pagina di revisione/conferma. Test PGlite e fixture sintetiche. Il vecchio commit `179bfd4` resta un riferimento incompatibile non integrato. | Walkthrough browser Clerk autenticato da eseguire con ambiente/servizi di test. Nessun invio automatico o migration live. |
-| 8. Emissione inviti/QR, dashboard RSVP e risposte offline | **PARZIALE: 8.1–8.4 implementati; handoff QR privato e walkthrough aperti** | Generatore per nuovi nuclei, route RSVP personale, dashboard/export online, preview read-only, transazione SQL atomica e azioni Clerk/allowlist per preparazione, revisione e conferma di household esistenti. Il commit locale `0f26498` resta un riferimento storico non integrato. | Manca l'handoff privato URL/QR scaricabile fuori dal repository e il walkthrough browser autenticato. Risposte offline ancora separate. |
+| 8. Emissione inviti/QR, dashboard RSVP e risposte offline | **PARZIALE: 8.1–8.5 implementati; walkthrough e risposte offline aperti** | Generatore per nuovi nuclei, route RSVP personale, dashboard/export online, preview read-only, transazione SQL atomica, conferma Clerk/allowlist e handoff privato URL/QR in memoria/browser download. Il commit locale `0f26498` resta un riferimento storico non integrato. | Walkthrough browser Clerk autenticato ancora da eseguire. Risposte offline ancora separate. QR e token reali non generati in questa sessione; migration 013 non applicata. |
 
 ## Architettura e componenti presenti
 
@@ -119,23 +119,25 @@ La riconciliazione non può usare nomi o numeri di riga. La migrazione 011 forni
 
 ## Test esistenti e copertura assente
 
-Nel branch di lavoro sono presenti test Node in `tests/guest-sync/` per
-parser/piano, UUID, nome/cognome, Google adapter, allowlist Clerk, workflow,
-replay, UI Preview, mapping Household UUID e migrazioni SQL 008–012. La suite
-eseguita durante il punto 7.4 ha superato 140 test con PGlite, senza test
-saltati; TypeScript e lint sono passati. Non sono test live di
-Neon, Sheets o Clerk. I test Save the Date, lifecycle, RSVP offline e roadmap
-esistono solo nella storia locale alternativa e non verificano la base attuale.
+Nel branch di lavoro sono presenti test Node in `tests/guest-sync/` e
+`tests/rsvp/` per parser/piano, UUID, Google adapter, allowlist Clerk, workflow,
+replay, mapping Household UUID e migrazioni SQL 008–013. Il precedente
+checkpoint dello Step 7.4 registrava 140 test; la suite corrente dopo gli Step
+8.3–8.5 supera 160 test locali. Non sono test live di Neon, Sheets o Clerk.
+Alcuni test del lifecycle storico esistono solo nella storia locale alternativa
+e non verificano la base attuale.
 
-Non risultano test dedicati a Save the Date, attivazione di nuclei importati,
-risposte offline o dashboard RSVP end-to-end. Da svolgere anche: test reali
-multi-connessione Neon, Google/Clerk autenticati, browser con dati fittizi,
-email e restore backup.
+I bullet 7 e 8.1–8.5 hanno test locali sintetici per planner, receipt,
+autorizzazione, SQL atomico/replay e QR in memoria. Non sono stati eseguiti test
+con Neon/Sheets/Clerk live, concorrenza multi-connessione o walkthrough browser
+autenticato. Le risposte offline e la verifica end-to-end della dashboard RSVP
+restano aperte. La review indipendente Codex per gli Step 8.4–8.5 è
+`INFRASTRUCTURE BLOCKED`: Codex CLI non è installato nel checkout.
 
 ## Dipendenze tecniche
 
 - Next.js 16 App Router, React 19, TypeScript strict, Zod 4.
-- Neon Postgres e `@neondatabase/serverless`; schema SQL 001–012 e ruoli DB separati.
+- Neon Postgres e `@neondatabase/serverless`; schema SQL 001–013 e ruoli DB separati.
 - Clerk (`@clerk/nextjs`) con allowlist; Cloudflare Turnstile e rate limit RSVP.
 - Google Sheets API read-only via service account; script Apps Script per UUID ospite.
 - `qrcode` per QR privati; `node:test` e PGlite per test locali di sync/SQL;
@@ -159,12 +161,15 @@ email e restore backup.
 3. Procedura tecnica di riconciliazione completata; mapping reale resta separato e non autorizzato da questo step.
 4. Conservare e confrontare i commit locali 012–015 con la base runtime/reconciliation 010–011 corrente. Non integrare la vecchia coppia 010–011 né sovrascrivere Step 8.1–8.2.
 5. **Step 7.1–7.5c implementati:** planner, draft, ricevuta HMAC, journal SQL atomico, adapter DB, azioni admin Clerk/allowlist e pagina di revisione/conferma sono verificati con fixture e build. Il browser Clerk autenticato resta da provare in ambiente di test.
-6. **Step 8.1–8.4 implementati:** preview, interfaccia admin, transazione SQL atomica, preparazione con receipt firmata, conferma Clerk/allowlist e recupero replay. Prossimo bullet: handoff URL/QR privato senza scrittura nel repo 8.5. Il raw token resta nella memoria della pagina e non è recuperabile dopo refresh/chiusura; QR e comunicazioni restano esclusi.
+6. **Step 8.1–8.5 implementati:** preview, interfaccia admin, transazione SQL atomica, preparazione con receipt firmata, conferma Clerk/allowlist, replay e handoff privato URL/QR generato nel browser. Il raw token resta nella memoria della pagina e non è recuperabile dopo refresh/chiusura; nessuna comunicazione automatica.
 7. Valutare separatamente le risposte offline (014) e i grant (015); verificare la parità con il runtime corrente prima di portarli. Chiudere con test SQL isolati, concorrenza PostgreSQL, browser autenticato fittizio e gate backup/rollback. Nessun deploy o dato reale.
 
 ## Validazione dell’audit
 
-Verifica statica di sorgenti, SQL, test e guide su `8e5bbdd5`. Nessun test,
-build, accesso a servizi, lettura/scrittura Sheets o Neon, modifica grafica o
-verifica visuale è stata eseguita. Per questo documento e il changelog si
-applicano `git diff --check` e revisione del diff limitato ai due file.
+L'audit iniziale era una verifica statica di sorgenti, SQL, test e guide su
+`8e5bbdd5`. I successivi bullet Step 8.3–8.5 sono stati verificati con la suite
+guest-sync/RSVP, lint, TypeScript, build webpack e `git diff --check`, usando
+solo fixture sintetiche. Non sono state eseguite letture o scritture live su
+Sheets o Neon, generate QR per invitati reali, inviate comunicazioni, né fatti
+merge o deploy. La review indipendente Codex CLI resta
+`INFRASTRUCTURE BLOCKED` perché il comando non è disponibile in questo checkout.

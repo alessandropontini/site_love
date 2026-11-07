@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Image from "next/image";
 
 import { confirmImportedInvitation, prepareImportedInvitation, previewImportedInvitations } from "./actions";
 import type { AdminImportedHouseholdActivationPreview } from "@/lib/rsvp/imported-household-activation-preview";
@@ -24,6 +25,7 @@ export default function ImportedHouseholdActivationPreview() {
   const [preparation, setPreparation] = useState<Preparation | null>(null);
   const [activated, setActivated] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const [qrDataUrl, setQrDataUrl] = useState("");
   const [message, setMessage] = useState("No source or database data has been loaded.");
   const [pending, startTransition] = useTransition();
 
@@ -34,6 +36,7 @@ export default function ImportedHouseholdActivationPreview() {
       setPreparation(null);
       setActivated(false);
       setConfirmed(false);
+      setQrDataUrl("");
       setMessage("Loading the read-only preview…");
       try {
         const result = await previewImportedInvitations();
@@ -57,6 +60,7 @@ export default function ImportedHouseholdActivationPreview() {
       setPreparation(null);
       setActivated(false);
       setConfirmed(false);
+      setQrDataUrl("");
       setMessage("Rechecking the selected mapping and preparing a private activation…");
       try {
         const result = await prepareImportedInvitation({ externalHouseholdId: selectedId });
@@ -70,6 +74,29 @@ export default function ImportedHouseholdActivationPreview() {
         setMessage("Preparation failed. No database change has been made.");
       }
     });
+  }
+
+  function generateQr() {
+    if (!privateUrl) return;
+    startTransition(async () => {
+      setMessage("Rendering the private QR in this browser…");
+      try {
+        const { renderPrivateInvitationQr } = await import("@/lib/rsvp/private-invitation-qr");
+        setQrDataUrl(await renderPrivateInvitationQr(privateUrl, window.location.origin));
+        setMessage("Private QR is ready in this page. It has not been saved to the project or sent.");
+      } catch {
+        setMessage("The private QR could not be rendered. The RSVP URL remains available.");
+      }
+    });
+  }
+
+  async function copyPrivateUrl() {
+    try {
+      await navigator.clipboard.writeText(privateUrl);
+      setMessage("Private RSVP URL copied to clipboard. Keep it confidential; no message was sent.");
+    } catch {
+      setMessage("Copy was unavailable. Select and copy the private RSVP URL manually.");
+    }
   }
 
   function confirmActivation() {
@@ -153,6 +180,7 @@ export default function ImportedHouseholdActivationPreview() {
                             setPreparation(null);
                             setActivated(false);
                             setConfirmed(false);
+                            setQrDataUrl("");
                           }}>Select</button>
                       ) : null}
                     </td>
@@ -171,6 +199,7 @@ export default function ImportedHouseholdActivationPreview() {
                 setPreparation(null);
                 setActivated(false);
                 setConfirmed(false);
+                setQrDataUrl("");
               }}>
               <option value="">Choose a household</option>
               {preview.households.filter((household) => household.eligible).map((household) => (
@@ -208,6 +237,16 @@ export default function ImportedHouseholdActivationPreview() {
             <>
               <label htmlFor="activated-private-url">Private RSVP URL (keep confidential; no message was sent)</label>
               <input id="activated-private-url" className={styles.privateUrl} readOnly value={privateUrl} />
+              <div className={styles.handoffActions}>
+                <button className={styles.button} type="button" onClick={copyPrivateUrl}>Copy private URL</button>
+                {!qrDataUrl ? (
+                  <button className={styles.button} type="button" disabled={pending} onClick={generateQr}>Generate private QR</button>
+                ) : (
+                  <a className={styles.download} href={qrDataUrl} download="site-love-rsvp-invitation.png">Download private QR</a>
+                )}
+              </div>
+              {qrDataUrl ? <Image className={styles.qr} src={qrDataUrl} width={512} height={512} unoptimized alt="Private RSVP QR code" /> : null}
+              <p>The URL and QR are shown only in this admin page. Save the downloaded file in a private location. Nothing is sent automatically.</p>
             </>
           )}
         </section>

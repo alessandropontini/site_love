@@ -143,6 +143,32 @@
   flex: 0 0 auto;
 }
 
+.handoffActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.download {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  padding: 10px 18px;
+  border: 1px solid #261b20;
+  border-radius: 999px;
+  color: #261b20;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.qr {
+  width: min(100%, 320px);
+  height: auto;
+  border: 1px solid rgba(38, 27, 32, 0.16);
+  border-radius: 12px;
+  background: #fff;
+}
+
 @media (max-width: 720px) {
   .tableScroll table {
     min-width: 760px;
