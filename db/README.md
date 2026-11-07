@@ -111,10 +111,11 @@ named roster and writes answers, response audit metadata and a replay journal
 atomically. A structured reason distinguishes a first off-site response from a
 correction. The journal contains actor, provenance, reason, revision and a
 server-computed HMAC commitment, never response content, contact email or
-token. The future Clerk-protected Server Action must bind every request field
-to that HMAC; SQL cannot verify a Clerk session. The
+token. The Clerk-protected Server Action derives the actor and binds every
+validated request field to that HMAC; SQL cannot verify a Clerk session. The
 `site_love_sync` role can execute the restricted functions and read the
 metadata-only journal, but cannot directly write it; `site_love_app` remains
-denied. No admin form is included in this database bullet. The migration has
-only been tested locally with fictional data and must not be applied to Neon
-without separate approval.
+denied. Clerk/allowlist-protected server actions now call this adapter, while
+the admin form is still a separate step. The migration has only been tested
+locally with fictional data and must not be applied to Neon without separate
+approval.

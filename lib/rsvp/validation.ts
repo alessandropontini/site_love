@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { RSVP_PRIVACY_NOTICE_VERSION } from "@/lib/rsvp/privacy";
+import { RSVP_PRIVACY_NOTICE_VERSION } from "./privacy";
 
 export const rsvpSubmissionSchema = z
   .object({

@@ -22,18 +22,35 @@ payload restituiscono il risultato già registrato, mentre riusare l'ID con dati
 diversi viene rifiutato. Risposta e audit vengono scritti in un'unica
 transazione. Non viene inviata alcuna comunicazione.
 
-Il journal amministrativo conserva solo household ID, attore che la futura
-Server Action dovrà ricavare dalla sessione Clerk allowlisted, provenienza,
+Il journal amministrativo conserva solo household ID, attore ricavato dalla
+Server Action dalla sessione Clerk allowlisted, provenienza,
 motivo, revisione, data DB e HMAC della richiesta. La funzione SQL non può
-verificare la sessione Clerk: la Server Action deve calcolare e validare
-l'HMAC di tutti i campi della richiesta prima di invocarla. Il journal non
+verificare la sessione Clerk: la Server Action deriva l'attore autenticato,
+valida i campi e calcola l'HMAC dell'intera richiesta prima di invocarla. Il journal non
 contiene nomi, email, risposte o token. Il ruolo `site_love_sync` non ha
 scritture dirette sulla tabella; il ruolo RSVP runtime `site_love_app` non può
 leggere il journal né invocare le funzioni.
 
-Questo bullet aggiunge solo schema e contratto SQL. La UI/action Clerk,
-l'anteprima, la conferma, il retry esplicito, i grant per eventuali riepiloghi
-dashboard e il walkthrough autenticato restano da implementare o verificare
-con bullet separati. Test locali con PGlite e dati fittizi non sostituiscono
-una verifica PostgreSQL multi-connessione. La migration non è stata applicata
-a Neon.
+## Adapter e azioni amministrative — Step 8.6b
+
+`app/admin/rsvp/manual/actions.ts` espone una lettura read-only per ID interno e
+una registrazione esplicita. Ogni chiamata verifica Clerk e la allowlist
+`RSVP_ADMIN_EMAILS` prima di accedere al DB; il valore `actor` deriva dallo user
+ID della sessione, mai dall'input. L'adapter usa solo
+`GUEST_SYNC_DATABASE_URL`, verifica che punti allo stesso database di
+`DATABASE_URL` e invoca le funzioni 014 ristrette.
+
+La registrazione valida il payload con lo schema RSVP condiviso, richiede
+conferma esplicita e l'attestazione `emailProvidedByRespondent: true`. L'azione
+non copia automaticamente l'email restituita dalla lettura, né valori da
+Google Sheets. Il request hash è un HMAC server-side legato a ID operazione,
+household, actor, provenienza, motivo, attestazione e payload confermato; un
+retry dello stesso input produce la stessa firma. Gli errori SQL e di
+connessione vengono convertiti in codici sicuri. La funzione non invia email o
+messaggi.
+
+La UI di preview/revisione, il blocco del payload dopo un tentativo, il pulsante
+di retry identico, i riepiloghi/provenienza in dashboard e il walkthrough
+Clerk autenticato restano separati. Test PGlite e fixture fittizie non
+sostituiscono una verifica PostgreSQL multi-connessione. Le migration 014 e
+012–013 non sono state applicate a Neon.

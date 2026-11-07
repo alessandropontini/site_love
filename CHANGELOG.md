@@ -4,6 +4,11 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Step 8.6b — adapter e azioni amministrative RSVP offline
+- Aggiunto adapter server-only sul ruolo DB dedicato e due Server Actions: lettura di un household per ID interno e registrazione con autorizzazione Clerk/allowlist verificata a ogni chiamata.
+- L'attore deriva dalla sessione Clerk; Zod valida l'RSVP e richiede conferma amministrativa e attestazione che l'email sia stata fornita dal rispondente. Un HMAC lega attore, operazione, provenienza, motivo, attestazione e payload; gli errori DB sono sanitizzati. Nessuna comunicazione viene inviata.
+- Aggiunti test sintetici di autorizzazione prima dell'accesso DB, firma/retry, input non attendibile, adapter SQL e sanitizzazione. UI e riepiloghi restano bullet separati.
+
 ### Step 8.6a — contratto database per risposte offline
 - Aggiunta migration 014 adattata allo schema RSVP e ai grant attuali: le risposte raccolte offline usano la revisione condivisa, una chiave di replay e un journal metadata-only, senza modificare identità o token.
 - Provenienza e motivo strutturato (`initial_offsite_response` / `correction`) sono obbligatori; il ruolo sync può invocare la funzione senza privilegi diretti di scrittura. Il form admin e i grant di lettura dashboard restano bullet separati. Migration non applicata a Neon.

@@ -166,8 +166,9 @@ Games are not mounted by the wedding site. If they return, they use a separate r
 
 The local-only database contract for recording a response received off-site is
 documented in [manual RSVP](manual-rsvp.md). Migration 014 is not applied to
-Neon, and no manual-response admin screen is available until its separate UI
-and authorization bullet is completed.
+Neon. Clerk/allowlist-protected server actions are present, but no
+manual-response admin screen is available until its separate UI bullet is
+completed.
 
 `npm run backup:rsvp` creates a custom-format `pg_dump` of the `rsvp` schema with owner-only permissions. Restore tests must target a separate Neon branch. A lost or shared link requires token rotation/reissue before launch; do not send the same compromised URL again.
 
