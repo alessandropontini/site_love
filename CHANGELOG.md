@@ -4,6 +4,11 @@ Le modifiche completate vengono annotate qui in modo conciso. Le voci sono raggr
 
 ## Unreleased
 
+### Step 8.4 — conferma amministrativa e retry
+- Aggiunte azioni Clerk/allowlist separate per preparazione e conferma esplicita del mapping selezionato; ogni richiesta admin riautentica prima di leggere Sheets o DB.
+- La preparazione genera un token da 256 bit e restituisce token/receipt firmata solo al browser; il server persiste esclusivamente l'hash. Il client conserva il token in memoria, mentre retry idempotenti recuperano il commit anche dopo timeout/expiry senza inviare comunicazioni.
+- Aggiunto controllo DB del commit preesistente per distinguere replay da prima attivazione e test sintetici per autorizzazione, drift, scadenza e retry. La migration aggiornata resta non applicata a Neon.
+
 ### Step 8.3 — transazione SQL per household importati
 - Aggiunta migration 013 per attivare un household esistente soltanto tramite mapping Household UUID esplicito, senza creare o sostituire identità.
 - La funzione serializza l'operazione, controlla mapping, roster persistito, esclusioni, token e attività RSVP, registra un evento idempotente e accetta solo il token hash. Test PGlite verificano replay, privilegi minimi e preservazione dei dati; migration non applicata a Neon.

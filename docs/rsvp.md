@@ -263,3 +263,29 @@ may execute it but cannot write the household or journal tables directly; the
 ordinary RSVP role has no execute grant. PGlite tests cover the transaction,
 replay, conflict cases, data preservation and grants using fictional fixtures.
 Migration 013 has not been applied to Neon.
+
+### Clerk confirmation and retries — Step 8.4
+
+The protected `/admin/invitations` workflow separates read-only preview,
+preparation/review and explicit confirmation. Both Server Actions call
+`requireRsvpAdmin` before any Sheets or database read, and each request is
+independently authorized. Preparation rechecks the selected external Household
+UUID mapping, validates current source/database eligibility, generates a
+256-bit opaque RSVP token and signs an actor-bound receipt containing its SHA-256
+hash plus an HMAC commitment to the current source snapshot. The raw token is
+returned only to the current browser page; it is never logged or persisted by
+the server. The administrator must confirm that exact mapping before the
+existing household can be activated.
+
+Confirmation checks for an exact committed event first, then enforces the
+30-minute receipt expiry, re-reads Sheets and compares the source commitment,
+and calls the atomic SQL function. SQL rechecks mapping, roster, exclusion,
+token and RSVP state under its shared lock. If a network timeout obscures a
+successful commit, retrying the same receipt returns the journal match before
+expiry checks. The raw token remains in page memory during a pending/retry flow;
+closing or refreshing that page discards it, so keep the page open during an
+unverified confirmation. After confirmation the page reveals the private RSVP
+URL; it does not send a message or generate a QR. A changed source or any
+incompatible database state blocks a new activation. These operations have
+only been exercised with fictional fixtures; neither Sheets nor Neon was
+contacted in local tests.

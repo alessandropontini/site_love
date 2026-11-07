@@ -123,17 +123,61 @@ begin
 end
 $$;
 
+-- Lets an authenticated retry distinguish a committed timeout from a new
+-- activation before applying receipt expiry and source freshness checks.
+create function rsvp.imported_household_invitation_activation_committed(
+  event_id uuid,
+  actor text,
+  target_source text,
+  external_household uuid,
+  target_household uuid,
+  expected_response_version integer,
+  new_token_hash text
+) returns boolean
+language plpgsql security definer set search_path = pg_catalog, rsvp as $$
+declare
+  existing rsvp.imported_household_invitation_events%rowtype;
+  request_hash_value text;
+begin
+  if event_id is null or actor is null or length(btrim(actor)) not between 1 and 255 or
+    target_source is null or length(btrim(target_source)) not between 1 and 150 or
+    external_household is null or target_household is null or
+    expected_response_version is distinct from 0 or
+    new_token_hash is null or new_token_hash !~ '^[0-9a-f]{64}$' then
+    raise exception 'INVALID_IMPORTED_ACTIVATION_REQUEST';
+  end if;
+  request_hash_value := md5(jsonb_build_object(
+    'id', event_id, 'actor', actor, 'source', target_source,
+    'externalHouseholdId', external_household, 'householdId', target_household,
+    'expectedResponseVersion', expected_response_version, 'tokenHash', new_token_hash
+  )::text);
+  select * into existing from rsvp.imported_household_invitation_events where id=event_id;
+  if not found then return false; end if;
+  if existing.actor_id <> actor or existing.source_id <> target_source or
+    existing.external_household_id <> external_household or
+    existing.household_id <> target_household or existing.request_hash <> request_hash_value then
+    raise exception 'IMPORTED_ACTIVATION_EVENT_REUSED';
+  end if;
+  return true;
+end
+$$;
+
 revoke all on rsvp.imported_household_invitation_events from public;
 revoke all on function rsvp.activate_imported_household_invitation(uuid,text,text,uuid,uuid,integer,text) from public;
+revoke all on function rsvp.imported_household_invitation_activation_committed(uuid,text,text,uuid,uuid,integer,text) from public;
 do $$ begin
   if exists(select 1 from pg_roles where rolname='site_love_sync') then
     revoke all on rsvp.imported_household_invitation_events from site_love_sync;
     grant execute on function rsvp.activate_imported_household_invitation(uuid,text,text,uuid,uuid,integer,text)
       to site_love_sync;
+    grant execute on function rsvp.imported_household_invitation_activation_committed(uuid,text,text,uuid,uuid,integer,text)
+      to site_love_sync;
   end if;
   if exists(select 1 from pg_roles where rolname='site_love_app') then
     revoke all on rsvp.imported_household_invitation_events from site_love_app;
     revoke all on function rsvp.activate_imported_household_invitation(uuid,text,text,uuid,uuid,integer,text)
+      from site_love_app;
+    revoke all on function rsvp.imported_household_invitation_activation_committed(uuid,text,text,uuid,uuid,integer,text)
       from site_love_app;
   end if;
 end $$;

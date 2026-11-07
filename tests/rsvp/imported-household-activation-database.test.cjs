@@ -101,6 +101,16 @@ test("imported-household activation is atomic, replay-safe and hash-only", {
       )).rows[0];
       assert.deepEqual(await activation(), { status: "active", replayed: false });
       assert.deepEqual(await activation(), { status: "active", replayed: true });
+      assert.equal((await db.query(
+        `select rsvp.imported_household_invitation_activation_committed(
+          $1::uuid,$2::text,$3::text,$4::uuid,$5::uuid,$6::integer,$7::text) as committed`,
+        [ids.event, "fictional-admin", ids.source, valid.externalId, valid.householdId, 0, tokenHash]
+      )).rows[0].committed, true);
+      assert.equal((await db.query(
+        `select rsvp.imported_household_invitation_activation_committed(
+          $1::uuid,$2::text,$3::text,$4::uuid,$5::uuid,$6::integer,$7::text) as committed`,
+        ["eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee", "fictional-admin", ids.source, valid.externalId, valid.householdId, 0, tokenHash]
+      )).rows[0].committed, false);
       const after = (await db.query(
         `select h.id,h.display_name,h.invited_by,h.preferred_locale,h.deadline,h.response_version,
           h.revoked_at,h.allow_plus_one,h.has_children,h.created_at,h.updated_at,
@@ -141,6 +151,12 @@ test("imported-household activation is atomic, replay-safe and hash-only", {
         assert.deepEqual(await activation({ event: "cccccccc-cccc-4ccc-8ccc-cccccccccccc", external: syncIssued.externalId,
           household: syncIssued.householdId, tokenHash: "b".repeat(64) }),
           { status: "active", replayed: false });
+        assert.equal((await db.query(
+          `select rsvp.imported_household_invitation_activation_committed(
+            $1::uuid,$2::text,$3::text,$4::uuid,$5::uuid,$6::integer,$7::text) as committed`,
+          ["cccccccc-cccc-4ccc-8ccc-cccccccccccc", "fictional-admin", ids.source,
+            syncIssued.externalId, syncIssued.householdId, 0, "b".repeat(64)]
+        )).rows[0].committed, true);
         await db.exec("savepoint deny_direct_write");
         await assert.rejects(db.query("update rsvp.households set status='disabled' where id=$1", [syncIssued.householdId]), /permission denied/);
         await db.exec("rollback to savepoint deny_direct_write");
@@ -152,7 +168,16 @@ test("imported-household activation is atomic, replay-safe and hash-only", {
       }
       await db.exec("begin; set role site_love_app;");
       try {
+        await db.exec("savepoint deny_function_execution");
         await assert.rejects(activation({ event: "dddddddd-dddd-4ddd-8ddd-dddddddddddd", external: valid.externalId, household: valid.householdId }), /permission denied/);
+        await db.exec("rollback to savepoint deny_function_execution");
+        await db.exec("savepoint deny_lookup_execution");
+        await assert.rejects(db.query(
+          `select rsvp.imported_household_invitation_activation_committed(
+            $1::uuid,$2::text,$3::text,$4::uuid,$5::uuid,$6::integer,$7::text)`,
+          [ids.event, "fictional-admin", ids.source, valid.externalId, valid.householdId, 0, tokenHash]
+        ), /permission denied/);
+        await db.exec("rollback to savepoint deny_lookup_execution");
       } finally {
         await db.exec("rollback;");
       }

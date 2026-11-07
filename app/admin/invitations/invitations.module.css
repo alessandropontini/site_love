@@ -92,6 +92,57 @@
   line-height: 1.5;
 }
 
+.selectButton {
+  min-height: 36px;
+  margin-top: 10px;
+  padding: 6px 14px;
+  border: 1px solid #261b20;
+  border-radius: 999px;
+  color: #261b20;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.review {
+  display: grid;
+  gap: 12px;
+  max-width: 760px;
+  margin-top: 24px;
+  padding: 18px;
+  border: 1px solid rgba(38, 27, 32, 0.16);
+  border-radius: 16px;
+  background: #fffdfa;
+}
+
+.review h3,
+.review p {
+  margin: 0;
+}
+
+.review select,
+.privateUrl {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid rgba(38, 27, 32, 0.35);
+  border-radius: 8px;
+  font: inherit;
+}
+
+.confirmation {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  line-height: 1.5;
+}
+
+.confirmation input {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+
 @media (max-width: 720px) {
   .tableScroll table {
     min-width: 760px;

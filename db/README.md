@@ -96,3 +96,10 @@ server-only sync login may execute the function; it receives no direct table
 write or event-journal access, and `site_love_app` is denied. PGlite tests use
 fictional IDs and hashes. Do not apply migration 013 to Neon without separate
 approval.
+
+The same migration exposes `rsvp.imported_household_invitation_activation_committed`
+to the sync role. It returns only whether an exact event/actor/mapping/hash
+combination is already committed, allowing an administrator retry after a
+network timeout to recover success before receipt expiry checks. It cannot
+create or mutate an activation and exposes no journal contents. The RSVP app
+role and public remain denied.
